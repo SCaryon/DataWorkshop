@@ -89,30 +89,6 @@ fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是�
     xhr.addEventListener("load",uploadComplete,false);
 xhr.send(fd);
 }
-if(fileType=='jar')//执行java程序
-{
-var fd=new FormData();
-
-fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是获取上传的文件
-    fd.append('label','jar');
-
-    var xhr=new XMLHttpRequest();
-    xhr.open("POST","/cluster_code");//要传到后台方法的路径
-    xhr.addEventListener("load",uploadComplete,false);
-xhr.send(fd);
-}
-if(fileType=='so')//执行c或者C++程序
-{
-var fd=new FormData();
-
-fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是获取上传的文件
-    fd.append('label','so');
-
-    var xhr=new XMLHttpRequest();
-    xhr.open("POST","/cluster_code");//要传到后台方法的路径
-    xhr.addEventListener("load",uploadComplete,false);
-xhr.send(fd);
-}
 }
     }
 

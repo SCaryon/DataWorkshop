@@ -76,28 +76,6 @@ fd.append('label','py');
     xhr.addEventListener("load",uploadComplete,false);
 xhr.send(fd)
     };
-if(fileType=='so')
-{
-var fd=new FormData();
-
-fd.append("file",document.getElementById('embedding_csvfile').files[0]);//这是获取上传的文件
-fd.append('label','so');
-    var xhr=new XMLHttpRequest();
-    xhr.open("POST","/User_code");//要传到后台方法的路径
-    xhr.addEventListener("load",uploadComplete,false);
-xhr.send(fd)
-    };
-if(fileType=='jar')
-{
-var fd=new FormData();
-
-fd.append("file",document.getElementById('embedding_csvfile').files[0]);//这是获取上传的文件
-fd.append('label','jar');
-    var xhr=new XMLHttpRequest();
-    xhr.open("POST","/User_code");//要传到后台方法的路径
-    xhr.addEventListener("load",uploadComplete,false);
-xhr.send(fd)
-    };
 if(fileType=='zip')
 {
 var fd=new FormData();

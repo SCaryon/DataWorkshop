@@ -15,7 +15,6 @@
 
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="../static/css/tooplate-style.css">
-    <link rel="stylesheet" href="../static/css/tablegoo_homepage.css">
     <link rel="stylesheet" href="../static/css/parallel.css">
     <link rel="stylesheet" href="../static/css/radviz.css">
     <link rel="stylesheet" href="../static/css/scatter.css">
@@ -23,6 +22,12 @@
     <link rel="stylesheet" type="text/css" href="/static/css/user.css">
 
 </head>
+
+<style>
+    .hidden{
+        display: none;
+    }
+</style>
 <body >
 
 <!-- MENU -->
@@ -163,7 +168,7 @@
             </ul>
             <ul id="analysis_cluster_embedding">
                 <div class="row">
-                    <div class="col-lg-1" id="analysis_list">
+                    <div class="col-lg-2" id="analysis_list">
                         <div class="col-xs-12 smart-margin-bottom-20">
                             <button id="corr_matrix_button" onclick="action_performed('/cluster')" rel="tooltip" data-placement="right" data-original-title="cluster methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
                         </div>
@@ -172,7 +177,7 @@
                         </div>
                     </div>
                     <div class="col-lg-5" id="analysis_cluster_embedding_svg"></div>
-                    <div class="col-lg-6" id="analysis_user_image"></div>
+                    <div class="col-lg-5" id="analysis_user_image"></div>
                 </div>
             </ul>
             <ul id="analysis_anomaly_detection">
@@ -267,6 +272,15 @@
         </div>
         </div>
     </div>
+</section>
+
+<!---Contact us---->
+<section id="aboutus" class="parallax-section">
+	<div class="container">
+        <div class="row">
+            <h1>Contact us</h1>
+	</div>
+  </div>
 </section>
 
 <div class="getdata">
@@ -610,7 +624,7 @@
     'The dataset is projected from n-dimensional to two-dimensional';
     users_image = [];
     user_image_data = [];
-    /**/for(i = 0; i < clusters; i++){
+    /*for(i = 0; i < clusters; i++){
         each_row = [];
         for(j = 0; j < feature_list.length; j++){
             sum = 0;
@@ -620,7 +634,7 @@
             each_row.push(sum/indexes[i].length);
         }
         users_image.push(each_row);
-    }
+    }*/
 
     attributions_analysis_dataset = [];
     arr = document.getElementById("attributions_analysis_data").getElementsByTagName('li');
@@ -1099,7 +1113,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     var yScale = d3.scale.linear()
         .domain([cmin, cmax])
         .range([analysis_svgsize - padding, padding]);
-    /**/var  brush = d3.svg.brush()
+    var  brush = d3.svg.brush()
         .x(xScale)
         .y(yScale)
         .extent([0, 0], [0, 0])
@@ -1113,7 +1127,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .attr('height', analysis_svgsize*1.1)
         .append("g")
         .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
-    /**/d3.select("#analysis_cluster_embedding_svg svg g")
+    d3.select("#analysis_cluster_embedding_svg svg").append("g")
         .call(brush)
         .selectAll("rect")
         .style("fill-opacity", 0.1);
@@ -1121,7 +1135,6 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .attr("width", analysis_svgsize)
         .attr("height", analysis_svgsize)
         .attr('fill', 'none')
-        .attr('pointer-events', 'all')
         .attr('stroke', 'black');
 
     circles = cluster_svg.selectAll('circle')
@@ -1168,15 +1181,20 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         cluster_svg_url = cluster_canvas.toDataURL("image/png");
     };
 
-    /*window.onload = function() {
-        var width = 600, height = 300;
+    //function draw_user_image() {
+        /*var width = 600, height = 300;
+        // 模拟数据
         var data = {
             fieldNames: feature_list,
             values: users_image
         };
+        // 设定一些方便计算的常量
         var radius = 100,
+            // 指标的个数，即fieldNames的长度
             total = feature_list.length,
+            // 需要将网轴分成几级，即网轴上从小到大有多少个正多边形
             level = 5,
+            // 网轴的范围，类似坐标轴
             rangeMin = 0,
             rangeMax = 100,
             arc = 2 * Math.PI;
@@ -1188,7 +1206,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
             for(j = 1; j < clusters; j++){
                 if(users_image[j][i] < min){
                     min = users_image[j][i];
-
+                    console.log(j)
                 }
                 if(users_image[j][i] > max){
                     max = users_image[j][i];
@@ -1197,7 +1215,9 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
             range_lower.push(min);
             range_upper.push(2*max);
         }
+        // 每项指标所在的角度
         var onePiece = arc/total;
+        // 计算网轴的正多边形的坐标
         var polygons = {
             webs: [],
             webPoints: []
@@ -1241,6 +1261,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
             });
         }
         // 创建一个分组用来组合要画的图表元素
+
         var main = d3.select('#analysis_user_image').append('svg')
             .attr('width', 500)
             .attr('height', 440)
@@ -1361,10 +1382,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
             .text(function(d,i) {
                 return data.fieldNames[i];
             });
-    }*/
+    //};*/
 
-
-    /**/
     function draw_user_image() {
         if(users_image){
         var width = 600, height = 300;
@@ -1565,6 +1584,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         if(brushcell !== this){
             d3.select(brushcell).call(brush.clear());
             brushcell = this;
+            /**/
+
         }
         if(d3.select('#analysis_user_image svg')){
                 d3.select('#analysis_user_image svg').remove();
@@ -1581,7 +1602,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         user_image_data = [];
         cluster_svg.selectAll('circle')
             .classed("hidden", function (d, i) {
-               if(!(d[0] < xmin || d[0] > xmax || d[1] < ymin || d[1] > ymax)){
+                /**/if(!(d[0] < xmin || d[0] > xmax || d[1] < ymin || d[1] > ymax)){
                     user_image_data.push(no_identifiers_data_list[i]);
                 }
                 return d[0] < xmin || d[0] > xmax || d[1] < ymin || d[1] > ymax
@@ -1592,7 +1613,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         if (brush.empty()){
             cluster_svg.selectAll(".hidden").classed("hidden", false);
         }
-        each_row = [];
+        /**/each_row = [];
             for (j = 0; j < feature_list.length; j++) {
                 sum = 0;
                 for (k = 0; k < user_image_data.length; k++) {
@@ -1608,7 +1629,6 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         cluster_svg.selectAll('circle')
             .data(data_dictionary);
     }
-
 </script>
 <!--anomaly-->
 <script>

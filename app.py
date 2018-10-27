@@ -30,7 +30,7 @@ import pytesseract
 #用于文字识别
 
 #用于执行c和java程序
-from jpype import *
+# from jpype import *
 from ctypes import *
 import platform
 #用于执行c和java程序
@@ -1119,6 +1119,63 @@ def picture_OCR():
         result = text.replace('\n', ' ').replace(',', ' ').replace('.', ' ')
         print(result)
         return result
+
+
+@app.route('/graphgoo', methods=['POST', 'GET'])
+def graphgoo():
+    global graph_object
+    if request.method == 'POST':
+        graph_object = {}
+        json_data = request.form.get('json_data')
+        temp = json.loads(json_data)
+        del temp[0]
+        graph_nodes = []
+        graph_matrix = []
+        for temp_list in temp:
+            if not temp_list[0]:
+                continue
+            graph_nodes.append(temp_list[0])
+            del temp_list[0]
+            row = []
+            for str in temp_list:
+                try:
+                    t = ast.literal_eval(str)
+                except:
+                    t = 'o'
+                finally:
+                    row.append(t)
+            graph_matrix.append(row)
+        graph_object['nodes'] = graph_nodes
+        graph_object['matrix'] = graph_matrix
+        return jsonify(True)
+    else:
+        csv_reader = csv.reader(open('./examples/graph.csv'))
+        graph_nodes = []
+        graph_matrix = []
+        for temp_list in csv_reader:
+            if not temp_list[0]:
+                continue
+            graph_nodes.append(temp_list[0])
+            del temp_list[0]
+            row = []
+            for str in temp_list:
+                try:
+                    t = ast.literal_eval(str)
+                except:
+                    t = 'o'
+                finally:
+                    row.append(t)
+            graph_matrix.append(row)
+        graph_object['nodes'] = graph_nodes
+        graph_object['matrix'] = graph_matrix
+        return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+
+
+@app.route('/graphgoo_home')
+def graphgoo_home():
+    return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
 
 
 if __name__ == '__main__':

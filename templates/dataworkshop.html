@@ -1128,6 +1128,13 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     /*var cluster_zoom = d3.behavior.zoom()
         .scaleExtent([0, 20])
         .on("zoom", cluster_zoomed);*/
+    var  brush = d3.svg.brush()
+        .x(xScale)
+        .y(yScale)
+        .extent([0, 0], [0, 0])
+        .on("brushstart", brushstart)
+        .on("brush", brushed)
+        .on("brushend", brushend);
     cluster_svg = d3.select("#analysis_cluster_embedding_svg")       //create svg
         .append('svg')
         .attr('id', 'cluster_svg')
@@ -1137,6 +1144,10 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         //.call(cluster_zoom)
         //.append("g")
         .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
+    cluster_svg.append("g")
+        .call(brush)
+        .selectAll("rect")
+        .style("fill-opacity", 0.1);
     cluster_svg.append('rect')
         .attr("width", analysis_svgsize)
         .attr("height", analysis_svgsize)
@@ -1191,6 +1202,33 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     /*function cluster_zoomed() {
         cluster_svg.attr("transform", "translate(" + cluster_zoom.translate() + ")" + "scale(" + cluster_zoom.scale() + ")");
     }*/
+    function brushstart() {
+        svg.selectAll('circle')
+            .data(dataset);
+        if(brushcell !== this){
+            d3.select(brushcell).call(brush.clear());
+            brushcell = this;
+        }
+    }
+
+  function brushed() {
+      var extend = brush.extent();
+      var xmin = extend[0][0];
+      var xmax = extend[1][0];
+      var ymin = extend[0][1];
+      var ymax = extend[1][1];
+
+      svg.selectAll('circle')
+            .classed("hidden", function (d) {
+                return d[0] < xmin || d[0] > xmax || d[1] < ymin || d[1] > ymax
+            })
+  }
+
+  function brushend() {
+      if (brush.empty()) svg.selectAll(".hidden").classed("hidden", false);
+      svg.selectAll('circle')
+          .data(rows);
+  }
 </script>
 <!--anomaly-->
 <script>
