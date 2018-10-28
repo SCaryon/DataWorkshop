@@ -474,8 +474,23 @@ def admin_id(id):
     return render_template('admin/' + id + '.html')
 
 
-@app.route('/geo/', methods=['GET', 'POST'])
-def geo():
+# 地图方法begin
+# 进入地图的index界面
+@app.route('/geo/index/', methods=['GET', 'POST'])
+def geo_index():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('geo_Index.html',user=user1)
+    else:
+        return render_template('geo_Index.html')
+
+
+# 行政热力图
+@app.route('/geo/admin/', methods=['GET', 'POST'])
+def geo_admin():
     global final_data_object
     if 'province' in final_data_object.keys():
         if session.get('email'):
@@ -483,13 +498,10 @@ def geo():
             user1 = user.query.filter_by(email=email).first()
             if user1 is None:
                 return "false"
-            return render_template('geography.html', user=user1, attr=final_data_object['attr'])
+            return render_template('geo_admin.html', user=user1, attr=final_data_object['attr'])
         else:
-            print('data:',final_data_object['data'])
-            print("province",final_data_object['province'])
-            print("attr:",final_data_object['attr'])
-            return render_template('geography.html',attr=final_data_object['attr'])
-    else:
+            return render_template('geo_admin.html', attr=final_data_object['attr'])
+    else:  # 读取默认的数据
         final_data = csv.reader(open('./static/user/service/olddata/dist_code.csv'))
         province = []
         data = []
@@ -509,30 +521,14 @@ def geo():
             user1 = user.query.filter_by(email=email).first()
             if user1 is None:
                 return "false"
-            return render_template('geography.html', user=user1, attr=final_data_object['attr'])
+            return render_template('geo_admin.html', user=user1, attr=final_data_object['attr'])
         else:
-            return render_template('geography.html', attr=final_data_object['attr'])
+            return render_template('geo_admin.html', attr=final_data_object['attr'])
 
 
-@app.route('/geo/get/',methods=['GET','POST'])
-def geo_get():
-    return jsonify(final_data_object)
-
-
-@app.route('/geo/point/',methods=['GET','POST'])
-def geo_point():
-    if session.get('email'):
-        email = session.get('email')
-        user1 = user.query.filter_by(email=email).first()
-        if user1 is None:
-            return "false"
-        return render_template('geo2.html', user=user1)
-    else:
-        return render_template('geo2.html')
-
-
-@app.route('/index/geography/', methods=['GET', 'POST'])
-def index_geography():
+# 读取用户上传的行政区数据
+@app.route('/geo/admin/upload/', methods=['GET', 'POST'])
+def geo_admin_upload():
     global final_data_object
     if request.method == 'POST':
         json_data = request.form.get('json_data')
@@ -553,6 +549,72 @@ def index_geography():
         return "true"
     else:
         return "false"
+
+
+#海量点分布
+@app.route('/geo/points/', methods=['GET', 'POST'])
+def geo_points():
+    global final_data_object
+    if 'points' in final_data_object.keys():
+        if session.get('email'):
+            email = session.get('email')
+            user1 = user.query.filter_by(email=email).first()
+            if user1 is None:
+                return "false"
+            return render_template('geo_points.html', user=user1)
+        else:
+            return render_template('geo_points.html')
+    else:  # 读取默认的数据
+        final_data = csv.reader(open('./static/user/service/olddata/geo_points.csv'))
+        point=[]
+        for i in final_data:
+            dic=dict(zip(['longitude','latitude','value','name'],i))
+            point.append(dic)
+        final_data_object = {}
+        final_data_object['points']=point
+        if session.get('email'):
+            email = session.get('email')
+            user1 = user.query.filter_by(email=email).first()
+            if user1 is None:
+                return "false"
+            return render_template('geo_points.html', user=user1)
+        else:
+            return render_template('geo_points.html')
+
+
+#读取用户上传的点数据
+@app.route('/geo/points/upload/',methods=['GET','POST'])
+def geo_points_upload():
+    global final_data_object
+    if request.method == 'POST':
+        json_data = request.form.get('json_data')
+        temp = json.loads(json_data)
+        final_data = temp
+        point=[]
+        for i in final_data:
+            dic=dict(zip(['longitude','latitude','value','name'],i))
+            point.append(dic)
+        final_data_object={}
+        final_data_object['points']=point
+        return 'true'
+    else:
+        return 'false'
+
+
+# 向前端传递后台的地理信息数据
+@app.route('/geo/get/', methods=['GET', 'POST'])
+def geo_get():
+    return jsonify(final_data_object)
+
+
+
+
+@app.route('/geo/line/', methods=['GET', 'POST'])
+def geo_line():
+    return "true"
+
+
+# 地图方法end
 
 
 @app.route('/text_upload', methods=['GET', 'POST'])
