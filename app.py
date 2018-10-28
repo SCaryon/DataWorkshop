@@ -210,18 +210,18 @@ def user_login():
     session.clear()
     return render_template('login.html')
 
-
-# 这个装饰器的作用是一个URL与视图的映射
-# 当URL的尾数是这个的时候，就会请求这个函数并且将结果返给浏览器
-@app.route('/login/pass/', methods=['POST'])
+# 验证密码
+@app.route('/login/pass/', methods=['GET','POST'])
 def login_pass():
     # 添加数据到session中
     data = request.get_json('data')
     email = data['email']
     pas = data['password']
-    theuser = user.query.filter_by(email=email, password=pas).first()
+    theuser = user.query.filter_by(email=email).first()
     if theuser is None:
         return "account not exist"
+    elif not theuser.check_password_hash(pas):
+        return "password not right"
     else:
         session.clear()
         session['email'] = email
@@ -229,7 +229,8 @@ def login_pass():
         login1 = login(email=email)
         db.session.add(login1)
         db.session.commit()
-        return render_template("datagoo_homepage.html")
+        print(theuser)
+        return render_template("datagoo_homepage.html", user=theuser)
 
 
 @app.route('/login/pass/name/', methods=['GET', 'POST'])
