@@ -279,6 +279,8 @@ $('#log').click(function () {
         success: function (res) {//返回数据根据结果进行相应的处理
             if (res == "account not exist")
                 $('#userCue1').html("Please enter the right username and password");
+            else if(res=="password not right")
+                $('#userCue1').html("Please enter the right password");
             else {
                 window.location.href = "/";
                 console.log("获取数据成功");
