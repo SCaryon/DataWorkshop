@@ -211,7 +211,6 @@ def user_login():
     return render_template('login.html')
 
 @app.route('/master/',methods=['GET','POST'])
-
 def master():
     return render_template('master.html')
 
