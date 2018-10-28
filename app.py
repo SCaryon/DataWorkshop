@@ -210,6 +210,11 @@ def user_login():
     session.clear()
     return render_template('login.html')
 
+@app.route('/master/',methods=['GET','POST'])
+
+def master():
+    return render_template('master.html')
+
 
 # 这个装饰器的作用是一个URL与视图的映射
 # 当URL的尾数是这个的时候，就会请求这个函数并且将结果返给浏览器
