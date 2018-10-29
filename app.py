@@ -943,7 +943,7 @@ def User_code():
     if request.method == 'POST':
         f = request.files['file']
         #basepath = os.path.dirname(__file__) + '\\static\\user\\' + session.get('email') + "\\user_code"  # 文件所要放入的路径
-        basepath = os.path.join(os.path.dirname(__file__), 'static', 'user', '1361377791@qq.com', 'user_code')# upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
+        basepath = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')# upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if (request.form.get('label') == 'zip'):
             filename = os.path.join(basepath,'User_embedding.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
@@ -977,7 +977,7 @@ def User_method():
     #run user's embedding way
     current_path = os.getcwd()
     # os.chdir(os.path.dirname(__file__)+'\\static\\user\\'+session.get('email')+"\\user_code")  # 切换成用户代码的路径
-    target_url = os.path.join(os.path.dirname(__file__), 'static', 'user', '1361377791@qq.com', 'user_code')
+    target_url = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
     os.chdir(target_url)
     draw_id = str(request.get_json()['draw_id'])
     if os.path.exists(os.path.join(target_url, 'User_embedding.py')):
