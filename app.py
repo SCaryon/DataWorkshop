@@ -1026,7 +1026,7 @@ def cluster_code():
         #1361377791@qq.com
         #basepath = os.path.dirname(__file__)+'\\static\\user\\'+session.get('email')+"\\user_code"
         #  文件所要放入的路径
-        basepath = os.path.join(os.path.dirname(__file__),'static','user','1361377791@qq.com','user_code') #+ '\\static\\user\\1361377791@qq.com\\user_code'  # 文件所要放入的路径
+        basepath = os.path.join("/home/ubuntu/dagoo",'static','user','1361377791@qq.com','user_code') #+ '\\static\\user\\1361377791@qq.com\\user_code'  # 文件所要放入的路径
 
         #upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if(request.form.get('label')=='zip'):
@@ -1065,7 +1065,7 @@ def User_cluster():
     # 首先修改当前的工作路径，执行完程序后改回原来的工作路径
     current_path = os.getcwd()
     #os.chdir(os.path.dirname(__file__)+'\\static\\user\\'+session.get('email')+"\\user_code")  # 切换成用户代码的路径
-    target_url=os.path.join(os.path.dirname(__file__), 'static', 'user', '1361377791@qq.com', 'user_code')
+    target_url=os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
     os.chdir(target_url)
     draw_id = str(request.get_json()['draw_id'])
     body = 'page-top' + draw_id
