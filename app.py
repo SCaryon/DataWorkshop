@@ -1217,6 +1217,7 @@ def graphgoo():
         graph_object['matrix'] = graph_matrix
         return jsonify(True)
     else:
+        graph_object = {}
         csv_reader = csv.reader(open('./examples/graph.csv'))
         graph_nodes = []
         graph_matrix = []
