@@ -1,6 +1,6 @@
 $.fn.csv2arr = function (callback) {
     if (typeof(FileReader) == 'undefined') {    //if not H5
-        alert("Your browser is too old,please use Chrome or Firefox");
+        alert("Please use Chrome or Firefox");
         return false;
     }
     if (!$(this)[0].files[0]) {
@@ -17,9 +17,9 @@ $.fn.csv2arr = function (callback) {
             encoding: encoding,
             complete: function (results) {
                 var res = results.data;
-                console.log("被选中的是：", $("input[name=select]:checked").val());
+                // console.log("被选中的是：", $("input[name=select]:checked").val());
                 if ($('input[name=select]:checked').val() == 'Normal') {
-                    console.log("成功进入normal");
+                    //console.log("成功进入normal");
                     $.ajax({
                         url: '/data_workshop',
                         type: 'POST',
@@ -37,7 +37,7 @@ $.fn.csv2arr = function (callback) {
                     });
                 }
                 else if ($('input[name=select]:checked').val() == 'Geographical') {
-                    console.log("成功进入geo");
+                    //console.log("成功进入geo");
                     $.ajax({
                         url: '/index/geography/',
                         type: 'POST',
@@ -57,7 +57,7 @@ $.fn.csv2arr = function (callback) {
                     });
                 }
                 else if ($('input[name=select]:checked').val() == 'Text') {
-                    console.log("成功进入text");
+                    //console.log("成功进入text");
                     $.ajax({
                         url: '/text_upload',
                         type: 'POST',
@@ -73,6 +73,17 @@ $.fn.csv2arr = function (callback) {
                         },
                         error: function () {
                             alert('Internet error');
+                        }
+                    });
+                }
+                else if($('input[name=select]:checked').val() == 'Graph'){
+                    $.ajax({
+                        url: '/graphgoo',
+                        type: 'POST',
+                        data: {json_data: JSON.stringify(res)},
+                        success: function (data) {
+                            console.log(data);
+                            window.location.href = '/graphgoo_home'
                         }
                     });
                 }
