@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>DaGoo</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/font-awesome.min.css">
+
+    <!-- MAIN CSS -->
+    <link rel="stylesheet" href="../static/css/tooplate-style.css">
+
+    <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+
+</head>
+<body>
+
+<!-- MENU -->
+<div class="navbar custom-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- NAVBAR HEADER -->
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+            <!-- lOGO -->
+            <a href="#" class="navbar-brand">DaGoo!</a>
+        </div>
+
+        <!-- MENU LINKS -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/products" class="smoothScroll">Products</a></li>
+                <li><a href="#visual_charts" class="smoothScroll">Gallery</a></li>
+                <li><a href="#" class="smoothScroll">Contact us</a></li>
+                <li>
+                    <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
+                </li>
+                {% if user %}
+                    <li class="user_img"><a class="page-scroll" href="/user/">
+                        <div class="to3" style="margin-top: -10px;">
+                            <div class="to2">
+                                <div class="to1">
+                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    </li>
+                    <li><a href="/login/" class="page-scroll">Quit</a></li>
+                {% else %}
+                    <li>
+                        <a href="/login/" class="">Log in/Sign up</a>
+                    </li>
+                {% endif %}
+                {% if user %}
+                    {% if user.permission==100 %}
+                        <li>
+                            <a href="/admin/?manager={{ user.username }}" class="">manage</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            {% if user %}
+                <script>
+
+                    var permi = '' +{{ user.permission }};
+                    switch (permi) {
+                        case "1":
+                            $('.to3').css('background-color', '#aac4bc');
+                            break;
+                        case "2":
+                            $('.to3').css('background-color', '#ae853b');
+                            break;
+                        case "3":
+                            $('.to3').css('background-color', '#dfdc5d');
+                            break;
+                        case "100":
+                            $('.to3').css('background-color', '#ede4b8');
+                            break;
+                        default:
+                            $('.to3').css('background-color', 'white');
+                    }
+                </script>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<!-- HOME -->
+<section id="home" class="parallax-section">
+    <div class="overlay"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-sm-12">
+                <div class="home-text">
+                    <h1>Welcome to DaGoo!</h1>
+                    <br>
+                    <div id="upload_data_type" class="select_container">
+                        Data Type: &nbsp
+                        <input id="r1" type="radio" name="select" class= "dataType" checked="checked" value="Normal"> &nbsp Normal</input> &nbsp
+                        <input id="r2" type="radio" name="select" class= "dataType" value="Streaming">&nbsp Streaming</input> &nbsp
+                        <input id="r3" type="radio" name="select" class= "dataType" value="Geographical">&nbsp Geographical</input> &nbsp
+                        <input id="r4" type="radio" name="select" class= "dataType" value="Text">&nbsp Text</input> &nbsp
+                        <input id="r5" type="radio" name="select" class= "dataType" value="Graph">&nbsp Graph</input>
+                    </div>
+
+                    <input class="button_blue" id="file_path" name="file_path" type="button"
+                           onclick="path.click()" value="File Upload">
+                    <input type="file" id="path" style="display:none" name="csvfile"
+                           onchange="file_path.value=this.value">
+                    <input class="button_blue" type="button" onclick="read_file()" value="Submit">
+                    <a href='/clean' style="color: white">Clean</a>
+                    <a href='/geo/' style="color: white">&nbsp;Map</a>
+    <a href='/master/' style='color:white'>Master</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Video -->
+    <video controls autoplay loop muted>
+        <source src="../static/videos/video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</section>
+
+
+<!-- SCRIPTS -->
+<script src="../static/js/jquery.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/js/jquery.parallax.js"></script>
+<script src="../static/js/modernizr.custom.js"></script>
+<script src="../static/js/smoothscroll.js"></script>
+<script src="../static/js/main.js"></script>
+<script src="../static/js/custom.js"></script>
+<script src="../static/js/upload.js"></script>
+<script src="../static/js/tab.js"></script>
+<script src="../static/js/papaparse.js"></script>
+<script src="../static/js/jschardet.min.js"></script>
+<script src="../static/js/topojson.min.js"></script>
+</body>
+</html>
