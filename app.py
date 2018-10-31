@@ -210,10 +210,6 @@ def user_login():
     session.clear()
     return render_template('login.html')
 
-@app.route('/master/',methods=['GET','POST'])
-def master():
-    return render_template('master.html')
-
 
 # 验证密码
 @app.route('/login/pass/', methods=['GET','POST'])
