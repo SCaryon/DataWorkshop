@@ -15,13 +15,11 @@
 
     <!-- MAIN CSS-->
     <link rel="stylesheet" href="../static/css/tooplate-style.css">
-    <link rel="stylesheet" href="../static/css/graphgoo_homepage.css">
-
+    <link rel="stylesheet" href="../static/css/graph_layout.css">
 
 </head>
 <body>
 
-<!-- MENU -->
 <div class="navbar custom-navbar navbar-fixed-top" role="navigation">
     <div class="container">
         <!-- NAVBAR HEADER -->
@@ -32,13 +30,13 @@
                 <span class="icon icon-bar"></span>
             </button>
             <!-- lOGO -->
-            <a href="#" class="navbar-brand">DaGoo</a>
+            <a href="#" class="navbar-brand">GraphGoo</a>
         </div>
 
         <!-- MENU LINKS -->
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/" class="smoothScroll">Upload File</a></li>
+                <li><a href="/graphgoo_home" class="smoothScroll">Home</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
                 <li><a href="#" class="smoothScroll">Contact us</a></li>
                 <li>
@@ -92,94 +90,11 @@
                 </script>
             {% endif %}
         </div>
-
     </div>
 </div>
 
-<!--- ---->
 <section id="graph_layout2d" class="parallax-section">
-    <div class="section-title">
-        <h1>
-            Graph Layout
-        </h1>
-    </div>
 	<div class="container">
-        <div class="row">
-            <div class="col-lg-2">
-                <h5>
-                    Circular Layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='circular') }}"><img src="../static/img/circular2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Chord Diagram
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='chord') }}"><img src="../static/img/chord2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Tree Layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='tree') }}"><img src="../static/img/tree2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Radial layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='radial') }}"><img src="../static/img/radial2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Grid Layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='grid') }}"><img src="../static/img/grid2d.html" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Hierarchical Layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='hierarchical') }}"><img src="../static/img/hierarchical2d.html" style="width: 150px;height: 150px;"></a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-2">
-                <h5>
-                    Pack Layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='pack') }}"><img src="../static/img/pack2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Dagre Layout
-                </h5>
-                <a href=""><img src="" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Layout
-                </h5>
-                <a href=""><img src="" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Layout
-                </h5>
-                <a href=""><img src="" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Layout
-                </h5>
-                <a href="#"><img src="" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2">
-                <h5>
-                    Layout
-                </h5>
-                <a href="#"><img src="" style="width: 150px;height: 150px;"></a>
-            </div>
-        </div>
         <div class="row" id="circular_layout">
         </div>
   </div>
@@ -199,14 +114,15 @@
 </div>
 
 <!-- SCRIPTS -->
-<script src="../static/js/jquery.js"></script>
-<script src="../static/js/bootstrap.min.js"></script>
-<script src="../static/js/jquery.parallax.js"></script>
-<script src="../static/js/modernizr.custom.js"></script>
-<script src="../static/js/smoothscroll.js"></script>
-<script src="../static/js/main.js"></script>
-<script src="../static/js/custom.js"></script>
-<script src="../static/js/d3.v3.min.js"></script>
+<script src="../../static/js/jquery.js"></script>
+<script src="../../static/js/bootstrap.min.js"></script>
+<script src="../../static/js/jquery.parallax.js"></script>
+<script src="../../static/js/modernizr.custom.js"></script>
+<script src="../../static/js/SmoothScroll.js"></script>
+<script src="../../static/js/main.js"></script>
+<script src="../../static/js/custom.js"></script>
+<script src="../../static/js/d3.v3.min.js"></script>
+<script src="../static/js/circleGraph.js"></script>
 <script>
     nodes = new Array();
     arr = document.getElementById("graph_nodes").getElementsByTagName('li');
@@ -229,7 +145,104 @@
         });
         graph_matrix.push(numArray)
     }
-</script>
 
+   circular_nodes = [];
+    for(i = 0; i < nodes.length; i++){
+        object = {};
+        object.name = nodes[i];
+        circular_nodes.push(object);
+    }
+    circular_edges = [];
+    for(i = 0; i < graph_matrix.length; i++){
+        for(j = 0; j < graph_matrix[0].length; j++){
+            if(!isNaN(graph_matrix[i][j])){
+                object = {};
+                object.source = nodes[i];
+                object.target = nodes[j];
+                circular_edges.push(object);
+            }
+
+        }
+    }
+</script>
+<script>
+    var radius = 200;
+    var margin = 50;
+    var outerRadius = radius + margin;
+    // Create the layout
+    var circleGraph = d3.layout.circleGraph()
+        .tension(0.2)
+        .radius(radius)
+        .range(Math.PI * 2)
+        .nodes(circular_nodes)
+        .edges(circular_edges);
+
+    var circular_svg = d3.select('#circular_layout')
+        .append('svg')
+        .attr('width', outerRadius * 2)
+        .attr('height', outerRadius * 2)
+        .append('g')
+        .attr('transform', 'translate(' + outerRadius + ', ' + outerRadius + ')');
+
+    // draw main circle
+    /*svg.append('circle')
+        .classed('main-circle', true)
+        .attr('r', radius)
+        .attr('stroke', '#DDD')
+        .attr('stroke-width', '3px')
+        .attr('fill', 'none');
+    */
+    // draw edges
+    circular_svg.selectAll('path.edge')
+        .data(circular_edges)
+        .enter()
+        .append('path')
+        .classed('edge', true)
+        .attr('d', circleGraph.line)
+        .attr('stroke', '#CCC')
+        .attr('stroke-width', '2px')
+        .attr('fill', 'none');
+
+    // draw circles
+    circular_svg.selectAll('circle.node')
+        .data(circular_nodes)
+        .enter()
+        .append('circle')
+        .classed('node', true)
+        .attr('r', 5)
+        .attr('cx', function (d) { return d.x; })
+        .attr('cy', function (d) { return d.y; })
+        .attr('fill', 'red');
+
+    // draw labels
+    circular_svg.selectAll('text.node')
+        .data(circular_nodes)
+        .enter()
+        .append('text')
+        .classed('node', true)
+        .attr({
+            'text-anchor': function (d) {
+                return (Math.sin(d.radians) < 0) ? 'end' : 'begin';
+            },
+            dy: '0.3em',
+            dx: function(d) {
+                return (Math.sin(d.radians) < 0) ? '-1em' : '1em';
+            },
+            transform: function (d) {
+                var degrees = d.degrees - 90;
+                var xTranslate = radius;
+                if (Math.sin(d.radians) < 0) {
+                    degrees -= 180;
+                    xTranslate *= -1;
+                }
+                return 'rotate(' + degrees + ') translate(' + xTranslate + ', 0)';
+            }
+        })
+        .text(function(d) {
+            return d.name;
+        })
+        .style('fill', 'white')
+        .attr('font-size', '10px');
+</script>
 </body>
 </html>

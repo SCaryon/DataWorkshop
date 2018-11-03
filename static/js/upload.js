@@ -59,7 +59,7 @@ $.fn.csv2arr = function (callback) {
                 else if ($('input[name=select]:checked').val() == 'Text') {
                     //console.log("成功进入text");
                     $.ajax({
-                        url: '/text_upload',
+                        url: '/textgoo',
                         type: 'POST',
                         data: {json_data: JSON.stringify(res)},
                         success: function (res) {
@@ -82,7 +82,6 @@ $.fn.csv2arr = function (callback) {
                         type: 'POST',
                         data: {json_data: JSON.stringify(res)},
                         success: function (data) {
-                            console.log(data);
                             window.location.href = '/graphgoo_home'
                         }
                     });

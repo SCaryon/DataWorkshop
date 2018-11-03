@@ -40,8 +40,3 @@ class AnonalyMethod:
         outlier_pre=clf.predict(data)
         outlier=data[outlier_pre==-1]
         return(outlier)
-
-'''
-data00=pd.read_csv('car.csv',delimiter=',')
-X=np.array(data00)
-print(AnonalyMethod.clfdetection(X))'''
