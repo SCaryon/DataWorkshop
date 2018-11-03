@@ -50,7 +50,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
 global final_data_object
 final_data_object = {}
-
+global text_object
+text_object={}
 
 def data_list_to_dictionary(list_key, list_value):
     if len(list_key) != len(list_value):
@@ -190,7 +191,7 @@ def index():
     # initialization
     final_data_object = {}
 
-    data_list = pd.read_csv('./test.csv', encoding='gbk')
+    data_list = pd.read_csv('./examples/test.csv', encoding='gbk')
     feature_list = data_list.columns
     feature_list = feature_list.tolist()
     data_list = np.array(data_list).tolist()
@@ -609,8 +610,6 @@ def geo_get():
     return jsonify(final_data_object)
 
 
-
-
 @app.route('/geo/line/', methods=['GET', 'POST'])
 def geo_line():
     return "true"
@@ -619,14 +618,14 @@ def geo_line():
 # 地图方法end
 
 
-@app.route('/text_upload', methods=['GET', 'POST'])
+@app.route('/textgoo', methods=['GET', 'POST'])
 def text_upload():
-    global final_data_object
+    global text_object
+    text_object = {}
     clean_flag = False
     if request.method == 'POST':
         # initialization
         try:
-            final_data_object = {}
             # get json data
             json_data = request.form.get('json_data')
             temp = json.loads(json_data)
@@ -641,17 +640,32 @@ def text_upload():
                     list_num.append(num)
                 my_dic = data_list_to_dictionary(features_list, list_num)
                 text_no_identifiers_data_dictionary.append(my_dic)
-            final_data_object['text_no_identifiers_data_dictionary'] = text_no_identifiers_data_dictionary
+            text_object['text_no_identifiers_data_dictionary'] = text_no_identifiers_data_dictionary
             clean_flag = True
         except:
             clean_flag = False
-    clean_flag = jsonify(clean_flag)
-    return clean_flag
+
+        clean_flag = jsonify(clean_flag)
+        return clean_flag
+    else:
+        csv_reader = csv.reader(open('./examples/text_data.csv'))
+        text_no_identifiers_data_dictionary = []
+        features_list = ['source', 'target', 'rela']
+        for temp_list in csv_reader:
+            if not temp_list[0]:
+                continue
+            list_num = []
+            for str in temp_list:
+                list_num.append(str)
+            my_dic = data_list_to_dictionary(features_list, list_num)
+            text_no_identifiers_data_dictionary.append(my_dic)
+        text_object['text_no_identifiers_data_dictionary'] = text_no_identifiers_data_dictionary
+        return render_template('draw_text.html', text_data=text_object['text_no_identifiers_data_dictionary'])
 
 
 @app.route('/text_home', methods=['GET', 'POST'])
 def text_home():
-    return render_template('draw_text.html', text_data=final_data_object['text_no_identifiers_data_dictionary'])
+    return render_template('draw_text.html', text_data=text_object['text_no_identifiers_data_dictionary'])
 
 
 @app.route('/data_workshop', methods=['GET', 'POST'])
@@ -1247,7 +1261,13 @@ def graphgoo_home():
                            matrix=graph_object['matrix'])
 
 
+@app.route('/graph_layout2d/<layout>')
+def graph_layout2d(layout):
+    html = './graph_layout2d/' + layout + '_layout2d.html'
+    return render_template(html, nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+
+
 if __name__ == '__main__':
-    app.run(debug=True,
-            ssl_context=('certs/server.crt', 'certs/server.key'))
+    app.run(debug=True)
 
