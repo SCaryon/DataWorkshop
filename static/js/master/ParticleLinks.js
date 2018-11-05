@@ -1,23 +1,25 @@
-function ParticleLinks(count, clock,darkMode) {
+function ParticleLinks(count, clock, darkMode) {
     this.count = count;
     this.totalAdded = 0;
     this.dotsAdded = [];
     this.clock = clock;
     this.ordered = false;
     this.linkGeometry = new THREE.BufferGeometry();
-    if(darkMode)
-        var col=0xffffff;
+    if (darkMode)
+        var col = 0xffffff;
     else
-        var col=0x00ff00;
+        var col = 0x00ff00;
     var attributes = {size: {type: 'f', value: null}, customColor: {type: 'c', value: null}};
+    var texture = new THREE.TextureLoader().load("/static/images/master/dot.png");
     var uniforms = {
         color: {type: "c", value: new THREE.Color(col)},
-        texture: {type: "t", value: THREE.ImageUtils.loadTexture("/static/images/master/dot.png")}
+        texture: {type: "t", value: texture}
     };
+    // console.log(texture);
 
     var shaderMaterial = new THREE.ShaderMaterial({
         uniforms: uniforms,
-        attributes: attributes,
+        // attributes: attributes,
         vertexShader: document.getElementById('vertexshader').textContent,
         fragmentShader: document.getElementById('fragmentshader').textContent,
         //blending:       THREE.AdditiveBlending,
@@ -40,13 +42,14 @@ function ParticleLinks(count, clock,darkMode) {
     this.linkGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
     this.linkGeometry.addAttribute('customColor', new THREE.BufferAttribute(colors, 3));
     this.linkGeometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    this.particleMesh = new THREE.PointCloud(this.linkGeometry, shaderMaterial);
+    this.linkGeometry.addAttribute('attributes', new THREE.BufferAttribute(attributes, 1));
+    this.particleMesh = new THREE.Points(this.linkGeometry, shaderMaterial);
     this.particleMesh.dynamic = true;
     this.particleMesh.frustrumCulled = true;
-
 }
-ParticleLinks.prototype.changelinkColor=function(color){
-  this.particleMesh.material.uniforms.color.value=new THREE.Color(color);
+
+ParticleLinks.prototype.changelinkColor = function (color) {
+    this.particleMesh.material.uniforms.color.value = new THREE.Color(color);
 };
 ParticleLinks.prototype.getMesh = function () {
     return this.particleMesh;

@@ -38,7 +38,7 @@ LabelManager.prototype.toScreenXY = function (id, country, particleSystem) {
     var p = new THREE.Vector3(country.lat * 1.55 + particleSystem.position.x, country.lon * 1.55 + particleSystem.position.y, particleSystem.position.z);
     projScreenMat = new THREE.Matrix4;//4*4矩阵
     projScreenMat.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-    p.applyProjection(projScreenMat);
+    p.applyMatrix4(projScreenMat);
     var ID = "#" + id;
     var labelWidth = $(ID).width();
     $(ID).css({
@@ -60,7 +60,7 @@ LabelManager.prototype.toScreenXYZ = function (id, country, geometry) {
         var p = new THREE.Vector3(x, y, z);
         projScreenMat = new THREE.Matrix4;
         projScreenMat.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-        p.applyProjection(projScreenMat);
+        p.applyMatrix4(projScreenMat);
         var ID = "#" + id;
         var labelWidth = $(ID).width();
         $(ID).css({
