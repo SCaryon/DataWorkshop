@@ -211,6 +211,7 @@ def user_login():
     session.clear()
     return render_template('login.html')
 
+
 @app.route('/master/',methods=['GET','POST'])
 def master():
     return render_template('master.html')
@@ -585,7 +586,7 @@ def geo_points():
             return render_template('geo_points.html')
 
 
-#读取用户上传的点数据
+# 读取用户上传的点数据
 @app.route('/geo/points/upload/',methods=['GET','POST'])
 def geo_points_upload():
     global final_data_object
@@ -1263,7 +1264,7 @@ def graphgoo_home():
 
 @app.route('/graph_layout2d/<layout>')
 def graph_layout2d(layout):
-    html = './graph_layout2d/' + layout + '_layout2d.html'
+    html = 'graph_layout2d//' + layout + '_layout2d.html'
     return render_template(html, nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
 
