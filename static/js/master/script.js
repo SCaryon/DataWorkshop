@@ -22,7 +22,7 @@ window.onload = function () {
     var sales = {};
     var trades = {};
     var countryOverlay = null;//鼠标覆盖的地图的边界
-    var links;//可能是点云
+    var links;//点云中的线
     var showLinks = true;
     var data = null;
     var blending = true;
@@ -58,6 +58,7 @@ window.onload = function () {
     var Pgeometry = null;
     var Sgeometry = null;
     var overlayMaterial = null;
+    // var texturedot7, textureblock, texturecolormap;
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
     if (WebGLtest()) {
@@ -81,6 +82,9 @@ window.onload = function () {
             ASPECT = WIDTH / HEIGHT,
             NEAR = 0.1,
             FAR = 10000;
+        // texturedot7 = new THREE.TextureLoader().load("/static/images/master/dot7.png");
+        // textureblock = new THREE.TextureLoader().load("/static/images/master/block.png");
+        // texturecolormap = new THREE.TextureLoader().load("/static/images/master/colormap5.png");
 
         renderer = new THREE.WebGLRenderer();
         if (darkMode)
@@ -104,7 +108,7 @@ window.onload = function () {
         scene.add(camera);
         //FogExp2对象的构造函数.用来在场景内创建指数雾效,指数雾效是雾效浓度递增根据指数(参数density)设定
         if (darkMode)
-            scene.fog = new THREE.FogExp2(0x000000, 0.001);
+            scene.fog = new THREE.FogExp2(0xffffff, 0.001);
         else
             scene.fog = new THREE.FogExp2(0x00ffff, 0.001);
 
@@ -124,18 +128,18 @@ window.onload = function () {
             customColor: {type: 'c', value: null},
         };
 
+        var textureblock = new THREE.TextureLoader().load("/static/images/master/block.png");
         var uniforms = {
             color: {type: "c", value: new THREE.Color(0xffffff)},
-            texture: {type: "t", value: THREE.ImageUtils.loadTexture("/static/images/master/block.png")}
+            texture: {type: "t", value: textureblock}
         };
-
+        // console.log('block',textureblock);
         var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: uniforms,
-            attributes: attributes,
+            // attributes: attributes,
             vertexShader: document.getElementById('vertexshader').textContent,
             fragmentShader: document.getElementById('fragmentshader').textContent,
         });
-
 
         geometry = new THREE.BufferGeometry();
 
@@ -152,10 +156,11 @@ window.onload = function () {
 
         //载入边界信息
         $.getJSON("/static/data/master/world.json", function (json) {
+            var texturecolormap = new THREE.TextureLoader().load("/static/images/master/colormap5.png");
             overlayMaterial = new THREE.MeshPhongMaterial({//一种光亮表面的材质效果
-                map: THREE.ImageUtils.loadTexture("/static/images/master/colormap5.png"),
+                map: texturecolormap,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.5,
                 blending: THREE.AdditiveBlending//决定物体如何与背景进行融合,提供一种半透明的眩光。
             });
 
@@ -170,7 +175,7 @@ window.onload = function () {
                 color: 0x7e7e7e,
                 linewidth: 2,
                 transparent: true,
-                opacity: 0.5
+                opacity: 0.7
             });
             shape = new THREE.Object3D();
             shape.add(temp[0]);//边界线
@@ -181,7 +186,8 @@ window.onload = function () {
             globe = new THREE.Object3D();
             globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
                 new THREE.MeshBasicMaterial({
-                    color: darkMode ? 0x000000 : 0xffffff
+                    color: 0x000000,
+                    opacity: 0.2
                 })));
             //globe.add(new THREE.Mesh(new THREE.IcosahedronGeometry( globeSize-1, 6 ),new THREE.MeshBasicMaterial({color:0x080808,wireframe:true})));
 
@@ -189,12 +195,12 @@ window.onload = function () {
             overlaySphere.rotation.y = -Math.PI / 2;
             globe.add(overlaySphere);
             //画地图边界信息
-            temp = drawThreeGeo(json, globeSize * 1.43, 'sphere', scene, {
-                color: darkMode ? 0x7e7e7e : 0x000000,
+            temp = drawThreeGeo(json, globeSize * 1.45, 'sphere', scene, {
+                color: 0x7e7e7e,
                 linewidth: 2,
                 blending: THREE.AdditiveBlending,
                 transparent: true,
-                opacity: 0.5
+                opacity: 0.7
             });
             sphereShapeIDs = temp[1];
             globe.add(temp[0]);
@@ -309,13 +315,14 @@ window.onload = function () {
             geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
             geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
             geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
+            geometry.addAttribute('attributes', new THREE.BufferAttribute(attributes, 1));
 
-            particleSystem = new THREE.PointCloud(geometry, shaderMaterial);
+            particleSystem = new THREE.Points(geometry, shaderMaterial);
             particleSystem.frustrumCulled = true;
             scene.add(particleSystem);
             loaded = true;
             switcher("gridSphere", false, 25);
-            Particlelinks = new ParticleLinks(13000, clock,darkMode);
+            Particlelinks = new ParticleLinks(13000, clock, darkMode);
             links = Particlelinks.getMesh();
             scene.add(links);
 
@@ -374,8 +381,15 @@ window.onload = function () {
     }
 
 
+    // function updatematerial(){
+    //     var texture=new THREE.TextureLoader().load("/static/images/master/dot7.png");
+    //     cloudMaterial.map=texture;
+    //     console.log("call update");
+    //
+    // }
+    // setTimeout(updatematerial(),500);
     //更新点云，为点设定颜色并存储入dict里面
-    function updatePointCloud() {
+    function updatePoints() {
         colors = [];
         addedProducts = {};
         availableProducts = null;
@@ -434,10 +448,10 @@ window.onload = function () {
     function addProductLinks(circles, threeD) {
         if ((currentSetup === "productspace" || currentSetup === "productspace3D") && Pgeometry) {
             scene.add(Pgeometry);
-            updatePointCloud();
+            updatePoints();
         } else if (currentSetup === "productsphere" && Sgeometry) {
             scene.add(Sgeometry);
-            updatePointCloud();
+            updatePoints();
         }
         else {
             newlinks = new THREE.Object3D();
@@ -473,6 +487,7 @@ window.onload = function () {
                                 productVector.x = val.x3;
                                 productVector.y = val.y3;
                                 productVector.z = val.z3;
+                                // console.log('dot',ncolor,productVector);
                                 cloudGeometry.vertices.push(productVector);
                                 colors.push(ncolor);
                             }
@@ -480,20 +495,23 @@ window.onload = function () {
                     }
                 });
                 cloudGeometry.colors = colors;
-                cloudMaterial = new THREE.PointCloudMaterial({
-                    size: nodeSize,
+
+                var texturedot7 = new THREE.TextureLoader().load("/static/images/master/dot7.png");
+                cloudMaterial = new THREE.PointsMaterial({
                     transparent: true,
+                    size: nodeSize,
                     opacity: 0.8,
+                    map: texturedot7,
                     vertexColors: THREE.VertexColors,
-                    map: THREE.ImageUtils.loadTexture("/static/images/master/dot7.png"),
                     blending: THREE.AdditiveBlending,
                     fog: false,
                     depthTest: false
                 });
-                cloud = new THREE.PointCloud(cloudGeometry, cloudMaterial);
+                cloud = new THREE.Points(cloudGeometry, cloudMaterial);
                 newlinks.add(cloud);
             }
             else {
+                // console.log('not circle');
                 var radius = 2.5;
                 var segments = 32;
                 var ncolor = new THREE.Color();
@@ -559,9 +577,11 @@ window.onload = function () {
 
                     if (productA && productB) {
                         if (threeD) {
+                            // console.log(productA);
                             line_geom.vertices.push(new THREE.Vector3(productA.x, productA.y, 0));
                             line_geom.vertices.push(new THREE.Vector3(productB.x, productB.y, 0));
                         } else if (productA.x3) {
+                            // console.log(productA);
                             line_geom.vertices.push(new THREE.Vector3(productA.x3, productA.y3, productA.z3));
                             line_geom.vertices.push(new THREE.Vector3(productB.x3, productB.y3, productB.z3));
                         }
@@ -569,16 +589,22 @@ window.onload = function () {
                     }
                 });
 
-                mergedMesh = new THREE.Line(line_geom, line_material, THREE.LinePieces);
+                mergedMesh = new THREE.Line(line_geom, line_material);//, THREE.LinePieces
+
+                // newlinks = new THREE.Object3D();
                 newlinks.add(mergedMesh);
+                // console.log(mergedMesh);
 
                 scene.remove(links);
-                links = newlinks.clone();
+                // console.log(newlinks);
+
+                links = newlinks;
+                // console.log(links);
                 scene.add(links);
                 if (currentSetup === "productspace" || currentSetup === "productspace3D") {
-                    if (!Pgeometry) Pgeometry = links.clone();
+                    if (!Pgeometry) Pgeometry = links;
                 } else if (currentSetup === "productsphere") {
-                    if (!Sgeometry) Sgeometry = links.clone();
+                    if (!Sgeometry) Sgeometry = links;
                 }
             });
         }
@@ -739,14 +765,14 @@ window.onload = function () {
         var material = new THREE.LineDashedMaterial({
             dashSize: 1,
             gapSize: 100,
-            colorHex: colorHex,
+            // colorHex: colorHex,
             transparent: true,
             opacity: 0.8,
             vertexColors: true,
             linewidth: width + 1
         });
         var colors = [];
-        var spline = new THREE.SplineCurve3(controlPoints);//通过一系列的点来创建一条平滑的曲线。
+        var spline = new THREE.CatmullRomCurve3(controlPoints);//通过一系列的点来创建一条平滑的曲线。
         var geometry = new THREE.Geometry();
         var splinePoints = spline.getPoints(100);
         for (var i = 0; i < splinePoints.length; i++) {
@@ -756,7 +782,7 @@ window.onload = function () {
         }
         geometry.colors = colors;
 
-        return (new THREE.Line(geometry, material, THREE.LinePieces));
+        return (new THREE.Line(geometry, material, THREE.LineSegments));
     }
 
     //？？？？对于粒子系统
@@ -819,7 +845,7 @@ window.onload = function () {
                 if (currentSetup === "gridSphere")
                     cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
                 else cameraDistance = 3000;
-                s.unprojectVector(vector, camera);
+                vector.unproject(camera);
                 o.ray.set(camera.position, vector.sub(camera.position).normalize());
 
                 intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
@@ -875,21 +901,23 @@ window.onload = function () {
                 if (currentSetup === "gridSphere") {
                     meshes = country.polygons3D;
                     if (!countryOverlay) countryOverlay = [];
-                    for (var i = 0; i < meshes.length; i++) {
-                        currentMesh = globe.children[2].getObjectById(meshes[i], true);
-                        currentMesh.material.linewidth = 5;
-                        currentMesh.material.opacity = 1;
-                        countryOverlay.push(meshes[i]);
-                    }
+                    if (meshes != null)
+                        for (var i = 0; i < meshes.length; i++) {
+                            currentMesh = globe.children[2].getObjectById(meshes[i], true);
+                            currentMesh.material.linewidth = 5;
+                            currentMesh.material.opacity = 1;
+                            countryOverlay.push(meshes[i]);
+                        }
                 } else if (currentSetup === "gridmap" || currentSetup === "towers") {
                     meshes = country.polygons;
                     if (!countryOverlay) countryOverlay = [];
-                    for (var i = 0; i < meshes.length; i++) {
-                        currentMesh = shape.children[0].getObjectById(meshes[i], true);
-                        currentMesh.material.linewidth = 5;
-                        currentMesh.material.opacity = 1;
-                        countryOverlay.push(meshes[i]);
-                    }
+                    if (meshes != null)
+                        for (var i = 0; i < meshes.length; i++) {
+                            currentMesh = shape.children[0].getObjectById(meshes[i], true);
+                            currentMesh.material.linewidth = 5;
+                            currentMesh.material.opacity = 1;
+                            countryOverlay.push(meshes[i]);
+                        }
                 }
             }
         }
@@ -975,10 +1003,6 @@ window.onload = function () {
                             addLinks("countries2D", co);
                         cameraControls.center(target.lat * 1.55, target.lon * 1.55, 0);
                     }
-                    // if (!storyMode) {
-                    //     $("#atlasBox").html("<div class='optionSeparator'>&nbsp;</div><div class='sectionTitle'>点击了解更多出口信息:</div><a target='blank' href='http://atlas.cid.harvard.edu/explore/tree_map/export/" + target.iso.toLowerCase() + "/all/show/2012/'><img src='/static/images/master/atlasimages/" + co + ".png' id='treeMapImage' onError=\"this.onerror=null;this.src='/static/images/master/noimage.png';\"/></a></div>");
-                    //     $("#atlasBox").stop().fadeIn();
-                    // }
                     break;
                 default:
                     break;
@@ -2038,7 +2062,7 @@ window.onload = function () {
         currentSetup = to;
         if (!storyMode) $("#atlasBox").stop().fadeIn();
         if (currentSetup === "productspace" || currentSetup === "productspace3D" || currentSetup === "productsphere") {
-            $("#atlasBox").stop().fadeOut();
+            // $("#atlasBox").stop().fadeOut();
             $("#countrySection").hide();
             $("#productSection").show();
 
@@ -2300,7 +2324,7 @@ window.onload = function () {
                 'border-left': '1px solid #aaa',
                 'background-image': 'linear-gradient(to bottom, #eeeeee 50%, #cccccc 100%)',
                 'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc', GradientType=0)"
-        });
+            });
             $('.select2-container--classic .select2-selection--single .select2-selection__arrow b').css('border-color', '#303030 transparent transparent transparent');
             $('.select2-container--classic[dir="rtl"] .select2-selection--single .select2-selection__arrow').css('border-right', '1px solid #aaa');
             $('.select2-container--classic.select2-container--open .select2-selection--single').css('border', '1px solid #ffffff');
@@ -2308,11 +2332,11 @@ window.onload = function () {
             $('.select2-container--classic.select2-container--open.select2-container--above .select2-selection--single').css({
                 'background-image': 'linear-gradient(to bottom, #ffffff 0%, #eeeeee 50%)',
                 "filter": "progid: DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee', GradientType=0)"
-        });
+            });
             $('.select2-container--classic.select2-container--open.select2-container--below .select2-selection--single').css({
                 'background-image': 'linear-gradient(to bottom, #eeeeee 50%, #ffffff 100%)',
                 'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#ffffff', GradientType=0)"
-        });
+            });
             $('.select2-container--classic .select2-selection--multiple').css('background-color', 'black');
             $('.select2-container--classic .select2-selection--multiple:focus').css('border', '1px solid #303030');
             $('.select2-container--classic .select2-selection--multiple .select2-selection__choice').css('background-color', '#e4e4e4');
@@ -2386,7 +2410,7 @@ window.onload = function () {
 
 
             //select2
-            $('.t').css('color','#aaa');
+            $('.t').css('color', '#aaa');
             $(".select2-dropdown .select2-close-mask .select2-container--default .select2-selection--single").css('background-color', 'white');
             // $('.select2-container--default .select2-selection--single').css('border', '1px solid #303030');
             $('.select2-container--default .select2-selection--single .select2-selection__rendered').css('color', '#222');
@@ -2421,7 +2445,7 @@ window.onload = function () {
                 'border-left': '1px solid #444',
                 'background-image': 'linear-gradient(to bottom, #222 50%, #444 100%)',
                 'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#222', endColorstr='#444', GradientType=0)"
-        });
+            });
             $('.select2-container--classic .select2-selection--single .select2-selection__arrow b').css('border-color', '#c0c0c0 transparent transparent transparent');
             $('.select2-container--classic[dir="rtl"] .select2-selection--single .select2-selection__arrow').css('border-right', '1px solid #555');
             $('.select2-container--classic.select2-container--open .select2-selection--single').css('border', '1px solid #000');
@@ -2429,11 +2453,11 @@ window.onload = function () {
             $('.select2-container--classic.select2-container--open.select2-container--above .select2-selection--single').css({
                 'background-image': 'linear-gradient(to bottom, #000 0%, #222 50%)',
                 "filter": "progid: DXImageTransform.Microsoft.gradient(startColorstr='#000', endColorstr='#222', GradientType=0)"
-        });
+            });
             $('.select2-container--classic.select2-container--open.select2-container--below .select2-selection--single').css({
                 'background-image': 'linear-gradient(to bottom, #222 50%, #000 100%)',
                 'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#222', endColorstr='#000', GradientType=0)"
-        });
+            });
             $('.select2-container--classic .select2-selection--multiple').css('background-color', 'white');
             $('.select2-container--classic .select2-selection--multiple:focus').css('border', '1px solid #dfdfdf');
             $('.select2-container--classic .select2-selection--multiple .select2-selection__choice').css('background-color', '#2a2a2a');
@@ -2464,7 +2488,7 @@ window.onload = function () {
         cameraControls.loaded();
         $("#UI").fadeIn();
         values = parseURL.decode_url();
-        if (values.length!=0) {
+        if (values.length != 0) {
             switch (values[0][1]) {
                 case "gridSphere":
                 case "gridmap":

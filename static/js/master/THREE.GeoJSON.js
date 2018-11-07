@@ -214,7 +214,7 @@ function convertToSphereCoords(coordinates_array, sphere_radius) {
 
     x_values.push(Math.cos(lat * Math.PI/180) * Math.cos(lon * Math.PI/180) * sphere_radius);
     y_values.push(Math.cos(lat * Math.PI/180) * Math.sin(lon * Math.PI/180) * sphere_radius);
-    z_values.push(Math.sin(lat * Math.PI/180) * sphere_radius);    
+    z_values.push(Math.sin(lat * Math.PI/180) * sphere_radius)
 }
 
 function convertToPlaneCoords(coordinates_array, radius) {
@@ -232,6 +232,7 @@ function drawParticle(x, y, z, options) {
     var particle_material = new THREE.ParticleSystemMaterial(options);
     var particle = new THREE.ParticleSystem(particle_geom, particle_material);
     this.scene.add(particle);
+    // console.log(particle_geom);
     clearArrays();
 }
 
@@ -244,6 +245,7 @@ function drawLine(x_values, y_values, z_values, options) {
     var line = new THREE.Line(line_geom, line_material);
     formID[edgeID].push(line.id);
     lines.add(line);
+    // console.log(line);
     
     clearArrays();
 }
