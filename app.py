@@ -1269,22 +1269,22 @@ def graphgoo_home():
 def graph_layout2d(layout):
     global graph_object
     if layout == 'chord':
-        return render_template('graph_layout2d//chord_layout2d.html', nodes=graph_object['nodes'],
+        return render_template('chord_layout2d.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
     if layout == 'circular':
-        return render_template('graph_layout2d//circular_layout2d.html', nodes=graph_object['nodes'],
+        return render_template('circular_layout2d.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
     if layout == 'grid':
-        return render_template('graph_layout2d//grid_layout2d.html', nodes=graph_object['nodes'],
+        return render_template('grid_layout2d.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
     if layout == 'hierarchical':
-        return render_template('graph_layout2d//hierarchical_layout2d.html', nodes=graph_object['nodes'],
+        return render_template('hierarchical_layout2d.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
     if layout == 'pack':
-        return render_template('graph_layout2d//pack_layout2d.html', nodes=graph_object['nodes'],
+        return render_template('pack_layout2d.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
     if layout == 'tree':
-        return render_template('graph_layout2d//tree_layout2d.html', nodes=graph_object['nodes'],
+        return render_template('tree_layout2d.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
     return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
