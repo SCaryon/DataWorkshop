@@ -52,6 +52,8 @@ global final_data_object
 final_data_object = {}
 global text_object
 text_object={}
+global graph_object
+graph_object = {}
 
 def data_list_to_dictionary(list_key, list_value):
     if len(list_key) != len(list_value):
@@ -1258,14 +1260,33 @@ def graphgoo():
 
 @app.route('/graphgoo_home')
 def graphgoo_home():
+    global graph_object
     return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
 
 
 @app.route('/graph_layout2d/<layout>')
 def graph_layout2d(layout):
-    html = 'graph_layout2d//' + layout + '_layout2d.html'
-    return render_template(html, nodes=graph_object['nodes'],
+    global graph_object
+    if layout == 'chord':
+        return render_template('graph_layout2d//chord_layout2d.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+    if layout == 'circular':
+        return render_template('graph_layout2d//circular_layout2d.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+    if layout == 'grid':
+        return render_template('graph_layout2d//grid_layout2d.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+    if layout == 'hierarchical':
+        return render_template('graph_layout2d//hierarchical_layout2d.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+    if layout == 'pack':
+        return render_template('graph_layout2d//pack_layout2d.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+    if layout == 'tree':
+        return render_template('graph_layout2d//tree_layout2d.html', nodes=graph_object['nodes'],
+                           matrix=graph_object['matrix'])
+    return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
 
 
