@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+
+    <script src="../static/js/papaparse.js"></script>
+    <script src="../static/js/jschardet.min.js"></script>
+    <script src="../static/js/cluster_upload.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../static/css/cluster_css.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/parallel.css">
+
+    <script src="../static/js/jscolor.js"></script>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/echarts.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+
+    <title>Time series analysis</title>
+</head>
+
+<body>
+<div class="navbar custom-navbar navbar-fixed-top" style='background: black;' role="navigation">
+    <div class="container">
+
+        <!-- NAVBAR HEADER -->
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+            <!-- lOGO -->
+            <a href="/" class="navbar-brand" style="color:white;">TableGoo!</a>
+        </div>
+
+        <!-- MENU LINKS -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/home" class="smoothScroll" style="color:white;">Home</a></li>
+                <li><a href="/" class="smoothScroll" style="color:white;">About</a></li>
+                <li><a href="/" class="smoothScroll" style="color:white;">Gallery</a></li>
+                <li><a href="/" class="smoothScroll" style="color:white;">Contact us</a></li>
+                <li>
+                    <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
+                </li>
+                {% if user %}
+                    <li class="user_img"><a class="page-scroll" href="/user/">
+                        <div class="to3" style="margin-top: -10px;">
+                            <div class="to2">
+                                <div class="to1">
+                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    </li>
+                    <li><a href="/login/" class="page-scroll" style="color:white;">Quit</a></li>
+                {% else %}
+                    <li>
+                        <a href="/login/" class="" style="color:white;">Log in/Sign up</a>
+                    </li>
+                {% endif %}
+                {% if user %}
+                    {% if user.permission==100 %}
+                        <li>
+                            <a href="/admin/?manager={{ user.username }}" class="">manage</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            {% if user %}
+                <script>
+                    var permi = '' +{{ user.permission }};
+                    switch (permi) {
+                        case "1":
+                            $('.to3').css('background-color', '#aac4bc');
+                            break;
+                        case "2":
+                            $('.to3').css('background-color', '#ae853b');
+                            break;
+                        case "3":
+                            $('.to3').css('background-color', '#dfdc5d');
+                            break;
+                        case "100":
+                            $('.to3').css('background-color', '#ede4b8');
+                            break;
+                        default:
+                            $('.to3').css('background-color', 'white');
+                    }
+                </script>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+<style>
+    body { font: 12px Arial;}
+
+path {
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+</style>
+
+<div id="main" style="width: 600px;height:400px;"></div>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+    option = {
+
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'line',
+                lineStyle: {
+                    color: 'rgba(0,0,0,0.2)',
+                    width: 1,
+                    type: 'solid'
+                }
+            }
+        },
+        legend: {
+            data: ['DQ', 'TY', 'SS', 'QG', 'SY', 'DD']
+        },
+        singleAxis: {
+            // top: '8%',
+            axisTick: {},
+            axisLabel: {},
+            type: 'time',
+            // position: 'top',
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    type: 'dashed',
+                    opacity: 0.2
+                }
+            }
+        },
+        series: [{
+            type: 'themeRiver',
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 20,
+                    shadowColor: 'rgba(0, 0, 0, 0.8)'
+                }
+            },
+            data: [
+                ['2015/11/08', 10, 'DQ'],
+                ['2015/11/09', 15, 'DQ'],
+                ['2015/11/10', 35, 'DQ'],
+                // ['2015/11/11',38,'DQ'],['2015/11/12',22,'DQ'],['2015/11/13',16,'DQ'],
+                ['2015/11/14', 7, 'DQ'],
+                ['2015/11/15', 2, 'DQ'],
+                ['2015/11/16', 17, 'DQ'],
+                ['2015/11/17', 33, 'DQ'],
+                ['2015/11/18', 22, 'DQ'],
+                ['2015/11/19', 32, 'DQ'],
+                ['2015/11/20', 26, 'DQ'],
+                ['2015/11/21', 35, 'DQ'],
+                ['2015/11/22', 40, 'DQ'],
+                ['2015/11/23', 32, 'DQ'],
+                ['2015/11/24', 26, 'DQ'],
+                ['2015/11/25', 22, 'DQ'],
+                // ['2015/11/26',16,'DQ'],['2015/11/27',22,'DQ'],['2015/11/28',10,'DQ'],
+                ['2015/11/08', 35, 'TY'],
+                ['2015/11/09', 36, 'TY'],
+                ['2015/11/10', 37, 'TY'],
+                ['2015/11/11', 22, 'TY'],
+                ['2015/11/12', 24, 'TY'],
+                ['2015/11/13', 26, 'TY'],
+                ['2015/11/14', 34, 'TY'],
+                ['2015/11/15', 21, 'TY'],
+                ['2015/11/16', 18, 'TY'],
+                ['2015/11/17', 45, 'TY'],
+                ['2015/11/18', 32, 'TY'],
+                ['2015/11/19', 35, 'TY'],
+                ['2015/11/20', 30, 'TY'],
+                ['2015/11/21', 28, 'TY'],
+                ['2015/11/22', 27, 'TY'],
+                ['2015/11/23', 26, 'TY'],
+                ['2015/11/24', 15, 'TY'],
+                ['2015/11/25', 30, 'TY'],
+                ['2015/11/26', 35, 'TY'],
+                ['2015/11/27', 42, 'TY'],
+                ['2015/11/28', 42, 'TY'],
+                ['2015/11/08', 21, 'SS'],
+                ['2015/11/09', 25, 'SS'],
+                ['2015/11/10', 27, 'SS'],
+                ['2015/11/11', 23, 'SS'],
+                ['2015/11/12', 24, 'SS'],
+                ['2015/11/13', 21, 'SS'],
+                ['2015/11/14', 35, 'SS'],
+                ['2015/11/15', 39, 'SS'],
+                ['2015/11/16', 25, 'SS'],
+                ['2015/11/17', 36, 'SS'],
+                ['2015/11/18', 33, 'SS'],
+                ['2015/11/19', 41, 'SS'],
+                ['2015/11/20', 35, 'SS'],
+                ['2015/11/21', 34, 'SS'],
+                ['2015/11/22', 28, 'SS'],
+                ['2015/11/14', 7, 'QG'],
+                ['2015/11/15', 2, 'QG'],
+                ['2015/11/16', 17, 'QG'],
+                ['2015/11/17', 33, 'QG'],
+                ['2015/11/18', 40, 'QG'],
+                ['2015/11/19', 32, 'QG'],
+                ['2015/11/20', 26, 'QG'],
+                ['2015/11/21', 35, 'QG'],
+                ['2015/11/22', 40, 'QG'],
+                ['2015/11/23', 32, 'QG'],
+                ['2015/11/24', 26, 'QG'],
+                ['2015/11/25', 22, 'QG'],
+                ['2015/11/26', 16, 'QG'],
+                ['2015/11/27', 22, 'QG'],
+                ['2015/11/28', 10, 'QG'],
+                ['2015/11/08', 10, 'SY'],
+                ['2015/11/09', 15, 'SY'],
+                ['2015/11/10', 35, 'SY'],
+                ['2015/11/11', 38, 'SY'],
+                ['2015/11/12', 22, 'SY'],
+                ['2015/11/13', 16, 'SY'],
+                ['2015/11/14', 7, 'SY'],
+                ['2015/11/15', 2, 'SY'],
+                ['2015/11/16', 17, 'SY'],
+                ['2015/11/17', 33, 'SY'],
+                ['2015/11/18', 40, 'SY'],
+                ['2015/11/19', 32, 'SY'],
+                ['2015/11/20', 26, 'SY'],
+                ['2015/11/21', 35, 'SY'],
+                ['2015/11/22', 4, 'SY'],
+                ['2015/11/23', 32, 'SY'],
+                ['2015/11/24', 26, 'SY'],
+                ['2015/11/25', 22, 'SY'],
+                ['2015/11/26', 16, 'SY'],
+                ['2015/11/27', 22, 'SY'],
+                ['2015/11/28', 10, 'SY'],
+                ['2015/11/08', 10, 'DD'],
+                ['2015/11/09', 15, 'DD'],
+                ['2015/11/10', 35, 'DD'],
+                ['2015/11/11', 38, 'DD'],
+                ['2015/11/12', 22, 'DD'],
+                ['2015/11/13', 16, 'DD'],
+                ['2015/11/14', 7, 'DD'],
+                ['2015/11/15', 2, 'DD'],
+                ['2015/11/16', 17, 'DD'],
+                ['2015/11/17', 33, 'DD'],
+                ['2015/11/18', 4, 'DD'],
+                ['2015/11/19', 32, 'DD'],
+                ['2015/11/20', 26, 'DD'],
+                ['2015/11/21', 35, 'DD'],
+                ['2015/11/22', 40, 'DD'],
+                ['2015/11/23', 32, 'DD'],
+                ['2015/11/24', 26, 'DD'],
+                ['2015/11/25', 22, 'DD'],
+                ['2015/11/26', 16, 'DD'],
+                ['2015/11/27', 22, 'DD'],
+                ['2015/11/28', 10, 'DD']
+            ]
+        }]
+    };
+    myChart.setOption(option);
+
+</script>
+
+
+<div class="section" style="padding-top: 100px">
+    <!-- container -->
+    <div class="container">
+        <!-- row -->
+        <div class="row">
+            <!-- section title -->
+            <div class="col-md-12">
+
+                <h3 class="title">Time series analysis</h3>
+                <div class="section-title">
+                    <div style="margin-left: 40px;display:inline"><select id="time_selector">
+                        <option value="" style="color:black">--Time series analysis--</option>
+                        <option id="Exponential_smoothing" value="Exponential_smoothing"
+                                title="Exponential smoothing is a rule of thumb technique for smoothing time series data using the exponential window function. ">
+                            Exponential smoothing
+                        </option>
+                        <option value="Arithmetic_averaging" title="">Arithmetic averaging</option>
+                        <option value="Moving_averaging" title="">Moving averaging</option>
+                        <option value="User_prediction" title="User_prediction">User method</option>
+                    </select></div>
+                    <button id="get_inf" onclick="get_inf()">Wikipedia</button>
+                    <div class='demo-bg'></div>
+
+                    <button id="generate" onclick="generate()">Generate</button>
+                    <div class='demo-bg'></div>
+                    <div class='demo-bg'></div>
+                    <div class='demo-txt' id="parameter_select">
+
+                    </div>
+                    <form class="upload" style='float:right'>
+                        <input type="file" id="cluster_csvfile" style="display:none" name="cluster_csvfile"
+                               onchange="data_file_path.value=this.value">
+                        <div id="data_file_path" name="data_file_path" class="fas fa-plus-circle"
+                             onclick="cluster_csvfile.click()" data-title='select your file'></div>
+                        <div class='fas fa-upload' onclick="read_cluster_file()" data-title='upload your file'></div>
+                        <div data-title='save your way' style="font-weight: 900">
+                            <a data-toggle="modal" data-target="#login" href=""
+                               style="color:black;display:inline-block">
+                                <span class="glyphicon glyphicon-log-in"></span></a>
+                        </div>
+                    </form>
+                    <!--用户上传自己的方法并给它命名-->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<!-- 登录窗口 -->
+<div id="login" class="modal fade">
+    <div class="modal-dialog" style='width:400px;'>
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="close" data-dismiss="modal"><span>&times;</span></div>
+            </div>
+            <div class="modal-title">
+                <h1 class="text-center">submit</h1>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-group" style="padding-bottom: 10px">
+                        <p style="display: inline-block;">Name：</p>
+                        <input name='user_cluster_name' class="form-control" type="text"
+                               style='width:60%;display:inline-block;' placeholder=""></div>
+                    <div class="form-group">
+                        <p style="display: inline-block;">Role：</p>
+                        <label style="padding-left: 30px;padding-right: 20px"><input name="role" value='public'
+                                                                                     type="radio" checked/><span></span>public</label>
+                        <label><input name="role" value='private' type="radio"/><span></span>private</label>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-primary" type="submit" onclick="save_user_way()">OK</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" style="margin-bottom:20px;margin-top:20px;margin-left:80px;margin-right: 80px">
+    <!-- section title -->
+    <div class="col-md-12">
+        <div class="draw_bar" id="draw_bar">
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<!--get the information about timeseriesanalysis way-->
+<script>
+    window.link = {
+        'Exponential_smoothing': 'https://en.wikipedia.org/wiki/Exponential_smoothing',
+    }
+
+    function get_inf() {
+        var url = window.link[$('#time_selector option:selected').val()];
+        window.open(url);
+    };
+</script>
+<!--delete all-->
+<script>
+    function Delete_all(this_id, draw_or_evaluation) {
+        var body = document.getElementById('draw_inf' + this_id.toString());
+        var _parentElement = body.parentNode;
+        //body.innerHTML="";
+        //需要考虑动态删除后的布局--------------------------------------------------------------------------
+        //document.getElementById('delete_node'+this_id.toString()).style.display='none';
+        if (draw_or_evaluation == 'draw_bar') {
+            if (_parentElement) {
+                _parentElement.removeChild(body);
+            }
+            draw_counts.push(this_id);
+        }
+        if (draw_or_evaluation == 'draw_evaluation_bar') {
+            if (_parentElement) {
+                var change_color = document.getElementById('change_color' + this_id.toString());
+                change_color.style.display = 'none';
+                _parentElement.appendChild(change_color);
+                _parentElement.removeChild(body);
+            }
+            evaluation_count.push(this_id);
+        }
+    };
+</script>
+
+
+
+<script>
+    function getOffsetLeft(v) {
+        var tmp = v.offsetLeft;
+        var val = v.offsetParent;
+        while (val != null) {
+            tmp += val.offsetLeft;
+            val = val.offsetParent;
+        }
+        return tmp;
+    };
+
+    function select_num111(j, key, limit) {//j是int类型的，需要换成string.limit是三个元素的数组，分别表示起始数值、最大值、间距
+        var box = document.getElementById('box' + j.toString());
+        var bar = document.getElementById('bar' + j.toString());
+        var p = document.getElementById('show_num' + j.toString());
+        lenth_b.push(getOffsetLeft(bar));//box与浏览器的左边框的距离
+        cha.push(bar.offsetWidth - box.offsetWidth);
+        box.onmousedown = function (ev) {
+            let boxL = window.lenth_b[j];
+            let e = ev || window.event; //兼容性
+            let mouseX = e.clientX; //鼠标按下的位置
+            window.onmousemove = function (ev) {
+                let e = ev || window.event;
+                let moveL = e.clientX - mouseX; //鼠标移动的距离
+                let newL = boxL + moveL; //left值
+                // 判断最大值和最小值
+                if (newL < 0) {
+                    newL = 0;
+                }
+                if (newL >= window.cha[j]) {
+                    newL = window.cha[j];//此处待议，会出现box乱跳动的现象
+                }
+                // 改变left值
+                box.style.left = newL + 'px';
+                // 计算比例
+                let bili = newL / window.cha[j] * limit[1];
+                p.innerHTML = key + ': ' + Math.ceil(bili);
+                return false //取消默认事件
+            };
+            window.onmouseup = function () {
+                window.onmousemove = false; //解绑移动事件
+                return false;
+            };
+            return false;
+        };
+        // 点击音量条
+        bar.onclick = function (ev) {
+            let left = ev.clientX - window.lenth_b[j] - box.offsetWidth / 2;//看一下最左边的距离
+            if (left < 0) {
+                left = limit[0];
+            }
+            if (left >= window.cha[j]) {
+                left = window.cha[j];
+            }
+            box.style.left = left + 'px'
+            let bili = limit[0] + left / window.cha[j] * (limit[1] - limit[0]);
+            if (limit[2] == 1) {
+                p.innerHTML = key + ': ' + Math.ceil(bili);
+            }
+            else {
+                p.innerHTML = key + ': ' + bili.toFixed(1);
+            }
+            return false;
+        };
+    };
+</script>
+<!--window data-->
+
+
+<script>
+    window.is_exist_select = false;
+    lenth_b = new Array();//存储每个box与浏览器的距离。
+    cha = new Array();//存储cha数据
+    var demobg = document.querySelector(".demo-bg");
+    var demotxt = document.querySelector(".demo-txt");
+    select_cluster = '无';
+
+    function openDialog() {
+        demotxt.style.display = "block";
+        demobg.style.display = "block";
+        var current_select_cluster = $('#cluster_selector option:selected').val();
+        if (current_select_cluster != select_cluster) {
+            demobg.innerHTML = "";
+            demotxt.innerHTML = "";
+            select_cluster = $('#cluster_selector option:selected').val(); //获取选中的项的value数值
+            if (select_cluster == '无')
+                select_cluster = 'KMeans';
+            var parameter_select = document.getElementById('parameter_select');//弹出框容器
+            var j = 0;//用于标记每个参数容器，避免冲突
+            for (var key1 in window.data[select_cluster]) {
+                parameter_data = window.data[select_cluster][key1]//该参数的取值范围，有可能是数值区间，也有可能是几个字符串
+                if ((typeof parameter_data[0] == 'number'))//&&(parameter_data[2]==1 ))
+                {
+                    var all = document.createElement('div');
+                    all.setAttribute('class', 'all');
+                    all.setAttribute('id', "all" + j.toString());
+                    var p = document.createElement('p');
+                    p.setAttribute('id', 'show_num' + j.toString());
+                    p.setAttribute('name', key1);//将name属性命名成value
+                    p.setAttribute('class', 'parameter');//用于获取参数----
+                    p.innerHTML = key1 + ': ' + parameter_data[0] + '(' + parameter_data[0] + '---' + window.data[select_cluster][key1][1] + ')';
+                    var bar = document.createElement('div');
+                    bar.setAttribute('class', 'bar');
+                    bar.setAttribute('id', 'bar' + j.toString());
+                    var box = document.createElement('div');
+                    box.setAttribute('class', 'box');
+                    box.setAttribute('id', 'box' + j.toString());
+                    bar.appendChild(box);
+                    all.appendChild(bar);
+                    all.appendChild(p);
+                    parameter_select.appendChild(all);
+                    select_num111(j, key1, window.data[select_cluster][key1]);
+                    j++;//y用于动态确定元素的id}
+                }
+                else {//下拉菜单，选择该参数的一种形式
+                    var all = document.createElement('div');
+                    all.setAttribute('class', 'all');
+                    all.setAttribute('id', "all" + j.toString());
+                    var parameter_str = document.createElement('select');
+                    parameter_str.setAttribute('id', "parameter_str" + j.toString());
+                    parameter_str.setAttribute('class', 'button_blue');
+                    parameter_str.setAttribute('onchange', 'show_selected_parameters("' + "parameter_str" + j.toString() + '","' + 'show_num' + j.toString() + '")');
+                    parameter_str.style.background = 'ghostwhite';
+                    parameter_str.style.color = 'black';
+                    parameter_str.style.borderBottom = '3px solid white';
+                    parameter_str.style.textAlign = 'center';
+                    parameter_str.style.border = 'black';
+                    var intro_p = document.createElement('p');
+                    intro_p.setAttribute('id', 'show_num' + j.toString());
+                    intro_p.setAttribute('name', key1);//将name属性命名成value
+                    intro_p.setAttribute('class', 'parameter');//用于获取参数----
+                    intro_p.innerHTML = key1 + ': ';
+                    var option = document.createElement('option');
+                    option.setAttribute('value', '--options--');
+                    option.innerHTML = '--options--';
+                    parameter_str.appendChild(option);
+                    //parameter_str.select2();
+                    for (var p in parameter_data) {
+                        var option = document.createElement('option');
+                        option.setAttribute('value', parameter_data[p]);
+                        //option.setAttribute('onclick','show_selected_parameters("'+'show_num'+j.toString()+'","'+parameter_data[p]+'")');
+                        option.innerHTML = parameter_data[p];
+                        parameter_str.appendChild(option);
+                    }
+                    all.appendChild(intro_p);
+                    all.appendChild(parameter_str)
+                    parameter_select.appendChild(all);
+                    j++;
+                }
+            }
+            ;
+            var button = document.createElement('button');
+            button.setAttribute('id', 'btn');
+            button.innerHTML = '确定';
+            button.setAttribute('onclick', 'closeDialog()');
+            parameter_select.appendChild(button);
+        }
+        ;
+        window.is_exist_select = true;//用于标记是否已存在该标记，用户打开其他方法时会将该属性置为false；
+    }
+
+    function closeDialog() {
+        demotxt.style.display = "none";
+        demobg.style.display = "none";
+    };
+</script>
+<!--获取方法和参数，画图-->
+<script>
+function a(dataset){
+var width=500;
+var height=500;
+
+var padding={top:70, right:70, bottom: 70, left:70};
+var gdpmax=0;
+for(var i=0;i<dataset.length;i++){
+	var currGdp=d3.max(dataset[i],function(d){
+		return d[1];
+	});
+	if(currGdp>gdpmax)
+		gdpmax=currGdp;
+}
+console.log(gdpmax);
+
+var xScale=d3.scale.linear()
+			.domain([1995,2018])
+			.range([0,width-padding.left-padding.right]);
+
+var yScale=d3.scale.linear()
+			.domain([0,gdpmax*1.1])
+			.range([height-padding.bottom-padding.top,0]);
+
+var linePath=d3.svg.line()//创建一个直线生成器
+				.x(function(d){
+					return xScale(d[0]);
+				})
+				.y(function(d){
+					return yScale(d[1]);
+				})
+				.interpolate("basis")//插值模式
+				;
+
+//定义两个颜色
+var colors=[d3.rgb(0,0,255),d3.rgb(0,255,0)];
+
+var svg=d3.select("body")
+				.append("svg")
+				.attr("width",width)
+				.attr("height",height);
+
+svg.selectAll("path")
+	.data(dataset)
+	.enter()
+	.append("path")
+	.attr("transform","translate("+padding.left+","+padding.top+")")
+	.attr("d",function(d){
+		return linePath(d);
+		//返回线段生成器得到的路径
+	})
+	.attr("fill","none")
+	.attr("stroke-width",3)
+	.attr("stroke",function(d,i){
+		return colors[i];
+	});
+
+var xAxis=d3.svg.axis()
+			.scale(xScale)
+			.ticks(14)
+			.tickFormat(d3.format("d"))
+			.orient("bottom");
+
+var yAxis=d3.svg.axis()
+			.scale(yScale)
+			.orient("left");
+
+//添加一个g用于放x轴
+svg.append("g")
+	.attr("class","axis")
+	.attr("transform","translate("+padding.left+","+(height-padding.top)+")")
+	.call(xAxis);
+
+svg.append("g")
+	.attr("class","axis")
+	.attr("transform","translate("+padding.left+","+padding.top+")")
+	.call(yAxis);
+}
+</script>
+<script>
+    function create_draw(target_draw_bar_id, j, cluster_way_inf) {
+        var draw_inf = document.createElement('div');
+        draw_inf.setAttribute('class', 'draw_inf');
+        draw_inf.setAttribute('id', 'draw_inf' + j.toString());
+        var draw = document.createElement('div');
+        draw.setAttribute('id', 'draw_' + j.toString());
+        draw.setAttribute('class', 'draw');
+        var save = document.createElement('button');
+        save.style.color = 'black';
+        save.style.float = 'right';
+        save.innerHTML = 'Save';
+        save.setAttribute('id', 'save_node' + j.toString());
+        save.setAttribute('onclick', 'save(' + j + ')');//保存该id用于获取该图片下的聚类方法和参数
+        var button = document.createElement('div');//===========================
+        button.setAttribute('class', 'delete_node');
+        button.setAttribute('id', 'delete_node' + j.toString());
+        button.setAttribute('onclick', "Delete_all(" + j + ",'" + target_draw_bar_id + "')");
+        var inf = document.createElement('div');
+        inf.setAttribute('class', 'cluster_way_inf');
+        inf.setAttribute('id', 'cluster_way_inf' + j.toString());
+        inf.innerHTML = cluster_way_inf;
+        draw_inf.appendChild(draw);
+        draw_inf.appendChild(save);
+        draw_inf.appendChild(inf);
+        draw_inf.appendChild(button);
+        var draw_bar = document.getElementById(target_draw_bar_id);
+        draw_bar.appendChild(draw_inf);
+    }
+
+    function create_draw_element(target_draw_bar_id, j, cluster_way_inf_value) {
+        var draw_inf = document.createElement('div');
+        draw_inf.setAttribute('class', 'draw_inf');
+        draw_inf.setAttribute('id', 'draw_inf' + j.toString());
+        var draw = document.createElement('div');
+        draw.setAttribute('id', 'draw_' + j.toString());
+        draw.setAttribute('class', 'draw');
+        draw_inf.appendChild(draw);//把画布放进去
+        var draw_inf_body = document.createElement('div');
+        draw_inf_body.setAttribute('class', 'draw_inf_body');
+        draw_inf_body.setAttribute('id', 'draw_inf_body' + j.toString());
+        var cluster_way_inf = document.createElement('div');
+        cluster_way_inf.setAttribute('class', 'cluster_way_inf');
+        cluster_way_inf.setAttribute('id', 'cluster_way_inf' + j.toString());
+        cluster_way_inf.setAttribute('value', cluster_way_inf_value);
+        var array = cluster_way_inf_value.split('<br>');
+        var show_innerhtml = (array[0].split(': '))[1];
+        for (var i = 1; i < array.length; i++) {
+            if (i % 2 == 1) {
+                show_innerhtml += '<br>' + array[i];
+            }
+            if (i % 2 == 0) {
+                show_innerhtml += '&nbsp &nbsp' + array[i];
+            }
+        }
+        cluster_way_inf.innerHTML = show_innerhtml;
+        var draw_operators = document.createElement('div');
+        draw_operators.setAttribute('class', 'draw_operators');
+        draw_operators.setAttribute('id', 'draw_operators' + j.toString());
+        if (target_draw_bar_id != 'draw_evaluation_bar') {//当前评价指标里面是没有save功能的
+            var draw_operators_save_div = document.createElement('div');//save的div
+            draw_operators_save_div.setAttribute('class', 'far fa-check-circle');
+            draw_operators_save_div.setAttribute('id', 'draw_operators_save_div' + j.toString());
+            var draw_operators_save_span = document.createElement('span');
+            draw_operators_save_span.setAttribute('class', 'tooltipp');
+            draw_operators_save_span.setAttribute('id', 'draw_operators_save_span' + j.toString());
+            draw_operators_save_span.innerHTML = 'save and return';
+            draw_operators_save_div.appendChild(draw_operators_save_span);
+            draw_operators_save_div.setAttribute('onclick', 'save(' + j + ')');//保存该id用于获取该图片下的聚类方法和参数
+            draw_operators.appendChild(draw_operators_save_div);
+        }
+        var draw_operators_delete_div = document.createElement('div');//delete的div
+        draw_operators_delete_div.setAttribute('class', 'fa fa-trash');
+        draw_operators_delete_div.setAttribute('id', 'draw_operators_delete_div' + j.toString());
+        draw_operators_delete_div.setAttribute('onclick', "Delete_all(" + j + ",'" + target_draw_bar_id + "')");//为该删除按钮添加onclick时间，target是draw或者evaluation
+        var draw_operators_delete_span = document.createElement('span');
+        draw_operators_delete_span.setAttribute('class', 'tooltipp');
+        draw_operators_delete_span.setAttribute('id', 'draw_operators_delete_span' + j.toString());
+        draw_operators_delete_span.innerHTML = 'delete';
+        draw_operators_delete_div.appendChild(draw_operators_delete_span);
+        var draw_operators_view_div = document.createElement('div');//view的div
+        draw_operators_view_div.setAttribute('class', 'fa fa-eye');
+        draw_operators_view_div.setAttribute('id', 'draw_operators_view_div' + j.toString());
+        var draw_operators_view_span = document.createElement('span');
+        draw_operators_view_span.setAttribute('class', 'tooltipp');
+        draw_operators_view_span.setAttribute('id', 'draw_operators_delete_span' + j.toString());
+        draw_operators_view_span.innerHTML = 'view';
+        draw_operators_view_div.appendChild(draw_operators_view_span);
+        //把save，delete，view放入operator
+        draw_operators.appendChild(draw_operators_delete_div);
+        draw_operators.appendChild(draw_operators_view_div);
+        draw_inf_body.appendChild(cluster_way_inf);//把operator放入body
+        draw_inf_body.appendChild(draw_operators);
+        draw_inf.appendChild(draw_inf_body);//把body放入inf
+        var draw_bar = document.getElementById(target_draw_bar_id);
+        draw_bar.appendChild(draw_inf);
+        /* <div class="draw_inf" id="draw_inf1">
+                       <div class="draw_inf_body">
+                <div class="draw_operators product-btns">
+                    <div class="fa fa-heart-o"><span class="tooltipp">save</span></div>
+                    <div class="fa fa-trash" onclick="Delete_all(1,'draw_bar')"><span class="tooltipp">delete</span></div>
+                    <div class="fa fa-eye"><span class="tooltipp">quick view</span></div>
+                </div>
+            </div>
+                            </div>*/
+    }
+
+    //从第0个画布开始画图
+    draw_counts = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];//初始化可以画的div编号
+    function generate() {
+        var options = $('#time_selector option:selected'); //获取选中的项,需要给每个方法的每个参数都搞一个默认值
+        var cluster_way_inf = 'Prediction method: ' + options.val();
+
+        var draw_count = draw_counts.pop();
+        //parameters['draw_id'] = draw_count;
+        if (options.val()=="Exponential_smoothing"){
+            var url="/time/ex/"
+        }
+        if (options.val()=="Arithmetic_averaging"){
+            var url="/time/ar/"
+        }
+        if (options.val()=="Moving_averaging"){
+            var url="/time/mo/"
+        }
+        alert(url);
+        $.ajax({
+            type: "POST",
+            url: url,
+            success: function(res) {//返回数据根据结果进行相应的处理
+                console.log(res);
+                var res_array=res.split(':');
+                var i=0;
+                var array=[];
+                while(i<res_array.length){
+                    array.push([parseFloat((parseFloat(res_array[i])).toFixed(1)),parseFloat((parseFloat(res_array[++i])).toFixed(3))]);
+                    i++;
+                }
+                console.log(array);
+                var use_data=[];
+                use_data.push(array);
+                a(use_data);
+                //create_draw_element('draw_bar', draw_count, cluster_way_inf);//首先创建一个div用来画图
+                //var count = "#draw_" + draw_count.toString();
+                //$(count).html(res);
+                //ddd(draw_count);
+            },
+            error: function () {
+                alert("获取数据失败！");
+                draw_counts.push(draw_count);
+            }
+        });
+    };
+    //根据URL，通过ajax传输来画图
+</script>
+
+
+
+
+
+</html>
