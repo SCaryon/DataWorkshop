@@ -1268,25 +1268,8 @@ def graphgoo_home():
 @app.route('/graph_layout2d/<layout>')
 def graph_layout2d(layout):
     global graph_object
-    if layout == 'chord':
-        return render_template('chord_layout2d.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
-    if layout == 'circular':
-        return render_template('circular_layout2d.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
-    if layout == 'grid':
-        return render_template('grid_layout2d.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
-    if layout == 'hierarchical':
-        return render_template('hierarchical_layout2d.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
-    if layout == 'pack':
-        return render_template('pack_layout2d.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
-    if layout == 'tree':
-        return render_template('tree_layout2d.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
-    return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
+    html = 'graph_layout2d/' + layout + '_layout2d.html'
+    return render_template(html, nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
 
 
