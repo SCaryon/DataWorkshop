@@ -380,12 +380,6 @@ window.onload = function () {
                         var avgLong = lon1 + Math.atan2(By, Math.cos(lat1) + Bx) * 180 / Math.PI;
 
                         //如果是二维的就提供首尾两点，三维的需要好几个点来确定一条曲线
-                        if (type === 'countries2D') {
-                            height = 0;
-                            color.setHSL(1, 1, 1);
-                            segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
-                            segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
-                        } else if (type === "countries3D") {
                             theta = (90 - country2.lon) * Math.PI / 180;
                             phi = (country2.lat) * Math.PI / 180;
                             sx = globeSize * Math.sin(theta) * Math.cos(phi);
@@ -416,15 +410,6 @@ window.onload = function () {
                             segments.push(D.multiplyScalar(extrude));
                             var B = new THREE.Vector3(tx, ty, tz);
                             segments.push(B.multiplyScalar(intrude));
-
-                        } else {
-                            color.setHSL(1, 1, 1);
-                            segments.push(new THREE.Vector3(country.lat * 1.45, country.lon * 1.45, height));
-                            segments.push(new THREE.Vector3(coord1[1] * 1.4, coord1[0] * 1.4, 30 + country.continent * 5));
-                            //segments.push(new THREE.Vector3(coord2[1]*1.4,coord2[0]*1.4,30+country2.continent*5));
-                            segments.push(new THREE.Vector3(coord2[1] * 1.4, coord2[0] * 1.4, 30 + country2.continent * 5));
-                            segments.push(new THREE.Vector3(country2.lat * 1.45, country2.lon * 1.45, height));
-                        }
                         line = Spline(segments, color.getHex(), 5 - j / 2);//返回一条线
                         Particlelinks.assignPositions(line.geometry.vertices, j, val.e);
                         //links.add(line);
