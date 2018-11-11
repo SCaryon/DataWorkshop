@@ -27,7 +27,7 @@ window.onload = function () {
     var cameraSpeed = 5;
     var currentSetup;//当前模式（也就是当前页面）
     var cameraControls = null;
-    var isDragging = false,isClicking=false;
+    var isDragging = false, isClicking = false;
     var mouseCoord = {"x": 0, "y": 0};
     var selectedNode = new THREE.Mesh(new THREE.SphereGeometry(5, 24, 24), new THREE.MeshBasicMaterial({
         transparent: true,
@@ -39,7 +39,7 @@ window.onload = function () {
     var Particlelinks = null;
     var particlesPlaced = 0;//被安置好的点的数量
     var Pgeometry = null;
-    var Sgeometry = null;
+
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
     init();
@@ -116,10 +116,7 @@ window.onload = function () {
 
         geometry = new THREE.BufferGeometry();
 
-
         var color = new THREE.Color();
-
-
         /*在countries.json文件里面包含了四个主要信息：
         载入country，trade，categories，和products*/
         $.getJSON("/static/data/master/countries.json", function (corejson) {
@@ -230,7 +227,7 @@ window.onload = function () {
 
             $(".countrySelection").on("change", function () {
                 filterCountry = $(this).val();
-                  switcher(currentSetup, true, 5);
+                switcher(currentSetup, true, 5);
 
 
             });
@@ -282,9 +279,6 @@ window.onload = function () {
         addedProducts = {};
         availableProducts = null;
         //如果是二维产品空间
-        if (currentSetup === "productspace" || currentSetup === "productspace3D")
-            P = true;
-        else P = false;
 
         if (countries[filterCountry])
             availableProducts = countries[filterCountry].products;
@@ -299,12 +293,7 @@ window.onload = function () {
             // 如果是在二维产品空间，加入它；
             //否则，如果它有xyz，也加入
             if (!addedProducts[i]) {
-                if (P) {
-                    if (val.x && val.y) {
-                        addedProducts[i] = true;
-                        colors.push(ncolor);
-                    }
-                } else if (val.x3 && val.y3 && val.z3) {
+                if (val.x && val.y) {
                     addedProducts[i] = true;
                     colors.push(ncolor);
                 }
@@ -312,13 +301,9 @@ window.onload = function () {
         });
 
         //如果是二维产品空间，那么颜色存储到P里面，否则存储到S里面
-        if (P) {
-            Pgeometry.children[0].geometry.colors = colors;
-            Pgeometry.children[0].geometry.colorsNeedUpdate = true;
-        } else {
-            Sgeometry.children[0].geometry.colors = colors;
-            Sgeometry.children[0].geometry.colorsNeedUpdate = true;
-        }
+        Pgeometry.children[0].geometry.colors = colors;
+        Pgeometry.children[0].geometry.colorsNeedUpdate = true;
+
     }
 
     /*在产品空间增加连线
@@ -334,11 +319,8 @@ window.onload = function () {
      * @param threeD 是否为3D点
      */
     function addProductLinks(circles, threeD) {
-        if ((currentSetup === "productspace" || currentSetup === "productspace3D") && Pgeometry) {
+        if (Pgeometry) {
             scene.add(Pgeometry);
-            updatePoints();
-        } else if (currentSetup === "productsphere" && Sgeometry) {
-            scene.add(Sgeometry);
             updatePoints();
         }
         else {
@@ -482,187 +464,10 @@ window.onload = function () {
                 scene.remove(links);
                 links = newlinks;
                 scene.add(links);
-                if (currentSetup === "productspace" || currentSetup === "productspace3D") {
-                    if (!Pgeometry) Pgeometry = links;
-                } else if (currentSetup === "productsphere") {
-                    if (!Sgeometry) Sgeometry = links;
-                }
+                if (!Pgeometry) Pgeometry = links;
+
             });
         }
-    }
-
-    //这是点击一个国家以后触发的动作，给选择的国家连上相应type的线
-    function addLinks(type, chosenCountry) {
-        scene.remove(links);
-        //links=new THREE.Object3D();
-        var count = 0;
-        var height = 15;
-        var color = new THREE.Color();
-        //大洲中心的坐标
-        var continentCentroid = {
-            1: [3.16, 19.33],
-            2: [48.92, 85.78],
-            3: [-13.58, 121.64],
-            4: [53.12, 4.21],
-            5: [-16.63, -59.76],
-            6: [35.74, -102.3],
-            7: [27.99, -173.32]
-        };
-        var regionCoords = [[-2.88891, 38.91750], [-3.23997, 18.52688], [26.98997, 16.41750], [-28.98956, 22.39406], [9.71916, -1.16062], [19.23786, -71.12156], [17.23455, -92.91844], [-24.91700, -58.46531], [44.28401, -99.24656], [41.97528, 68.44875], [35.96852, 120.12844], [29.77328, 68.44875], [-0.07764, 109.23000], [28.54528, 39.97219], [56.71013, 42.08156], [60.02608, 3.05813], [39.85016, 4.46438], [47.22653, 3.40969], [-33.20254, 144.73781], [-10.56414, 155.98781], [3.78679, 169.69875], [13.16436, 193.95656]];
-
-        //为其他国家设置不透明度0，选中国家不透明度100
-        $.each(countries, function (c, co) {
-            if (darkMode)
-                $("#" + c).css({'font-size': 10, 'color': '#FFFFFF', 'z-index': 2, 'opacity': 0});
-            else
-                $("#" + c).css({'font-size': 10, 'color': '#000000', 'z-index': 2, 'opacity': 0});
-
-        });
-        if (chosenCountry)
-            if (darkMode)
-                $("#" + chosenCountry).css({
-                    'font-size': 24,
-                    'color': '#FFFFFF',
-                    'z-index': 4,
-                    'opacity': 1
-                });
-            else
-                $("#" + chosenCountry).css({
-                    'font-size': 24,
-                    'color': '#000000',
-                    'z-index': 4,
-                    'opacity': 1
-                });
-
-        var cartx, carty, cartz, cartx2, carty2, cartz2;
-        $.each(trades, function (i, exports) {//对每个国家的出口
-            country = countries[i];
-            states = anchors[i];
-
-            if (country && states) {
-                var coord1 = continentCentroid[country.continent], coord2 = null;
-                $.each(exports, function (j, val) {//对当前国家的每一个出口
-                    country2 = countries[val.c];
-                    if (country2 && (chosenCountry === "ALL" || chosenCountry === i)) {
-
-                        if (darkMode)
-                            $("#" + val.c).css({
-                                'font-size': 12 + Math.sqrt(val.e) / 40,//字体大小和出口量有关
-                                'color': '#eee',
-                                'z-index': 2,
-                                'opacity': 1
-                            });
-                        else
-                            $("#" + val.c).css({
-                                'font-size': 12 + Math.sqrt(val.e) / 40,//字体大小和出口量有关
-                                'color': '#000',
-                                'z-index': 2,
-                                'opacity': 1
-                            });
-                        var coord2 = continentCentroid[country2.continent];
-                        var segments = [];
-
-                        var lon1 = Math.min(country.lat, country2.lat) / 180 * Math.PI;  // In radian
-                        var lon2 = Math.max(country.lat, country2.lat) / 180 * Math.PI;  // In radian
-                        var lat1 = Math.min(country.lon, country2.lon) / 180 * Math.PI; // In radian
-                        var lat2 = Math.max(country.lon, country2.lon) / 180 * Math.PI; // In radian
-
-                        var dLon = (lon2 - lon1);
-
-                        var Bx = Math.cos(lat2) * Math.cos(dLon);
-                        var By = Math.cos(lat2) * Math.sin(dLon);
-                        var avgLat = Math.atan2(
-                            Math.sin(lat1) + Math.sin(lat2),
-                            Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
-                        avgLat = avgLat * 180 / Math.PI;
-                        var avgLong = lon1 + Math.atan2(By, Math.cos(lat1) + Bx) * 180 / Math.PI;
-
-                        //如果是二维的就提供首尾两点，三维的需要好几个点来确定一条曲线
-                        if (type === 'countries2D') {
-                            height = 0;
-                            color.setHSL(1, 1, 1);
-                            segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
-                            segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
-                        } else if (type === "countries3D") {
-                            theta = (90 - country2.lon) * Math.PI / 180;
-                            phi = (country2.lat) * Math.PI / 180;
-                            sx = globeSize * Math.sin(theta) * Math.cos(phi);
-                            sy = globeSize * Math.sin(theta) * Math.sin(phi);
-                            sz = globeSize * Math.cos(theta);
-
-                            theta2 = (90 - country.lon) * Math.PI / 180;
-                            phi2 = (country.lat) * Math.PI / 180;
-                            tx = globeSize * Math.sin(theta2) * Math.cos(phi2);
-                            ty = globeSize * Math.sin(theta2) * Math.sin(phi2);
-                            tz = globeSize * Math.cos(theta2);
-
-                            avgX = (sx + tx) / 2;
-                            avgY = (sy + ty) / 2;
-                            avgZ = (sz + tz) / 2;
-                            dist = Math.sqrt(Math.pow(sx - tx, 2) + Math.pow(sy - ty, 2) + Math.pow(sz - tz, 2));
-                            //extrude=1+dist/globeSize/2;
-                            extrude = 1 + Math.pow(dist, 2) / 90000;
-                            intrude = 0.995;
-                            extrudeCenter = 1 + ((extrude - 1) * 1.5);
-                            var A = new THREE.Vector3(sx, sy, sz);
-                            segments.push(A.multiplyScalar(intrude));//multiplyScalar将A与常熟intrude相乘
-                            var C = new THREE.Vector3(sx + (tx - sx) / 3, sy + (ty - sy) / 3, sz + (tz - sz) / 3);
-                            segments.push(C.multiplyScalar(extrude));
-                            var E = new THREE.Vector3(sx + (tx - sx) / 2, sy + (ty - sy) / 2, sz + (tz - sz) / 2);
-                            segments.push(E.multiplyScalar(extrudeCenter));
-                            var D = new THREE.Vector3(sx + (tx - sx) * 2 / 3, sy + (ty - sy) * 2 / 3, sz + (tz - sz) * 2 / 3);
-                            segments.push(D.multiplyScalar(extrude));
-                            var B = new THREE.Vector3(tx, ty, tz);
-                            segments.push(B.multiplyScalar(intrude));
-
-                        } else {
-                            color.setHSL(1, 1, 1);
-                            segments.push(new THREE.Vector3(country.lat * 1.45, country.lon * 1.45, height));
-                            segments.push(new THREE.Vector3(coord1[1] * 1.4, coord1[0] * 1.4, 30 + country.continent * 5));
-                            //segments.push(new THREE.Vector3(coord2[1]*1.4,coord2[0]*1.4,30+country2.continent*5));
-                            segments.push(new THREE.Vector3(coord2[1] * 1.4, coord2[0] * 1.4, 30 + country2.continent * 5));
-                            segments.push(new THREE.Vector3(country2.lat * 1.45, country2.lon * 1.45, height));
-                        }
-                        line = Spline(segments, color.getHex(), 5 - j / 2);//返回一条线
-                        Particlelinks.assignPositions(line.geometry.vertices, j, val.e);
-                        //links.add(line);
-                        if (chosenCountry === "ALL") return false;
-                    }
-
-                });
-            }
-        });
-
-        links = Particlelinks.getMesh();
-        scene.add(links);
-
-    }
-
-    //在三维的空间里画线
-    function Spline(controlPoints, colorHex, width) {
-        var numPoints = 40;
-
-        var material = new THREE.LineDashedMaterial({
-            dashSize: 1,
-            gapSize: 100,
-            // colorHex: colorHex,
-            transparent: true,
-            opacity: 0.8,
-            vertexColors: true,
-            linewidth: width + 1
-        });
-        var colors = [];
-        var spline = new THREE.CatmullRomCurve3(controlPoints);//通过一系列的点来创建一条平滑的曲线。
-        var geometry = new THREE.Geometry();
-        var splinePoints = spline.getPoints(100);
-        for (var i = 0; i < splinePoints.length; i++) {
-            geometry.vertices.push(splinePoints[i]);
-            colors[i] = new THREE.Color();
-            colors[i].setHSL(0.5, 0.2, i / 100);//色相、饱和度、透明度
-        }
-        geometry.colors = colors;
-
-        return (new THREE.Line(geometry, material, THREE.LineSegments));
     }
 
 
@@ -685,8 +490,6 @@ window.onload = function () {
         //如果是鼠标拖拽
         if (isDragging) {
             UserInterface.changeCursor("grabbing", cameraControls.isLocked());
-            if (previousMode === "3D" || currentSetup === "towers")
-                cameraControls.setTarget(mouseCoord.x - moveX, mouseCoord.y - moveY);
             mouseCoord.x = moveX;
             mouseCoord.y = moveY;
 
@@ -734,7 +537,6 @@ window.onload = function () {
                 selectedID = null;
             }
         }
-
     }
 
     /*鼠标按下的反应
@@ -748,14 +550,11 @@ window.onload = function () {
         if (names[selectedID]) {
             var co = names[selectedID].c;
             targetNode(products[names[selectedID].n]);
-
         } else {
             freeNode();
             chosenCountry = null;
             UserInterface.changeCursor("grab", cameraControls.isLocked());
         }
-
-
     }
 
     //转移到选中的product
@@ -767,18 +566,9 @@ window.onload = function () {
         var productURL = "http://atlas.cid.harvard.edu/explore/tree_map/export/show/all/" + selectedProduct.atlasid + "/2012/";
         $("#productlabel").html("<h1>" + selectedProduct.name + '</h1><a target="blank" href="' + productURL + '">[在 Atlas 中打开]</a>');
 
-        if (currentSetup === "productsphere") {
-            if (selectedProduct.x3) {
-                selectedNode.position.set(selectedProduct.x3, selectedProduct.y3, selectedProduct.z3);
-                cameraControls.center(selectedProduct.x3, selectedProduct.y3, selectedProduct.z3);
-                cameraControls.focusCenter();
-                cameraControls.setZoom(100);
-            }
-        } else {
-            selectedNode.position.set(selectedProduct.x, selectedProduct.y, 0);
-            cameraControls.center(selectedProduct.x, selectedProduct.y, 0);
-            cameraControls.setZoom(100);
-        }
+        selectedNode.position.set(selectedProduct.x, selectedProduct.y, 0);
+        cameraControls.center(selectedProduct.x, selectedProduct.y, 0);
+        cameraControls.setZoom(100);
     }
 
     //将selectedNode设置到看不见的位置
@@ -864,173 +654,61 @@ window.onload = function () {
 
             var v = 0;
             scene.remove(Pgeometry);
-            scene.remove(Sgeometry);
-
             Labels.resetLabels(countries, darkMode);
             zoomlock = false;
             scene.remove(links);
 
             $(".selectionBox").stop().fadeIn();//停止正在运行的动画并渐进出现
 
-            switch (to) {
-                //二维产品空间
-                case "productspace":
-                    cameraControls.lockRotation(true);
-                    cameraControls.center(-45, 0, 10);
-                    increment = 0;
-                    previousMode = "2D";
-                    var state = "", yaxis = 0, xaxis = 0;
-                    v = 0;
-                    loaded = false;
-                    var ray = 2;
-                    var theta = 0;
-                    $.each(countries, function (i, val) {//对每个国家
-                        for (var key in val["products"]) {//该国家里的product分量（即product编号和产量）
-                            productValue = val["products"][key];
-                            productInfo = products[key];
-                            color = new THREE.Color(productInfo.color);
-                            //对每个国家的每个产品的出口量，以一个点代替1 'dollars'那么多的量进行描点，下面是点的位置确认
-                            for (var s = 0; s < Math.round(productValue / dollars); s++) {
-                                tetha = Math.random() * Math.PI * 2;
-                                if (!filterCountry || filterCountry == i) {
-                                    destination[v * 3 + 0] = productInfo.x + ray * (1 - Math.random() * Math.random()) * Math.cos(tetha);
-                                    destination[v * 3 + 1] = productInfo.y + ray * (1 - Math.random() * Math.random()) * Math.sin(tetha);
-                                    destination[v * 3 + 2] = 0;
 
-                                } else {
-                                    destination[v * 3 + 0] = 0;
-                                    destination[v * 3 + 1] = 0;
-                                    destination[v * 3 + 2] = 10000;
-                                }
-                                v++;
-                            }
+            //二维产品空间
+            cameraControls.lockRotation(true);
+            cameraControls.center(-45, 0, 10);
+            increment = 0;
+            previousMode = "2D";
+            var state = "", yaxis = 0, xaxis = 0;
+            v = 0;
+            loaded = false;
+            var ray = 2;
+            var theta = 0;
+            $.each(countries, function (i, val) {//对每个国家
+                for (var key in val["products"]) {//该国家里的product分量（即product编号和产量）
+                    productValue = val["products"][key];
+                    productInfo = products[key];
+                    color = new THREE.Color(productInfo.color);
+                    //对每个国家的每个产品的出口量，以一个点代替1 'dollars'那么多的量进行描点，下面是点的位置确认
+                    for (var s = 0; s < Math.round(productValue / dollars); s++) {
+                        tetha = Math.random() * Math.PI * 2;
+                        if (!filterCountry || filterCountry == i) {
+                            destination[v * 3 + 0] = productInfo.x + ray * (1 - Math.random() * Math.random()) * Math.cos(tetha);
+                            destination[v * 3 + 1] = productInfo.y + ray * (1 - Math.random() * Math.random()) * Math.sin(tetha);
+                            destination[v * 3 + 2] = 0;
+
+                        } else {
+                            destination[v * 3 + 0] = 0;
+                            destination[v * 3 + 1] = 0;
+                            destination[v * 3 + 2] = 10000;
                         }
-                    });
-                    addProductLinks(true, true);
-                    loaded = true;
-                    increment = 6;
-                    break;
-
-                //三维产品空间
-                case "productsphere":
-                    scene.fog = new THREE.FogExp2(0x000000, 0.002);
-                    increment = 0;
-                    previousMode = "3D";
-                    cameraControls.globe();
-                    if (!reset) {
-                        cameraControls.rotate(-Math.PI / 2, Math.PI);
-                        cameraControls.setZoom(600);
+                        v++;
                     }
-                    var v = 0;
-
-                    var country, code, productInfo;
-                    var tetha = 0, phi = 0;
-                    loaded = false;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        for (var product in country["products"]) {
-                            productInfo = products[product];
-                            lim = Math.round(country["products"][product] / dollars);
-                            for (var s = 0; s < lim; s++) {
-                                tetha = s / lim * Math.PI;
-                                phi = s / lim * Math.PI * 24;
-                                if (productInfo.x3 && (!filterCountry || filterCountry == code)) {
-                                    destination[v * 3 + 0] = productInfo.x3 + nodeSize / 30 * Math.sin(tetha) * Math.cos(phi);
-                                    destination[v * 3 + 1] = productInfo.y3 + nodeSize / 30 * Math.sin(tetha) * Math.sin(phi);
-                                    destination[v * 3 + 2] = productInfo.z3 + nodeSize / 30 * Math.cos(tetha);
-                                } else {
-                                    destination[v * 3 + 0] = 0;
-                                    destination[v * 3 + 1] = 0;
-                                    destination[v * 3 + 2] = 10000;
-                                }
-                                v++;
-
-                            }
-                        }
-                    }
-                    addProductLinks(true, false);
-                    loaded = true;
-                    increment = 6;
-
-                    break;
-
-                //产品空间Tower
-                case "productspace3D":
-                    previousMode = "3D";
-                    increment = 0;
-                    if (!reset)
-                        cameraControls.rotate(-Math.PI / 2, 3 * Math.PI / 4);
-
-                    cameraControls.center(-45, 0, 10);
-                    var state = "", yaxis = 0, xaxis = 0;
-                    v = 0;
-                    loaded = false;
-                    var ray = 3;
-                    var theta = 0;
-                    $.each(countries, function (i, val) {
-                        for (var key in val["products"]) {
-                            productValue = val["products"][key];
-                            productInfo = products[key];
-                            color = new THREE.Color(productInfo.color);
-                            for (var s = 0; s < Math.round(productValue / dollars); s++) {
-                                tetha = Math.round(Math.random() * Math.PI * 2 * 2) / 2;
-                                if (!filterCountry || filterCountry == i) {
-                                    destination[v * 3 + 2] = Math.round(Math.random() * productInfo.sales / dollars / 40 * 3) / 3;
-                                    ray = 3 / (destination[v * 3 + 2] + 1);
-                                    destination[v * 3 + 0] = productInfo.x + ray * Math.cos(tetha);
-                                    destination[v * 3 + 1] = productInfo.y + ray * Math.sin(tetha);
-                                } else {
-                                    destination[v * 3 + 0] = 0;
-                                    destination[v * 3 + 1] = 0;
-                                    destination[v * 3 + 2] = 10000;
-                                }
-                                v++;
-                            }
-                        }
-                    });
-                    addProductLinks(true, true);
-                    loaded = true;
-                    increment = 6;
-                    break;
-            }
+                }
+            });
+            addProductLinks(true, true);
+            loaded = true;
+            increment = 6;
         }
         particlesPlaced = 0;
         currentSetup = to;
         $("#countrySection").hide();
-            $("#productSection").show();
+        $("#productSection").show();
 
 
         hideCategories();
     }
 
     $("#backgroundButton").click(function () {
-        darkMode=!darkMode;
+        darkMode = !darkMode;
         // console.log(darkMode);
-    });
-
-    //点击选择框的时候switch到的内容所调用的方法
-    $("#UI").on("click", ".modeSelector", function () {
-        $(".modeSelector").removeClass("selectedMode");
-        $(this).addClass("selectedMode");
-        switch ($(this).prop('id')) {
-            case "productButton":
-                switcher("productspace", false, 5);
-                $(".countrySelection").select2("val", null);
-                break;
-            case "productButton2":
-                switcher("productspace3D", false, 5);
-                $(".countrySelection").select2("val", null);
-                break;
-            case "productButton3":
-                switcher("productsphere", false, 5);
-                $(".countrySelection").select2("val", null);
-                break;
-        }
     });
 
 
@@ -1066,19 +744,11 @@ window.onload = function () {
     });
 
 
-
-    $("#storyPrompt").on("click", "#beginStory", function () {
-        $("#storyPrompt").stop().fadeOut();
-        cameraControls.loaded();
-        $("#UI").fadeIn();
-    });
-
-    function existstory(){
+    function existstory() {
         $("#storyPrompt").stop().fadeOut();
         cameraControls.loaded();
         $("#UI").fadeIn();
     }
-
 
 
     //动画
