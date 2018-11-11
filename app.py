@@ -495,6 +495,8 @@ def master_index():
 
 @app.route('/master/<id>', methods=['GET', 'POST'])
 def master_id(id):
+    id = id.replace('<', '')
+    id = id.replace('>', '')
     return render_template('master/masterproduct.html', mode=id)
 
 
