@@ -114,55 +114,6 @@ function UI() {
         "img": "images/master/icon/stack.png",
         "desc": "按照产品类别将产品的分布分别展示"
     });
-    // buttons.push({
-    //     "id": "anchorButton",
-    //     "title": "cities",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "blendButton",
-    //     "title": "blend",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "centerButton",
-    //     "title": "center",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "piesButton",
-    //     "title": "pies",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "globeProbaButton",
-    //     "title": "probability3D",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "probaButton",
-    //     "title": "probability",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    //
-    // buttons.push({
-    //     "id": "globeButton",
-    //     "title": "globe",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "histButton",
-    //     "title": "histogram",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
 
 
     newDiv = "<table>";
@@ -229,13 +180,15 @@ UI.prototype.addSpinner = function () {
 };
 //建立最下方的目录
 UI.prototype.buildCategories = function (categories) {
-    cats = ["动物和动物产品","蔬菜产品","食品","矿物产品","化学品联合工业","塑料和橡胶","皮革和毛皮","木材和木制品","纺织品" ,"鞋类和头饰","石材和玻璃","金属","机电","运输","其他","服务"];    var catHTML = "<table><tr>";
+    cats = ["动物和动物产品","蔬菜产品","食品","矿物产品","化学品联合工业","塑料和橡胶","皮革和毛皮","木材和木制品","纺织品" ,"鞋类和头饰","石材和玻璃","金属","机电","运输","其他","服务"];
+    var catHTML = "<table>";
     $.each(categories, function (i, val) {
         color = new THREE.Color(i);
         rgba = "rgba(" + Math.round(color.r * 295) + "," + Math.round(color.g * 295) + "," + Math.round(color.b * 295) + ",0.8)";
-        catHTML += "<td class='categoryButton' style='border-top:8px solid " + rgba + " ;'><div id=cat" + val.id + " class='chooseCategory'>" + cats[val.id] + " </div></td>";
+        catHTML += "<tr><td class='categoryButton' style='border-left:16px solid " + rgba + " ;'>" +
+            "<div id=cat" + val.id + " class='chooseCategory'>" + cats[val.id] + " </div></td></tr>";
     });
-    $("#categories").html(catHTML + "</tr></table>");
+    $("#categories").html(catHTML + "</table>");
 };
 //加载中的时候展示加载速度
 UI.prototype.updateLoader = function (add) {

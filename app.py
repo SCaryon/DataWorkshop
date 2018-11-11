@@ -495,7 +495,7 @@ def master_index():
 
 @app.route('/master/<id>', methods=['GET', 'POST'])
 def master_id(id):
-    return render_template('master/master.html', mode=id)
+    return render_template('master/masterproduct.html', mode=id)
 
 
 # 地图方法begin
