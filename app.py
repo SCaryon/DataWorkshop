@@ -488,9 +488,9 @@ def master_index():
         user1 = user.query.filter_by(email=email).first()
         if user1 is None:
             return "false"
-        return render_template('masterindex.html', user=user1)
+        return render_template('master/masterindex.html', user=user1)
     else:
-        return render_template('masterindexx.html')
+        return render_template('master/masterindex.html')
 
 
 @app.route('/master/<id>', methods=['GET', 'POST'])
