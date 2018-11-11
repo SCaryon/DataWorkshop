@@ -9,6 +9,7 @@ window.onload = function () {
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
+    var globe = null;//存储sphere的边界信息
     var contrast = false;
     var percentage = 1;
     var loaded = false;//是否加载完毕
@@ -123,6 +124,7 @@ window.onload = function () {
         countryIndex = 0;
         var countryHTML = "";
         var planeShapeIDs;
+        var sphereShapeIDs;
 
         //载入边界信息
         $.getJSON("/static/data/master/world.json", function (json) {
@@ -146,6 +148,35 @@ window.onload = function () {
             shape.add(overlay);
             planeShapeIDs = temp[1];//边界线ID
 
+            globe = new THREE.Object3D();
+            if (darkMode) {
+                globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x000000,
+                        opacity: 0.2
+                    })));
+            } else {
+                globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x04042a,
+                        opacity: 0.2
+                    })));
+            }
+
+            overlaySphere = new THREE.Mesh(new THREE.SphereGeometry(globeSize + 2, 32, 32), overlayMaterial);
+            overlaySphere.rotation.y = -Math.PI / 2;
+            globe.add(overlaySphere);
+            //画地图边界信息
+            temp = drawThreeGeo(json, globeSize * 1.45, 'sphere', scene, {
+                color: 0x7e7e7e,
+                linewidth: 2,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                opacity: 0.7
+            });
+            sphereShapeIDs = temp[1];
+            globe.add(temp[0]);
+            globe.updateMatrix();
             renderer.render(scene, camera);
         });
 
@@ -159,6 +190,10 @@ window.onload = function () {
             $.each(planeShapeIDs, function (shapeid, shapes) {
                 if (countries[shapeid])
                     countries[shapeid]["polygons"] = planeShapeIDs[shapeid];
+            });
+            $.each(sphereShapeIDs, function (shapeid, shapes) {
+                if (countries[shapeid])
+                    countries[shapeid]["polygons3D"] = sphereShapeIDs[shapeid];
             });
             $.each(corejson.products, function (pid, product) {
                 products[pid] = product;
@@ -231,7 +266,7 @@ window.onload = function () {
             particleSystem.frustrumCulled = true;
             scene.add(particleSystem);
             loaded = true;
-            switcher("gridmap", false, 25);
+            switcher("gridSphere", false, 25);
             Particlelinks = new ParticleLinks(13000, clock, darkMode);
             links = Particlelinks.getMesh();
             scene.add(links);
@@ -457,8 +492,17 @@ window.onload = function () {
 
     //？？？？对于粒子系统
     function animateLinks() {
-        Particlelinks.animate();
-
+        switch (currentSetup) {
+            case "globe":
+            case "cities":
+            case "probability":
+            case "probability3D":
+            case "centroids3D":
+            case "gridmap":
+            case "gridSphere":
+                Particlelinks.animate();
+                break;
+        }
     }
 
     //在非产品空间移除连线
@@ -486,6 +530,8 @@ window.onload = function () {
         //如果是鼠标拖拽
         if (isDragging) {
             UserInterface.changeCursor("grabbing", cameraControls.isLocked());
+            if (previousMode === "3D" || currentSetup === "towers")
+                cameraControls.setTarget(mouseCoord.x - moveX, mouseCoord.y - moveY);
             mouseCoord.x = moveX;
             mouseCoord.y = moveY;
 
@@ -499,7 +545,9 @@ window.onload = function () {
             var s = new THREE.Projector;//可以用来进行碰撞检测
             //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
             var o = new THREE.Raycaster;
-            cameraDistance = 3000;
+            if (currentSetup === "gridSphere")
+                cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+            else cameraDistance = 3000;
             vector.unproject(camera);
             o.ray.set(camera.position, vector.sub(camera.position).normalize());
 
@@ -541,26 +589,40 @@ window.onload = function () {
 
     //鼠标指到这个国家里面的时候调用的方法，将当前高亮的国家转回普通，然后将当前国家的边界高亮
     function highLightCountry(country, on) {
-        //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
-        if (countryOverlay) {
-            for (var i = 0; i < countryOverlay.length; i++) {
-                currentMesh = scene.getObjectById(countryOverlay[i], true);
-                if (currentMesh) {
-                    currentMesh.material.linewidth = 1;
-                    currentMesh.material.opacity = 0.6;
+        if (currentSetup != "productspace" && currentSetup != "productspace3D" && currentSetup != "productsphere") {
+            //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
+            if (countryOverlay) {
+                for (var i = 0; i < countryOverlay.length; i++) {
+                    currentMesh = scene.getObjectById(countryOverlay[i], true);
+                    if (currentMesh) {
+                        currentMesh.material.linewidth = 1;
+                        currentMesh.material.opacity = 0.6;
+                    }
                 }
             }
-        }
-        if (on) {
-            meshes = country.polygons;
-            if (!countryOverlay) countryOverlay = [];
-            if (meshes != null)
-                for (var i = 0; i < meshes.length; i++) {
-                    currentMesh = shape.children[0].getObjectById(meshes[i], true);
-                    currentMesh.material.linewidth = 5;
-                    currentMesh.material.opacity = 1;
-                    countryOverlay.push(meshes[i]);
+            if (on) {
+                if (currentSetup === "gridSphere") {
+                    meshes = country.polygons3D;
+                    if (!countryOverlay) countryOverlay = [];
+                    if (meshes != null)
+                        for (var i = 0; i < meshes.length; i++) {
+                            currentMesh = globe.children[2].getObjectById(meshes[i], true);
+                            currentMesh.material.linewidth = 5;
+                            currentMesh.material.opacity = 1;
+                            countryOverlay.push(meshes[i]);
+                        }
+                } else if (currentSetup === "gridmap" || currentSetup === "towers") {
+                    meshes = country.polygons;
+                    if (!countryOverlay) countryOverlay = [];
+                    if (meshes != null)
+                        for (var i = 0; i < meshes.length; i++) {
+                            currentMesh = shape.children[0].getObjectById(meshes[i], true);
+                            currentMesh.material.linewidth = 5;
+                            currentMesh.material.opacity = 1;
+                            countryOverlay.push(meshes[i]);
+                        }
                 }
+            }
         }
     }
 
@@ -589,9 +651,30 @@ window.onload = function () {
         filterCountry = co;
         var target = countries[co];
         if (target) {
-            if (linksOn)
-                addLinks("countries2D", co);
-            cameraControls.center(target.lat * 1.55, target.lon * 1.55, 0);
+            switch (currentSetup) {
+                case "globe":
+                case "cities":
+                case "probability":
+                case "probability3D":
+                case "centroids3D":
+                case "gridmap":
+                case "gridSphere":
+                case "towers":
+                    if (previousMode === "3D") {
+                        if (linksOn)
+                            addLinks("countries3D", co);
+                        if (center)
+                            cameraControls.rotate(-(target.lat * Math.PI / 180 + Math.PI), -(target.lon * Math.PI / 180 - Math.PI) + 0.01);
+                        //console.log(countries[co].lat * Math.PI / 180+Math.PI+" "+(countries[co].lon * Math.PI / 180+Math.PI);
+                    } else {
+                        if (linksOn)
+                            addLinks("countries2D", co);
+                        cameraControls.center(target.lat * 1.55, target.lon * 1.55, 0);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -671,6 +754,7 @@ window.onload = function () {
             }
 
             var v = 0;
+            scene.remove(globe);
             scene.remove(shape);
 
             Labels.resetLabels(countries, darkMode);
@@ -679,137 +763,428 @@ window.onload = function () {
 
             $(".selectionBox").stop().fadeIn();//停止正在运行的动画并渐进出现
 
-            //普通的2D均匀展示
+            switch (to) {
+                //普通的2D均匀展示
+                case "gridmap":
+                    cameraControls.lockRotation(true);
+                    previousMode = "2D";
+                    scene.add(shape);
+                    var v = 0;
+                    loaded = false;
+                    zoomlock = true;
+                    cameraControls.center(-40, 0, 10);
+                    var randomCity, country = null;
+                    var colors = {};
+                    var count = 0;
+                    var xaxis = 0;
+                    yaxis = 0;
 
-            cameraControls.lockRotation(true);
-            previousMode = "2D";
-            scene.add(shape);
-            var v = 0;
-            loaded = false;
-            zoomlock = true;
-            cameraControls.center(-40, 0, 10);
-            var randomCity, country = null;
-            var colors = {};
-            var count = 0;
-            var xaxis = 0;
-            yaxis = 0;
-
-            function shapeCentroid(poly) {
-                var totalx = 0, totaly = 0, totalz = 0, perimeter = 0;
-                for (var l = 0; l < poly.length; l++) {
-                    totalx += poly[l].x;
-                    totaly += poly[l].y;
-                    totalz += poly[l].z;
-                    if (l < poly.length - 1) {
-                        perimeter += Math.sqrt(Math.pow(poly[l].x - poly[l + 1].x, 2) + Math.pow(poly[l].y - poly[l + 1].y, 2) + Math.pow(poly[l].z - poly[l + 1].z, 2));
+                function shapeCentroid(poly) {
+                    var totalx = 0, totaly = 0, totalz = 0, perimeter = 0;
+                    for (var l = 0; l < poly.length; l++) {
+                        totalx += poly[l].x;
+                        totaly += poly[l].y;
+                        totalz += poly[l].z;
+                        if (l < poly.length - 1) {
+                            perimeter += Math.sqrt(Math.pow(poly[l].x - poly[l + 1].x, 2) + Math.pow(poly[l].y - poly[l + 1].y, 2) + Math.pow(poly[l].z - poly[l + 1].z, 2));
+                        }
                     }
+                    return [totalx / poly.length * 0.7, totaly / poly.length * 0.7, totalz / poly.length * 0.7, perimeter];
                 }
-                return [totalx / poly.length * 0.7, totaly / poly.length * 0.7, totalz / poly.length * 0.7, perimeter];
-            }
 
-            for (var i = 0; i < countryIndex; i++) {
-                $.each(countries, function (p, o) {
-                    if (i == o.id) {
-                        country = o;
-                        code = p;
-                    }
-                });
-                IDs = country.polygons;
-                var dotspacing = Math.pow(country.particles / country.area, 0.5) * 40;
-                if (IDs) {
-                    var p = 0;
-                    while (p < country.particles) {
-                        for (var k = 0; k < IDs.length; k++) {
-                            countryline = shape.children[0].getObjectById(IDs[k]);
+                    for (var i = 0; i < countryIndex; i++) {
+                        $.each(countries, function (p, o) {
+                            if (i == o.id) {
+                                country = o;
+                                code = p;
+                            }
+                        });
+                        IDs = country.polygons;
+                        var dotspacing = Math.pow(country.particles / country.area, 0.5) * 40;
+                        if (IDs) {
+                            var p = 0;
+                            while (p < country.particles) {
+                                for (var k = 0; k < IDs.length; k++) {
+                                    countryline = shape.children[0].getObjectById(IDs[k]);
 
-                            test = shapeCentroid(countryline.geometry.vertices);
+                                    test = shapeCentroid(countryline.geometry.vertices);
 
-                            for (var j = 0; j < countryline.geometry.vertices.length - 1; j++) {
+                                    for (var j = 0; j < countryline.geometry.vertices.length - 1; j++) {
 
-                                r = Math.floor(Math.random() * (countryline.geometry.vertices.length - 1));
-                                vector = countryline.geometry.vertices[r];
-                                vector2 = countryline.geometry.vertices[r + 1];
-                                for (var u = 0; u < Math.sqrt(Math.pow(vector.x - vector2.x, 2) + Math.pow(vector.y - vector2.y, 2) + Math.pow(vector.z - vector2.z, 2)) / test[3] * countryline.geometry.vertices.length; u++) {
-                                    rand = Math.random();
+                                        r = Math.floor(Math.random() * (countryline.geometry.vertices.length - 1));
+                                        vector = countryline.geometry.vertices[r];
+                                        vector2 = countryline.geometry.vertices[r + 1];
+                                        for (var u = 0; u < Math.sqrt(Math.pow(vector.x - vector2.x, 2) + Math.pow(vector.y - vector2.y, 2) + Math.pow(vector.z - vector2.z, 2)) / test[3] * countryline.geometry.vertices.length; u++) {
+                                            rand = Math.random();
 
-                                    newx = -(vector.x + rand * (vector2.x - vector.x)) * 0.7;
-                                    newy = (vector.z + rand * (vector2.z - vector.z)) * 0.7;
-                                    newz = (vector.y + rand * (vector2.y - vector.y)) * 0.7;
-                                    theta = (90 - country.lon) * Math.PI / 180;
-                                    phi = (country.lat) * Math.PI / 180 + Math.PI / 2;
-                                    //rand=0.5+(Math.random()-0.5)*Math.random();
-                                    //rand=0.25+(Math.random()-0.25)*Math.random();
-                                    rand = Math.random();
-                                    //rand= Math.round(rand*dotspacing*30)/dotspacing/30;
-                                    //rand = 1-Math.random() * Math.random(); //powder
-                                    /*ray = globeSize + (1 - rand) * Math.PI * 2;
-                                    newx2 = (ray * Math.sin(theta) * Math.cos(phi));
-                                    newy2 = (ray * Math.sin(theta) * Math.sin(phi));
-                                    newz2 = (ray * Math.cos(theta));*/
-                                    offsetX = 0, offsetY = 0, offsetZ = 0;
-                                    if (k == 1 && code == "CN") offsetZ = 10;
-                                    if (k === 9 && code == "RU") offsetZ = 50;
-                                    if (k === 0 && code == "IN") offsetY = -15;
-                                    if (k === 0 && code == "AE") offsetZ = 3;
-                                    if (k === 0 && code == "BR") offsetX = 20;
-                                    if (k === 1 && code == "GB") offsetX = 2;
-                                    if (k === 5 && code == "US") offsetY = 14;
-                                    if (k === 1 && code == "JP") offsetX = -3;
-                                    if (k === 10 && code == "CA") offsetZ = 20;
-                                    if (k === 2 && code == "IT") {
-                                        if (r < 10 || r > 38) offsetZ = -5;
-                                        offsetX = offsetZ;
-                                    }
-                                    newx2 = -test[0] + (2 * Math.random() - 1) * rand - offsetX;
-                                    newy2 = test[2] + (2 * Math.random() - 1) * rand - offsetY;
-                                    newz2 = test[1] + (2 * Math.random() - 1) * rand - offsetZ;
-                                    //len=Math.sqrt(Math.pow(vector.x-newx2,2)+Math.pow(vector.y-newy2,2)+Math.pow(vector.z-newz2,2));
+                                            newx = -(vector.x + rand * (vector2.x - vector.x)) * 0.7;
+                                            newy = (vector.z + rand * (vector2.z - vector.z)) * 0.7;
+                                            newz = (vector.y + rand * (vector2.y - vector.y)) * 0.7;
+                                            theta = (90 - country.lon) * Math.PI / 180;
+                                            phi = (country.lat) * Math.PI / 180 + Math.PI / 2;
+                                            //rand=0.5+(Math.random()-0.5)*Math.random();
+                                            //rand=0.25+(Math.random()-0.25)*Math.random();
+                                            rand = Math.random();
+                                            //rand= Math.round(rand*dotspacing*30)/dotspacing/30;
+                                            //rand = 1-Math.random() * Math.random(); //powder
+                                            /*ray = globeSize + (1 - rand) * Math.PI * 2;
+                                            newx2 = (ray * Math.sin(theta) * Math.cos(phi));
+                                            newy2 = (ray * Math.sin(theta) * Math.sin(phi));
+                                            newz2 = (ray * Math.cos(theta));*/
+                                            offsetX = 0, offsetY = 0, offsetZ = 0;
+                                            if (k == 1 && code == "CN") offsetZ = 10;
+                                            if (k === 9 && code == "RU") offsetZ = 50;
+                                            if (k === 0 && code == "IN") offsetY = -15;
+                                            if (k === 0 && code == "AE") offsetZ = 3;
+                                            if (k === 0 && code == "BR") offsetX = 20;
+                                            if (k === 1 && code == "GB") offsetX = 2;
+                                            if (k === 5 && code == "US") offsetY = 14;
+                                            if (k === 1 && code == "JP") offsetX = -3;
+                                            if (k === 10 && code == "CA") offsetZ = 20;
+                                            if (k === 2 && code == "IT") {
+                                                if (r < 10 || r > 38) offsetZ = -5;
+                                                offsetX = offsetZ;
+                                            }
+                                            newx2 = -test[0] + (2 * Math.random() - 1) * rand - offsetX;
+                                            newy2 = test[2] + (2 * Math.random() - 1) * rand - offsetY;
+                                            newz2 = test[1] + (2 * Math.random() - 1) * rand - offsetZ;
+                                            //len=Math.sqrt(Math.pow(vector.x-newx2,2)+Math.pow(vector.y-newy2,2)+Math.pow(vector.z-newz2,2));
 
-                                    //mod=1+country.area/150000000;
-                                    mod = 1;
-                                    newx2 = newx2 * (mod);
-                                    newy2 = newy2 * (mod);
-                                    newz2 = newz2 * (mod);
+                                            //mod=1+country.area/150000000;
+                                            mod = 1;
+                                            newx2 = newx2 * (mod);
+                                            newy2 = newy2 * (mod);
+                                            newz2 = newz2 * (mod);
 
-                                    if (p < country.particles) {
-                                        newpoint = {
-                                            "x": newx + rand * (newx2 - newx),
-                                            "y": newy + rand * (newy2 - newy),
-                                            "z": newz + rand * (newz2 - newz)
-                                        };
-                                        newpoint2 = {"x": test[0], "y": test[2], "z": test[1]};
-                                        //if(code=="IT" ||code=="MX"||code=="JP"||code=="VN"||code=="TH"||code=="GB")polytest=!outofPoly(vector,vector2,newpoint);
-                                        polytest = false;
-                                        if (polytest) {
-                                            destination[v * 3 + 0] = 0;
-                                            destination[v * 3 + 1] = 0;
-                                            destination[v * 3 + 2] = 0;
-                                        } else {
-                                            destination[v * 3 + 0] = -Math.round(newpoint.x * dotspacing) / dotspacing;
-                                            destination[v * 3 + 2] = -Math.round(newpoint.y * dotspacing) / dotspacing;
-                                            destination[v * 3 + 1] = Math.round(newpoint.z * dotspacing) / dotspacing;
+                                            if (p < country.particles) {
+                                                newpoint = {
+                                                    "x": newx + rand * (newx2 - newx),
+                                                    "y": newy + rand * (newy2 - newy),
+                                                    "z": newz + rand * (newz2 - newz)
+                                                };
+                                                newpoint2 = {"x": test[0], "y": test[2], "z": test[1]};
+                                                //if(code=="IT" ||code=="MX"||code=="JP"||code=="VN"||code=="TH"||code=="GB")polytest=!outofPoly(vector,vector2,newpoint);
+                                                polytest = false;
+                                                if (polytest) {
+                                                    destination[v * 3 + 0] = 0;
+                                                    destination[v * 3 + 1] = 0;
+                                                    destination[v * 3 + 2] = 0;
+                                                } else {
+                                                    destination[v * 3 + 0] = -Math.round(newpoint.x * dotspacing) / dotspacing;
+                                                    destination[v * 3 + 2] = -Math.round(newpoint.y * dotspacing) / dotspacing;
+                                                    destination[v * 3 + 1] = Math.round(newpoint.z * dotspacing) / dotspacing;
+                                                }
+                                                v++;
+                                                p++;
+                                            } else {
+                                                break;
+                                            }
+
                                         }
-                                        v++;
-                                        p++;
-                                    } else {
-                                        break;
                                     }
+                                }
+                            }
+                        } else {
+                            for (var r = 0; r < country.particles; r++) {
+                                destination[v * 3 + 0] = 0;
+                                destination[v * 3 + 1] = 0;
+                                destination[v * 3 + 2] = 0;
+                                v++;
+                            }
+                        }
+                    }
+                    loaded = true;
+                    break;
 
+                //普通的3D网格球
+                case "gridSphere":
+                    previousMode = "3D";
+                    cameraControls.globe();
+                    if (!reset)
+                        cameraControls.rotate(-Math.PI / 2, Math.PI);
+                    particleSystem.position.set(0, 0, 0);
+                    globe.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+                    particleSystem.rotation.z = -Math.PI / 2;
+                    scene.add(globe);
+                    var v = 0;
+                    loaded = false;
+                    zoomlock = false;
+                    var randomCity, country = null;
+                    var ray = globeSize;
+                    var theta, phi;
+
+                    var randomCity, code, country = null;
+                    var shapecount = 0;
+                    var inc = 0;
+                    var particleCount = 0;
+
+                    //判断这个点是否在这个国家。
+                    // 注意到如果从P作水平向左的射线的话，如果P在多边形内部，那么这条射线与多边形的交点必为奇数，
+                    //如果P在多边形外部，则交点个数必为偶数(0也在内)
+                function isPointInPoly(poly, pt) {
+                    for (var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
+                        ((poly[i].y <= pt.y && pt.y < poly[j].y) || (poly[j].y <= pt.y && pt.y < poly[i].y))
+                        && (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
+                        && (c = !c);
+                    return c;
+                }
+
+                    //求这个国家的正中心点和周长
+                function shapeCentroid(poly) {
+                    var totalx = 0, totaly = 0, totalz = 0, perimeter = 0;
+                    for (var l = 0; l < poly.length; l++) {
+                        totalx += poly[l].x;
+                        totaly += poly[l].y;
+                        totalz += poly[l].z;
+                        if (l < poly.length - 1) {
+                            perimeter += Math.sqrt(Math.pow(poly[l].x - poly[l + 1].x, 2) +
+                                Math.pow(poly[l].y - poly[l + 1].y, 2) +
+                                Math.pow(poly[l].z - poly[l + 1].z, 2));
+                        }
+                    }
+                    return [totalx / poly.length * 0.7, totaly / poly.length * 0.7, totalz / poly.length * 0.7, perimeter];
+                }
+
+                    for (var i = 0; i < countryIndex; i++) {//对每个国家
+                        //找到对应的country
+                        $.each(countries, function (p, o) {
+                            if (i == o.id) {
+                                country = o;
+                                code = p;
+                            }
+                        });
+                        IDs = country.polygons3D;
+                        var dotspacing = Math.pow(country.particles / country.area, 0.5) * 40;
+                        /* 确定随机粒子分布的方法
+                         *
+                         * */
+                        if (IDs) {
+                            var p = 0;
+                            while (p < country.particles) {//对每个粒子
+                                for (var k = 0; k < IDs.length; k++) {//对每个边界线
+                                    countryline = globe.children[2].getObjectById(IDs[k], true);//在globe中寻找到该边界线
+                                    test = shapeCentroid(countryline.geometry.vertices);//找到该边界线（国界线）的中心点
+                                    for (var j = 0; j < countryline.geometry.vertices.length - 1; j++) {//对边界线上的每个点
+                                        r = Math.floor(Math.random() * (countryline.geometry.vertices.length - 1));
+                                        vector = countryline.geometry.vertices[r];
+                                        vector2 = countryline.geometry.vertices[r + 1];//任取线上两点
+                                        AveLen = Math.sqrt(Math.pow(vector.x - vector2.x, 2) + Math.pow(vector.y - vector2.y, 2) + Math.pow(vector.z - vector2.z, 2)) / test[3] * countryline.geometry.vertices.length;
+                                        for (var u = 0; u < AveLen; u++) {
+                                            rand = Math.random();
+
+                                            newx = -(vector.x + rand * (vector2.x - vector.x)) * 0.7;
+                                            newy = (vector.z + rand * (vector2.z - vector.z)) * 0.7;
+                                            newz = (vector.y + rand * (vector2.y - vector.y)) * 0.7;
+                                            theta = (90 - country.lon) * Math.PI / 180;
+                                            phi = (country.lat) * Math.PI / 180 + Math.PI / 2;
+                                            //rand=0.5+(Math.random()-0.5)*Math.random();
+                                            rand = 0.25 + (Math.random() - 0.25) * Math.random();
+                                            offsetX = 0, offsetY = 0, offsetZ = 0;
+                                            //对有多个边界线的国家进行分类讨论，确定它们的偏移量
+                                            if (k == 1 && code == "CN") offsetZ = 27;
+                                            if (k === 9 && code == "RU") offsetZ = 50;
+                                            if (k === 0 && code == "MX") {
+                                                if (r > 10 && r < 44) {
+                                                    offsetX = -60;
+                                                    offsetY = -15;
+                                                }
+                                            }
+                                            if (k === 0 && code == "TH") {
+                                                if (r > 6 && r < 24) {
+                                                    offsetZ = 12;
+                                                    offsetY = -3;
+                                                }
+                                            }
+                                            if (k === 0 && code == "IN") offsetY = -15;
+                                            if (k === 0 && code == "AE") offsetZ = 3;
+                                            if (k === 0 && code == "BR") offsetX = 50;
+                                            if (k === 1 && code == "GB") offsetX = 2;
+                                            if (k === 5 && code == "US") offsetY = 14;
+                                            if (k === 1 && code == "JP") offsetX = -10;
+                                            if (k === 10 && code == "CA") offsetZ = 20;
+                                            if (k === 2 && code == "IT") {
+
+                                                if (r < 5) offsetZ = -5;
+                                                if (r > 25 && r < 35) offsetZ = 5;
+                                                if (r > 40 && r < 47) offsetZ = -5;
+                                                offsetX = offsetZ;
+                                            }
+                                            newx2 = -test[0] + (2 * Math.random() - 1) * rand - offsetX;
+                                            newy2 = test[2] + (2 * Math.random() - 1) * rand - offsetY;
+                                            newz2 = test[1] + (2 * Math.random() - 1) * rand - offsetZ;
+                                            //len=Math.sqrt(Math.pow(vector.x-newx2,2)+Math.pow(vector.y-newy2,2)+Math.pow(vector.z-newz2,2));
+
+                                            //mod=1+country.area/150000000;
+                                            mod = 1;
+                                            newx2 = newx2 * (mod);
+                                            newy2 = newy2 * (mod);
+                                            newz2 = newz2 * (mod);
+
+                                            if (p < country.particles) {
+                                                newpoint = {
+                                                    "x": newx + rand * (newx2 - newx),
+                                                    "y": newy + rand * (newy2 - newy),
+                                                    "z": newz + rand * (newz2 - newz)
+                                                };
+                                                len = Math.sqrt(newpoint.x * newpoint.x + newpoint.y * newpoint.y + newpoint.z * newpoint.z);
+
+                                                newpoint.x *= globeSize / len;
+                                                newpoint.y *= globeSize / len;
+                                                newpoint.z *= globeSize / len;
+                                                newpoint2 = {"x": test[0], "y": test[2], "z": test[1]}
+                                                polytest = false;
+                                                if (polytest) {
+                                                    destination[v * 3 + 0] = 0;
+                                                    destination[v * 3 + 1] = 0;
+                                                    destination[v * 3 + 2] = 0;
+                                                } else {
+                                                    destination[v * 3 + 0] = Math.round(newpoint.x * dotspacing) / dotspacing;
+                                                    destination[v * 3 + 1] = Math.round(newpoint.y * dotspacing) / dotspacing;
+                                                    destination[v * 3 + 2] = Math.round(newpoint.z * dotspacing) / dotspacing;
+                                                }
+                                                v++;
+                                                p++;
+                                            } else {
+                                                break;
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            for (var r = 0; r < country.particles; r++) {
+                                destination[v * 3 + 0] = 0;
+                                destination[v * 3 + 1] = 0;
+                                destination[v * 3 + 2] = 0;
+                                v++;
+                            }
+                        }
+                    }
+
+                    //////////////////////////////////////////////////////////////////////////
+                    //////////////////////////////////////////////////////////////////////////
+                    //////////////////////////////////////////////////////////////////////////
+                    loaded = true;
+                    break;
+
+                //普通的塔状视图，可旋转
+                case "towers":
+                    previousMode = "2D";
+                    if (!reset)
+                        cameraControls.rotate(-Math.PI / 2, 3 * Math.PI / 4);
+                    scene.add(shape);
+                    var v = 0;
+                    loaded = false;
+                    zoomlock = false;
+                    var xaxis = 0, yaxis = 0, zaxis = 0;
+                    var randomCity, country = null;
+                    for (var i = 0; i < countryIndex; i++) {
+                        zaxis = 0;
+                        $.each(countries, function (p, o) {
+                            if (i == o.id) {
+                                country = o;
+                                code = p;
+                            }
+                        });
+                        xaxis = 0;
+                        yaxis = 0;
+                        // boxSize = Object.keys(country["products"]).length / 10000;
+                        //堆积成长宽各为5的Tower
+                        for (var j = 0; j < country.particles; j++) {
+                            if (xaxis > 5) {
+                                yaxis++;
+                                xaxis = 0;
+                            }
+                            if (yaxis > 5) {
+                                zaxis++;
+                                yaxis = 0;
+                            }
+                            destination[v * 3 + 0] = (country.lat) * 1.55 + (xaxis - 2.5) / 3;
+                            destination[v * 3 + 1] = (country.lon) * 1.55 + (yaxis - 2.5) / 3;
+                            destination[v * 3 + 2] = zaxis / 3;
+                            v++;
+                            xaxis++;
+                        }
+                    }
+                    loaded = true;
+                    break;
+
+                //2D平面Tower展示，不可旋转
+                case "centroid":
+                    previousMode = "2D";
+                    scene.add(shape);
+                    var v = 0;
+                    loaded = false;
+                    zoomlock = true;
+                    var xaxis = 0, yaxis = 0;
+                    var randomCity, country = null;
+
+                    for (var i = 0; i < countryIndex; i++) {
+                        $.each(countries, function (p, o) {
+                            if (i == o.id) {
+                                country = o;
+                                code = p;
+                            }
+                        });
+                        xaxis = 0;
+                        yaxis = 0;
+                        boxSize = Object.keys(country["products"]).length / 10000;
+                        for (var j = 0; j < country.particles; j++) {
+                            xaxis++;
+                            if (xaxis > 20) {
+                                yaxis++;
+                                xaxis = 0;
+                            }
+                            destination[v * 3 + 0] = (country.lat) * 1.55 + xaxis * boxSize + Math.random() * boxSize * 0.9;
+                            destination[v * 3 + 1] = (country.lon) * 1.55 + yaxis * boxSize + Math.random() * boxSize * 0.9;
+                            destination[v * 3 + 2] = 0;
+                            v++;
+                        }
+                    }
+                    loaded = true;
+                    break;
+
+                //按照产品种类进行分组展示
+                case "groupby":
+                    previousMode = "2D";
+                    $(".selectionBox").hide();
+                    var v = 0;
+                    loaded = false;
+                    zoomlock = true;
+                    var randomCity, country = null;
+                    var colors = {};
+                    var count = 0;
+                    var xaxis = 0;
+                    yaxis = 0;
+                    for (var i = 0; i < countryIndex; i++) {
+                        $.each(countries, function (p, o) {
+                            if (i == o.id) {
+                                country = o;
+                                code = p;
+                            }
+                        });
+                        state = anchors[code];
+                        if (country && state) {
+                            for (var product in country["products"]) {
+                                xaxis = categories[products[product].color].id;
+                                yaxis = Math.floor(xaxis / 5);
+                                xaxis -= yaxis * 5;
+
+                                for (var s = 0; s < Math.round(country["products"][product] / dollars); s++) {
+                                    randomCity = state[Math.round(Math.random() * (state.length - 1))];
+
+                                    destination[v * 3 + 0] = (randomCity["lon"]) / 3.5 + (xaxis) * 100 - window.innerWidth / 8;
+                                    destination[v * 3 + 1] = (randomCity["lat"]) / 3.5 + (2 - yaxis) * 100 - window.innerHeight / 8;
+                                    destination[v * 3 + 2] = 0;
+                                    v++;
                                 }
                             }
                         }
                     }
-                } else {
-                    for (var r = 0; r < country.particles; r++) {
-                        destination[v * 3 + 0] = 0;
-                        destination[v * 3 + 1] = 0;
-                        destination[v * 3 + 2] = 0;
-                        v++;
-                    }
-                }
+                    loaded = true;
+                    break;
             }
-            loaded = true;
-
         }
         particlesPlaced = 0;
         currentSetup = to;
@@ -821,6 +1196,26 @@ window.onload = function () {
 
     $("#backgroundButton").click(function () {
         darkMode = !darkMode;
+    });
+
+    //点击选择框的时候switch到的内容所调用的方法
+    $("#UI").on("click", ".modeSelector", function () {
+        $(".modeSelector").removeClass("selectedMode");
+        $(this).addClass("selectedMode");
+        switch ($(this).prop('id')) {
+            case "towersButton":
+                switcher("towers", false, 5);
+                break;
+            case "groupButton":
+                switcher("groupby", false, 5);
+                break;
+            case "gridSphereButton":
+                switcher("gridSphere", false, 5);
+                break;
+            case "gridButton":
+                switcher("gridmap", false, 5);
+                break;
+        }
     });
 
 
@@ -874,6 +1269,7 @@ window.onload = function () {
         highLightCountry(countries[selectedCountry], true);
 
         $("#pointer").css({top: -100, left: 0});
+
     });
 
 
@@ -894,6 +1290,11 @@ window.onload = function () {
             for (var i = 0; i < lines.children.length; i++) {
                 lines.children[i].material.linewidth = 6
             }
+            lines = globe.children[2];
+            for (var i = 0; i < lines.children.length; i++) {
+                lines.children[i].material.linewidth = 6
+            }
+
         } else {
             $(this).html("高亮");
             contrast = false;
@@ -903,23 +1304,33 @@ window.onload = function () {
             for (var i = 0; i < lines.children.length; i++) {
                 lines.children[i].material.linewidth = 2
             }
+            lines = globe.children[2];
+            for (var i = 0; i < lines.children.length; i++) {
+                lines.children[i].material.linewidth = 2
+            }
             animatePointSize(true);
         }
     });
 
     //根据当前的比例尺设定point的大小
     function animatePointSize(reset) {
-        testZoom = Math.round(Math.log(431 - particleSystem.position.z));
-        levels = [0.23, 0.23, 0.4, 0.8, 1, 1.3, 1.35, 1.38, 1.4, 1.41, 1.413, 1.4];
-        if (testZoom !== currentZoom || reset) {
-            currentZoom = testZoom;
-            var sizes = geometry.attributes.size.array;
-            for (var v = 0; v < particles / percentage; v++) {
-                sizes[v] = levels[currentZoom];
+        if (currentSetup !== "productspace" && currentSetup !== "productsphere" && currentSetup !== "productspace3D" && !constantSize) {
+            if (previousMode === "2D")
+                testZoom = Math.round(Math.log(431 - particleSystem.position.z));
+            else {
+                zoom = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+                testZoom = Math.round(Math.log(zoom - globeSize - 20));
             }
-            geometry.attributes.size.needsUpdate = true;
+            levels = [0.23, 0.23, 0.4, 0.8, 1, 1.3, 1.35, 1.38, 1.4, 1.41, 1.413, 1.4];
+            if (testZoom !== currentZoom || reset) {
+                currentZoom = testZoom;
+                var sizes = geometry.attributes.size.array;
+                for (var v = 0; v < particles / percentage; v++) {
+                    sizes[v] = levels[currentZoom];
+                }
+                geometry.attributes.size.needsUpdate = true;
+            }
         }
-
     }
 
     //改变点的大小，在产品空间的时候不起作用
@@ -933,17 +1344,22 @@ window.onload = function () {
 
     function animateOverlay(percentage) {
         //对于第一二种模式
-        var test = true;
-        //测试目录中每个类型的活跃度
-        $.each(categories, function (col, val) {
-            if (!val.active) test = false;
-        });
-        if (test) {
-            //如果所有点都安放好的话，边界就改变透明度
-            if (percentage === 0) {//如果还有没安放好的点的话
-                overlayMaterial.opacity = Math.min(((cameraControls.getZoom() - 175) / 300), 0.6);
+        if (currentSetup === "gridmap" || currentSetup === "gridSphere") {
+            var test = true;
+            //测试目录中每个类型的活跃度
+            $.each(categories, function (col, val) {
+                if (!val.active) test = false;
+            });
+            if (test) {
+                overlay = globe.children[1];
+                //如果所有点都安放好的话，边界就改变透明度
+                if (percentage === 0) {//如果还有没安放好的点的话
+                    overlayMaterial.opacity = Math.min(((cameraControls.getZoom() - 175) / 300), 0.6);
+                } else {
+                    overlayMaterial.opacity = Math.min(percentage / 100, 0.6);
+                }
             } else {
-                overlayMaterial.opacity = Math.min(percentage / 100, 0.6);
+                overlayMaterial.opacity = 0;
             }
         } else {
             overlayMaterial.opacity = 0;
@@ -1015,4 +1431,5 @@ window.onload = function () {
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     }
+
 };

@@ -21,7 +21,7 @@
     {#    <script src="/static/js/master/three.min.js"></script>#}
     <style>
         #try {
-            background-color: #7e7e7e;
+            background-color: #04042a;
         }
     </style>
 </head>
@@ -51,10 +51,6 @@
 <div id="UI" style="display:none">
     <!--最终页面的左侧-->
     <div id="sideBar">
-        <div class="optionSeparator">&nbsp;</div>
-        <div id="visualizations"></div><!--用于存放可视化产品的button，在UI.js里面定义-->
-
-        <div class="optionSeparator">&nbsp;</div><!--这是一道横杠-->
         <div id="buttons">
             <div id="countrySection">
                 <div class="optionSeparator">&nbsp;</div>
@@ -82,7 +78,7 @@
             <div id="backgroundButton">改变背景</div>
             {% if mode != "listmap" %}
                 <div id="selectcate">选择品类</div>
-                <div id="categories"></div>
+                <div id="categories" style="display: none"></div>
             {% endif %}
         </div>
     </div>

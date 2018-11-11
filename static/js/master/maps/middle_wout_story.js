@@ -19,54 +19,40 @@ window.onload = function () {
     var shape = null;//存储plane的边界信息
     var products = {};//存储产品，包括atlasid，color，id,name,sales,x,x3,y,y3,z3
     var countries = {};
-    var sales = {};
     var trades = {};
     var countryOverlay = null;//鼠标覆盖的地图的边界
     var links;//点云中的线
-    var showLinks = true;
-    var data = null;
-    var blending = true;
     var globeSize = 150;
     var names = [];//存储的是一个country中对应的一个点
     var countryIndex = 0;
     var categories = {};//下面的颜色目录条的信息
-    var incrementLink = 0;
-    var incrementLinkMax = 2000;
     var previousMode = "2D";//2D or 3D mode
     var darkMode = true;
-    var oldColors = [];
     var cameraSpeed = 5;
     var selectedCountry = null;
     var currentSetup;//当前模式（也就是当前页面）
     var cameraControls = null;
-    var isDragging = false;
+    var isDragging = false,isClicking=false;
     var mouseCoord = {"x": 0, "y": 0};
     var currentZoom = 0;
-    var step = 0;
     var selectedNode = new THREE.Mesh(new THREE.SphereGeometry(5, 24, 24), new THREE.MeshBasicMaterial({
         transparent: true,
         opacity: 0.2,
         blending: THREE.AdditiveBlending
     }));
-    var storyMode = false;//是否是在story状态，也就是是否在介绍
     var filterCountry = null;//被选中的国家
     var filterProduct = null;//被选中的产品（在下拉菜单中）
     var constantSize = false;
     var Particlelinks = null;
     var particlesPlaced = 0;//被安置好的点的数量
-    var centers = {};
     var Pgeometry = null;
     var Sgeometry = null;
     var overlayMaterial = null;
-    // var texturedot7, textureblock, texturecolormap;
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
-    if (WebGLtest()) {
-        init();
-        animate();
-    } else {
-        $("#storyPrompt").html($("#noWebGL").html());
-    }
+    init();
+    animate();
+    existstory();
 
     /**
      * 初始化，设置camera，renderer，scene等
@@ -82,9 +68,6 @@ window.onload = function () {
             ASPECT = WIDTH / HEIGHT,
             NEAR = 0.1,
             FAR = 10000;
-        // texturedot7 = new THREE.TextureLoader().load("/static/images/master/dot7.png");
-        // textureblock = new THREE.TextureLoader().load("/static/images/master/block.png");
-        // texturecolormap = new THREE.TextureLoader().load("/static/images/master/colormap5.png");
 
         renderer = new THREE.WebGLRenderer();
         if (darkMode)
@@ -133,10 +116,8 @@ window.onload = function () {
             color: {type: "c", value: new THREE.Color(0xffffff)},
             texture: {type: "t", value: textureblock}
         };
-        // console.log('block',textureblock);
         var shaderMaterial = new THREE.ShaderMaterial({
             uniforms: uniforms,
-            // attributes: attributes,
             vertexShader: document.getElementById('vertexshader').textContent,
             fragmentShader: document.getElementById('fragmentshader').textContent,
         });
@@ -164,13 +145,6 @@ window.onload = function () {
                 blending: THREE.AdditiveBlending//决定物体如何与背景进行融合,提供一种半透明的眩光。
             });
 
-            // geoMeshline = new GeoMeshLine(json, {
-            //     resolution: [window.innerWidth, window.innerHeight],
-            //     color: 0x00ffff,
-            //     lineWidth: 2
-            // });
-            // scene.add(geoMeshline);
-            //function drawThreeGeo(json, radius, shape,scene, options)
             temp = drawThreeGeo(json, 400, 'plane', scene, {
                 color: 0x7e7e7e,
                 linewidth: 2,
@@ -184,12 +158,19 @@ window.onload = function () {
             planeShapeIDs = temp[1];//边界线ID
 
             globe = new THREE.Object3D();
-            globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
-                new THREE.MeshBasicMaterial({
-                    color: 0x000000,
-                    opacity: 0.2
-                })));
-            //globe.add(new THREE.Mesh(new THREE.IcosahedronGeometry( globeSize-1, 6 ),new THREE.MeshBasicMaterial({color:0x080808,wireframe:true})));
+            if(darkMode) {
+                globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x000000,
+                        opacity: 0.2
+                    })));
+            }else{
+                globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x04042a,
+                        opacity: 0.2
+                    })));
+            }
 
             overlaySphere = new THREE.Mesh(new THREE.SphereGeometry(globeSize + 2, 32, 32), overlayMaterial);
             overlaySphere.rotation.y = -Math.PI / 2;
@@ -339,9 +320,6 @@ window.onload = function () {
             $("#loaded").fadeOut();
             $("#spinner").fadeOut('slow');
             $('#choice').fadeIn('slow');
-            //$("#sideBar").hide();
-            //$("#categories").hide();
-
         });
         selectedNode.position.set(0, 0, 10000);
         scene.add(selectedNode);
@@ -355,7 +333,6 @@ window.onload = function () {
             if (!isDragging) {
                 hideLinks();
                 Labels.resetLabels(countries, darkMode);
-                $("#atlasBox").stop().fadeOut();
             }
             UserInterface.changeCursor("default");
             isClicking = false;
@@ -381,13 +358,6 @@ window.onload = function () {
     }
 
 
-    // function updatematerial(){
-    //     var texture=new THREE.TextureLoader().load("/static/images/master/dot7.png");
-    //     cloudMaterial.map=texture;
-    //     console.log("call update");
-    //
-    // }
-    // setTimeout(updatematerial(),500);
     //更新点云，为点设定颜色并存储入dict里面
     function updatePoints() {
         colors = [];
@@ -511,7 +481,6 @@ window.onload = function () {
                 newlinks.add(cloud);
             }
             else {
-                // console.log('not circle');
                 var radius = 2.5;
                 var segments = 32;
                 var ncolor = new THREE.Color();
@@ -591,15 +560,9 @@ window.onload = function () {
 
                 mergedMesh = new THREE.Line(line_geom, line_material);//, THREE.LinePieces
 
-                // newlinks = new THREE.Object3D();
                 newlinks.add(mergedMesh);
-                // console.log(mergedMesh);
-
                 scene.remove(links);
-                // console.log(newlinks);
-
                 links = newlinks;
-                // console.log(links);
                 scene.add(links);
                 if (currentSetup === "productspace" || currentSetup === "productspace3D") {
                     if (!Pgeometry) Pgeometry = links;
@@ -608,7 +571,6 @@ window.onload = function () {
                 }
             });
         }
-
     }
 
     //这是点击一个国家以后触发的动作，给选择的国家连上相应type的线
@@ -832,56 +794,55 @@ window.onload = function () {
             mouseCoord.y = moveY;
 
             //如果不是拖拽，且不是在story模式
-        } else if (!storyMode) {
-            if (loaded) {
-                var mouseX = e.clientX / window.innerWidth * 2 - 1;
-                var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-                vector = new THREE.Vector3(mouseX, mouseY, 0);
-                var values_color = geometry.attributes.customColor.array;
-                var i = 1e3;
-                var s = new THREE.Projector;//可以用来进行碰撞检测
-                //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
-                var o = new THREE.Raycaster;
-                if (currentSetup === "gridSphere")
-                    cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
-                else cameraDistance = 3000;
-                vector.unproject(camera);
-                o.ray.set(camera.position, vector.sub(camera.position).normalize());
+        } else if (loaded) {
+            var mouseX = e.clientX / window.innerWidth * 2 - 1;
+            var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            vector = new THREE.Vector3(mouseX, mouseY, 0);
+            var values_color = geometry.attributes.customColor.array;
+            var i = 1e3;
+            var s = new THREE.Projector;//可以用来进行碰撞检测
+            //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
+            var o = new THREE.Raycaster;
+            if (currentSetup === "gridSphere")
+                cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+            else cameraDistance = 3000;
+            vector.unproject(camera);
+            o.ray.set(camera.position, vector.sub(camera.position).normalize());
 
-                intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
-                if (intersects.length > 0) {//如有相交
-                    for (var u = 0; u < intersects.length; u++) {//最近的相交物品
-                        if (intersects[u].distanceToRay < i) {
-                            i = intersects[u].distanceToRay;
-                            //获取该国家的index
-                            if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
-                                this.INTERSECTED = intersects[u].index;
-                            }
+            intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
+            if (intersects.length > 0) {//如有相交
+                for (var u = 0; u < intersects.length; u++) {//最近的相交物品
+                    if (intersects[u].distanceToRay < i) {
+                        i = intersects[u].distanceToRay;
+                        //获取该国家的index
+                        if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
+                            this.INTERSECTED = intersects[u].index;
                         }
                     }
-                } else if (this.INTERSECTED !== null) {
-                    this.INTERSECTED = null;
-                    highLightCountry(null, false);
                 }
+            } else if (this.INTERSECTED !== null) {
+                this.INTERSECTED = null;
+                highLightCountry(null, false);
+            }
 
-                if (this.INTERSECTED) {
-                    if (selectedID !== this.INTERSECTED) {
-                        selectedID = this.INTERSECTED;
-                    }
-                    UserInterface.changeCursor("pointer");
-                    $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
-                    $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
-                        countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
-                        products[names[this.INTERSECTED].n].sales + "</span>");
-                    highLightCountry(countries[names[this.INTERSECTED].c], true);
-                } else {
-                    $("#pointer").css({top: -100, left: 0});
-                    UserInterface.changeCursor("default");
-                    selectedID = null;
-                    highLightCountry(null, false);
+            if (this.INTERSECTED) {
+                if (selectedID !== this.INTERSECTED) {
+                    selectedID = this.INTERSECTED;
                 }
+                UserInterface.changeCursor("pointer");
+                $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
+                $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
+                    countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
+                    products[names[this.INTERSECTED].n].sales + "</span>");
+                highLightCountry(countries[names[this.INTERSECTED].c], true);
+            } else {
+                $("#pointer").css({top: -100, left: 0});
+                UserInterface.changeCursor("default");
+                selectedID = null;
+                highLightCountry(null, false);
             }
         }
+
     }
 
     //鼠标指到这个国家里面的时候调用的方法，将当前高亮的国家转回普通，然后将当前国家的边界高亮
@@ -931,20 +892,19 @@ window.onload = function () {
         mouseCoord.x = e.clientX || e.pageX;
         mouseCoord.y = e.clientY || e.pageY;
         isClicking = true;
-        if (!storyMode) {
-            if (names[selectedID]) {
-                var co = names[selectedID].c;
-                if (currentSetup === "productsphere" || currentSetup === "productspace" || currentSetup === "productspace3D") {
-                    targetNode(products[names[selectedID].n]);
-                } else {
-                    $(".countrySelection").select2("val", co);
-                }
+        if (names[selectedID]) {
+            var co = names[selectedID].c;
+            if (currentSetup === "productsphere" || currentSetup === "productspace" || currentSetup === "productspace3D") {
+                targetNode(products[names[selectedID].n]);
             } else {
-                freeNode();
-                chosenCountry = null;
-                UserInterface.changeCursor("grab", cameraControls.isLocked());
+                $(".countrySelection").select2("val", co);
             }
+        } else {
+            freeNode();
+            chosenCountry = null;
+            UserInterface.changeCursor("grab", cameraControls.isLocked());
         }
+
 
     }
 
@@ -1054,8 +1014,7 @@ window.onload = function () {
                                 destination[v * 3 + 2] = 0;//globeSize*1.05+Math.random()*3;
                             } else if (previousMode === "2D") {
                                 destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
-                                if (storyMode) destination[v * 3 + 1] = 3000;
-                                else destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight / 4.7;
+                                destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight / 4.7;
                                 destination[v * 3 + 2] = 0;
                             }
                         }
@@ -1446,130 +1405,6 @@ window.onload = function () {
                     loaded = true;
                     break;
 
-                //intro瑞士手表界面，所有的点都以随机的方向远离了
-                case "hide":
-                    $(".selectionBox").hide();
-                    previousMode = "2D";
-                    for (var v = particles - 1; v >= 0; v--) {
-                        tetha = Math.random() * Math.PI * 2;
-                        destination[v * 3 + 0] = 3000 * Math.cos(tetha);
-                        destination[v * 3 + 1] = 3000 * Math.sin(tetha);
-                        destination[v * 3 + 2] = 0;
-                    }
-                    loaded = true;
-                    break;
-
-                //intro 的初始界面，球模式，点以特定的球随机方式四散开来
-                case "wind":
-                    previousMode = "3D";
-                    cameraControls.globe();
-                    var v = 0;
-                    increment = 200 + Math.random() * 50;
-                    for (var v = particles - 1; v >= 0; v--) {
-                        tetha = Math.random() * Math.PI;
-                        phi = Math.PI * Math.random() * 2;
-                        r = 100 + Math.random() * 600;
-                        destination[v * 3 + 0] = r * Math.sin(tetha) * Math.cos(phi);
-                        destination[v * 3 + 1] = r * Math.sin(tetha) * Math.sin(phi);
-                        destination[v * 3 + 2] = r * Math.cos(tetha);
-                    }
-                    loaded = true;
-                    increment = 500;
-                    break;
-
-                //intro中世界是一个经济总体那个正方体的样子
-                case "step3":
-                    cameraControls.lockRotation(true);
-                    $(".selectionBox").hide();
-                    previousMode = "2D";
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = true;
-                    var xaxis = 0;
-                    yaxis = 0;
-                    var boxlimit = Math.round(Math.sqrt(particles));
-                    for (var i = 0; i < particles; i++) {
-                        xaxis += 1;
-                        if (xaxis % boxlimit == 0) {
-                            yaxis += 1;
-                        }
-                        destination[i * 3 + 0] = (xaxis - boxlimit * yaxis - boxlimit / 2) / 5.5;
-                        destination[i * 3 + 1] = (yaxis - boxlimit / 2) / 5.5 - 35;
-                        destination[i * 3 + 2] = 320;
-                        v++;
-                    }
-                    increment = 5;
-                    loaded = true;
-                    break;
-
-                //intro中瑞士表以后的那一页，一个国家的所有点都被集中到了国家的中心点上
-                case "centroids3D":
-                    previousMode = "3D";
-                    cameraControls.globe();
-                    if (!reset)
-                        cameraControls.rotate(-Math.PI / 2, Math.PI);
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = false;
-                    scene.add(globe);
-                    var country = null;
-                    var ray = globeSize;
-                    globe.rotation.set(Math.PI / 2, Math.PI / 2, 0);
-
-                    particleSystem.position.set(0, 0, 0);
-                    var theta, phi;
-                    var randomCity, code, country = null;
-                    var offsetx = 0, offsety = 0;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        for (var product in country["products"]) {
-                            theta = (90 - country.lon) * Math.PI / 180;
-                            phi = (country.lat) * Math.PI / 180;
-                            ray = globeSize;
-                            destination[v * 3 + 0] = ray * Math.sin(theta) * Math.cos(phi);
-                            destination[v * 3 + 1] = ray * Math.sin(theta) * Math.sin(phi);
-                            destination[v * 3 + 2] = ray * Math.cos(theta);
-                            v++;
-                        }
-                    }
-                    loaded = true;
-                    break;
-
-                //平面地图点展示（无国家坐标）
-                case "blend":
-                    previousMode = "2D";
-                    scene.add(shape);
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = true;
-                    loaded = true;
-                    var randomCity, code, country = null, actuator = 1;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        state = anchors[code];
-                        for (var j = 0; j < country.particles; j++) {
-                            if (state) {
-                                actuator = 2 + Math.random() * 100;
-                                randomCity = state[Math.round(Math.random() * (state.length - 1))];
-                                destination[v * 3 + 0] = (randomCity["lon"] + (country.lat - randomCity["lon"]) / actuator) * 1.55 + Math.random() - 0.5;
-                                destination[v * 3 + 1] = (randomCity["lat"] + (country.lon - randomCity["lat"]) / actuator) * 1.55 + Math.random() - 0.5;
-                                destination[v * 3 + 2] = 0;
-                            }
-                            v++;
-                        }
-                    }
-                    break;
-
                 //2D平面Tower展示，不可旋转
                 case "centroid":
                     previousMode = "2D";
@@ -1601,229 +1436,6 @@ window.onload = function () {
                             destination[v * 3 + 2] = 0;
                             v++;
                         }
-                    }
-                    loaded = true;
-                    break;
-
-                //哈哈有点搞笑，每个国家用饼环展示，很丑
-                case "pies":
-                    previousMode = "2D";
-                    scene.add(shape);
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = true;
-                    var ray, tetha, total;
-                    var randomCity, country = null, actuator = 1;
-                    var code;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        if (country) {
-                            total = 0;
-                            for (var key in country["products"]) {
-                                ray = country["exports"] / dollars / 1000;
-                                for (var s = 0; s < Math.round(country["products"][key] / dollars); s++) {
-                                    tetha = (total + country["products"][key] * Math.random()) / country["exports"] * Math.PI * 2;
-                                    destination[v * 3 + 0] = country.lat * 1.55 + ray * Math.cos(tetha);
-                                    destination[v * 3 + 1] = country.lon * 1.55 + ray * Math.sin(tetha);
-                                    destination[v * 3 + 2] = 0;
-                                    v++;
-                                }
-                                total += country["products"][key];
-                            }
-                        }
-
-                    }
-
-                    loaded = true;
-                    break;
-
-                //将点按照城市进行分布而不是按照平均分布
-                case "cities":
-                    previousMode = "2D";
-                    scene.add(shape);
-                    var v = 0;
-
-                    loaded = false;
-                    zoomlock = true;
-                    var randomCity, code, country = null;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        state = anchors[code];
-                        for (var j = 0; j < country.particles; j++) {
-                            if (state) {
-                                randomCity = state[Math.round(Math.random() * (state.length - 1))];//随意选择一个城市编号
-                                destination[v * 3 + 0] = (randomCity["lon"]) * 1.55;
-                                destination[v * 3 + 1] = (randomCity["lat"]) * 1.55;
-                                destination[v * 3 + 2] = Math.random();
-                            }
-                            v++;
-                        }
-                    }
-                    loaded = true;
-                    break;
-
-                //球状,按城市分布
-                case "probability3D":
-                    previousMode = "3D";
-                    cameraControls.globe();
-                    if (!reset)
-                        cameraControls.rotate(-Math.PI / 2, Math.PI);
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = false;
-                    scene.add(globe);
-                    var randomCity, country = null;
-                    var ray = globeSize;
-                    //particleSystem.rotation.set(-Math.PI/2,0,-Math.PI/2);
-                    globe.rotation.set(Math.PI / 2, Math.PI / 2, 0);
-
-                    particleSystem.position.set(0, 0, 0);
-                    var theta, phi;
-                    var randomCity, code, country = null;
-
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        state = anchors[code];
-                        if (country && state) {
-                            for (var product in country["products"]) {
-                                prob = categories[products[product].color].probabilities;
-                                cityLimit = state.length;
-                                selection = 0;
-
-                                for (var s = 0; s < Math.round(country["products"][product] / dollars); s++) {
-                                    selection = 0;
-                                    rand = Math.random();
-                                    //随机选择一个城市布置点，只是每个城市被选择的概率和它的prob有关
-                                    for (var r = 0; r < prob.length; r++) {
-                                        selection += prob[r];
-                                        if (selection > rand) break;
-                                    }
-                                    randomCity = state[Math.floor((r + rand) / 20 * state.length)];
-                                    theta = (90 - randomCity["lat"] + Math.random() / 20 * (country.lon - randomCity["lat"])) * Math.PI / 180;
-                                    phi = (randomCity["lon"] + Math.random() / 20 * (country.lat - randomCity["lon"])) * Math.PI / 180;
-                                    ray = globeSize;
-
-
-                                    actuator = 2 + Math.random() * 500;
-                                    // phi = ((randomCity["lon"] + (country.lat - randomCity["lon"]) / actuator)) * Math.PI / 180;
-                                    // theta = ((randomCity["lat"] + (country.lon - randomCity["lat"]) / actuator)) * Math.PI / 180;
-
-                                    destination[v * 3 + 0] = ray * Math.sin(theta) * Math.cos(phi) + (Math.random() - 0.5) / 2;
-                                    destination[v * 3 + 1] = ray * Math.sin(theta) * Math.sin(phi) + (Math.random() - 0.5) / 2;
-                                    destination[v * 3 + 2] = ray * Math.cos(theta) + (Math.random() - 0.5) / 2;
-                                    v++;
-                                }
-                            }
-                        }
-                    }
-                    loaded = true;
-                    break;
-
-                //平面地图按照城市分布进行分布，比较集中，不好看
-                case "probability":
-                    previousMode = "2D";
-                    scene.add(shape);
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = true;
-                    var randomCity, country = null;
-                    var colors = {};
-                    var count = 0;
-                    var xaxis = 0;
-                    yaxis = 0;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        state = anchors[code];
-                        if (country && state) {
-                            for (var product in country["products"]) {
-                                prob = categories[products[product].color].probabilities;
-                                cityLimit = state.length;
-                                selection = 0;
-
-                                for (var s = 0; s < Math.round(country["products"][product] / dollars); s++) {
-                                    selection = 0;
-                                    rand = Math.random();
-                                    for (var r = 0; r < prob.length; r++) {
-                                        selection += prob[r];
-                                        if (selection > rand) break;
-                                    }
-                                    randomCity = state[Math.floor((r + rand) / 20 * state.length)];
-                                    tetha = Math.PI * 2 * Math.random();
-                                    destination[v * 3 + 0] = randomCity["lon"] * 1.55 - tetha * (randomCity["lon"] - country.lat) / 100 + rand * 2 - 1;
-                                    destination[v * 3 + 1] = randomCity["lat"] * 1.55 - tetha * (randomCity["lat"] - country.lon) / 100 + Math.random() - 0.5;
-                                    destination[v * 3 + 2] = Math.random() * 3;
-                                    v++;
-                                    //console.log(colors[products[product].color]+" "+colors[products[product].color]%5+" "+colors[products[product].color]%5)
-                                }
-                            }
-                        }
-
-                    }
-                    loaded = true;
-                    break;
-
-                //按照城市分布简单的确定位置，3D
-                case "globe":
-                    previousMode = "3D";
-                    cameraControls.globe();
-                    if (!reset) {
-                        cameraControls.rotate(-Math.PI / 2, Math.PI);
-                        globe.rotation.set(Math.PI / 2, Math.PI / 2, 0);
-                    }
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = false;
-                    scene.add(globe);
-                    var randomCity, country = null;
-                    var ray = globeSize;
-                    //particleSystem.rotation.set(-Math.PI/2,0,-Math.PI/2);
-
-
-                    particleSystem.position.set(0, 0, 0);
-                    var theta, phi;
-                    var randomCity, code, country = null;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        state = anchors[code];
-                        for (var j = 0; j < country.particles; j++) {
-                            ray = globeSize + Math.random() / 100;
-                            if (state) {
-                                randomCity = state[Math.round(Math.random() * (state.length - 1))];
-                                theta = (90 - randomCity["lat"]) * Math.PI / 180 + (1 - Math.random() * 2) / 200;
-                                phi = (randomCity["lon"]) * Math.PI / 180 + (1 - Math.random() * 2) / 200;
-                                destination[v * 3 + 0] = ray * Math.sin(theta) * Math.cos(phi);
-                                destination[v * 3 + 1] = ray * Math.sin(theta) * Math.sin(phi);
-                                destination[v * 3 + 2] = ray * Math.cos(theta);
-                            }
-                            v++;
-                        }
-
-
                     }
                     loaded = true;
                     break;
@@ -1992,146 +1604,36 @@ window.onload = function () {
                     }
                     loaded = true;
                     break;
-
-                case "groupbyC":
-                    $(".selectionBox").hide();
-                    previousMode = "2D";
-                    var count = 0;
-                    var v = 0;
-                    loaded = false;
-                    var total = 0;
-                    boxSize = (window.innerWidth - 200) / Object.keys(products).length;
-
-                    $.each(countries, function (i, val) {
-                        for (var key in val["products"]) {
-                            count++;
-                            productInfo = products[key];
-                            for (var s = 0; s < Math.round(val["products"][key] / dollars); s++) {
-                                destination[v * 3 + 0] = 100 + i * boxSize + Math.random() * boxSize * 0.9;
-                                destination[v * 3 + 1] = productInfo.sales / dollars / 100 * Math.random();
-                                destination[v * 3 + 2] = 0;
-                                v++;
-                            }
-                        }
-                    });
-                    loaded = true;
-                    break;
-
-                case "treemap":
-
-                    break;
-
-                //对不同的国家进行柱状统计图展示
-                case "histogram":
-                    previousMode = "2D";
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = true;
-                    var xaxis = 0, yaxis = 0;
-                    var randomCity, country = null;
-                    var maxX = window.innerWidth, maxY = window.innerHeight;
-                    for (var i = 0; i < countryIndex; i++) {
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        xaxis = 0;
-                        yaxis = 0;
-                        boxSize = Object.keys(country["products"]).length / 5200;
-                        increment = (maxX) / countryIndex / 2;
-                        for (var j = 0; j < country.particles; j++) {
-                            xaxis++;
-                            if (xaxis > 20) {
-                                yaxis++;
-                                xaxis = 0;
-                            }
-                            destination[v * 3 + 0] = (i * increment + xaxis * boxSize + Math.random() * boxSize - maxX / 4) * 0.8;
-                            destination[v * 3 + 1] = yaxis * boxSize + Math.random() * boxSize - maxY / 8;
-                            destination[v * 3 + 2] = 0;
-                            v++;
-                        }
-                    }
-                    loaded = true;
-                    break;
-
             }
         }
         particlesPlaced = 0;
         currentSetup = to;
-        if (!storyMode) $("#atlasBox").stop().fadeIn();
         if (currentSetup === "productspace" || currentSetup === "productspace3D" || currentSetup === "productsphere") {
-            // $("#atlasBox").stop().fadeOut();
             $("#countrySection").hide();
             $("#productSection").show();
 
         } else {
-            $("#atlasBox").stop().fadeIn();
             $("#countrySection").show();
             $("#productSection").hide();
         }
         hideCategories();
     }
 
+    $("#backgroundButton").click(function () {
+        darkMode=!darkMode;
+        // console.log(darkMode);
+    });
+
     //点击选择框的时候switch到的内容所调用的方法
     $("#UI").on("click", ".modeSelector", function () {
         $(".modeSelector").removeClass("selectedMode");
         $(this).addClass("selectedMode");
         switch ($(this).prop('id')) {
-            case "mapButton":
-                switcher("map", false, 5);
-                break;
-            case "globeButton":
-                switcher("globe", false, 5);
-                break;
-            case "globeProbaButton":
-                switcher("probability3D", false, 5);
-                break;
-            case "hideButton":
-                switcher("hide", false, 5);
-                break;
-            case "anchorButton":
-                switcher("cities", false, 5);
-                break;
-            case "probaButton":
-                switcher("probability", false, 5);
-                break;
-            case "blendButton":
-                switcher("blend", false, 5);
-                break;
-            case "centerButton":
-                switcher("centroid", false, 5);
-                break;
             case "towersButton":
                 switcher("towers", false, 5);
                 break;
-            case "histButton":
-                switcher("histogram", false, 5);
-                break;
             case "groupButton":
                 switcher("groupby", false, 5);
-                break;
-            case "groupCButton":
-                switcher("groupbyC", false, 5);
-                break;
-            case "groupCButton":
-                switcher("groupbyc", false, 5);
-                break;
-            case "rankButton":
-                switcher("rank", false, 5);
-                break;
-            case "locationButton":
-                switcher("locationRank", false, 5);
-                break;
-            case "circleButton":
-                switcher("circles", false, 5);
-                break;
-            case "pieButton":
-                switcher("pie", false, 5);
-                break;
-            case "piesButton":
-                switcher("pies", false, 5);
                 break;
             case "gridSphereButton":
                 switcher("gridSphere", false, 5);
@@ -2154,20 +1656,6 @@ window.onload = function () {
         }
     });
 
-    /*下面的是story模式的时候的一些方法*/
-    $("#skipStoryLine").click(function () {
-        storyMode = false;
-        exitStoryline();
-    });
-
-    //点击story模式按钮的时候
-    $("#storyline").click(function () {
-        if (storyMode) {
-            exitStoryline();
-        } else {
-            StoryLine();
-        }
-    });
 
     //点击category选择product类别的时候所调用的方法
     $("#categories").on("click", ".chooseCategory", function () {
@@ -2202,9 +1690,7 @@ window.onload = function () {
 
     //选择国家
     $("#countries").on('click', '.chosenCountry', function () {
-        if (!storyMode) {
-            $(".countrySelection").select2("val", $(this).prop('id'));
-        }
+        $(".countrySelection").select2("val", $(this).prop('id'));
     });
 
     $("#countries").on('mouseout', '.chosenCountry', function () {
@@ -2224,297 +1710,18 @@ window.onload = function () {
 
     });
 
-    //改变整体色调
-    $("#backgroundButton").click(function () {
-        darkMode = !darkMode;
-        if (darkMode) {
-            // Particlelinks.changeColor(0xffffff);
 
-            scene.fog = new THREE.FogExp2(0x000000, 0.001);
-            renderer.setClearColor(0x080808);
-            globe.children[0].material.color.setHex(0x000000);
-            $('body').css('background-color', 'black');
-            $("a:link,a:visited,a:hover").css('color', '#E0E0E0');
-            $("#countries").css({
-                'background-color': 'rgba(0,0,0,0.6)',
-                'color': 'white'
-            });
-            // $("#categories").css('background-color', 'rgba(0,0,0,0.6)');
-            $(".chosenCountry").css('background-color', 'rgba(0,0,0,0.6)');
-            // $(".chooseCategory").css({
-            //     'background-color': '#FFFFFF',
-            //     'color': '#080808'
-            // });
-            // $('.categoryButton').css('color', 'white');
-            $(".chosenButton").css('color', 'white');
-            // $(".categorySelected").css({
-            //     'background-color': 'white',
-            //     'color': '#080808'
-            // });
-            $(".title,.titleup,.titleTop,.titleTop2").css('color', '#FFFFFF');
-            $(".subtitle，.subtitle2").css('color', '#DDD');
-            $("#pointer,#upperBar,#bottomBar").css('background-color', 'rgba(0,0,0,0.6)');
-            $("#watchsvg").css('fill', 'white');
-            $("#annotation").css({
-                'color': 'white',
-                'background-color': 'rgba(0,0,0,0.8)'
-            });
-            $("#description,#choice,#beginExplore,#beginStory").css('color', 'white');
-            $("#storyline,#fullscreen,#showAbout,#showLabels,#contrastbutton,#backgroundButton").css({
-                'color': 'white',
-                'border-top': '1px solid #121314',
-                'border-bottom': '1px solid #121314'
-            });
-            $("#aboutText").css({
-                'background': 'rgba(0,0,0,0.8)',
-                'color': 'white'
-            });
-            $("#storyline:hover,#fullscreen:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover").css('border-right', '2px solid #FFF')
-            $('.selectedMode').css('border', '1px solid white');
-            $('#storyPrompt').css('background-color', 'rgba(0,0,0,0.4)');
-            $('#productlabel').css({
-                'background-color': 'rgba(0,0,0,0.6)',
-                'color': 'white'
-            });
-            $('.modeSelector').css({
-                'border': '1px solid #151515',
-                'color': 'white'
-            });
-            $('.modeSelector:hover').css('border', '1px white solid');
-            $('#sideBar').css('background', 'linear-gradient(to right, rgba(0, 0, 0, 1),  rgba(0, 0, 0, 0.4))');
-            $('#nextlevel,#annotation,#title,#subtitle,#subtitle2').css('text-shadow', '0 0 0.3em #FFF');
-            $('#modeDescription').css('background-color', 'rgba(0,0,0,0.8');
-            $('.optionSeparator').css('background', 'linear-gradient(right,black,#606060,black)');
-            $('.midSeparator').css('background', 'linear-gradient(bottom,black,#606060,black)');
-            $('#loadingBar').css('background-color', 'white');
-
-
-            //select2
-            $(".select2-dropdown .select2-close-mask .select2-container--default .select2-selection--single").css('background-color', 'black');
-            $('.select2-container--default .select2-selection--single').css('border', '1px solid #303030');
-            $('.select2-container--default .select2-selection--single .select2-selection__rendered').css('color', '#EEE');
-            $('.select2-container--default .select2-selection--single .select2-selection__placeholder').css('color', '#EEE');
-            $('.select2-container--default.select2-container--disabled .select2-selection--single').css('background-color', '#EEE');
-            $('.select2-container--default .select2-selection--multiple').css({
-                'background-color': 'black',
-                'border': '1px solid #aaa'
-            });
-            $('.select2-container--default .select2-selection--multiple .select2-selection__placeholder').css('color', '#EEE');
-            $('.select2-container--default .select2-selection--multiple .select2-selection__choice').css({
-                'background-color': '#e4e4e4',
-                'border': '1px solid #aaa'
-            });
-            $('.select2-container--default .select2-selection--multiple .select2-selection__choice__remove').css('color', '#eee');
-            $('.select2-container--default.select2-container--focus .select2-selection--multiple').css('border', 'solid black 1px');
-            $('.select2-container--default.select2-container--disabled .select2-selection--multiple').css('background-color', '#eee');
-            $('.select2-container--default .select2-search--dropdown .select2-search__field').css('border', '1px solid #aaa');
-            $('.select2-container--default .select2-results__option[aria-disabled=true]').css('background-color', '#080808');
-            $('.select2-container--default .select2-results__option--highlighted[aria-selected]').css('border-right', '2px solid #FFF');
-            $('.select2-container--classic .select2-selection--single').css({
-                'background-color': '#f6f6f6',
-                'border': '1px solid #aaa',
-                'background-image': 'linear-gradient(to bottom, #ffffff 50%, #eeeeee 100%)',
-                'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee', GradientType=0)"
-            });
-            $('.select2-container--classic .select2-selection--single:focus').css('border', '1px solid #ffffff');
-            $('.select2-container--classic .select2-selection--single .select2-selection__rendered').css('color', '#eee');
-            $('.select2-container--classic .select2-selection--single .select2-selection__placeholder').css('color', '#eee');
-            $('.select2-container--classic .select2-selection--single .select2-selection__arrow').css({
-                'background-color': '#ddd',
-                'border-left': '1px solid #aaa',
-                'background-image': 'linear-gradient(to bottom, #eeeeee 50%, #cccccc 100%)',
-                'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc', GradientType=0)"
-            });
-            $('.select2-container--classic .select2-selection--single .select2-selection__arrow b').css('border-color', '#303030 transparent transparent transparent');
-            $('.select2-container--classic[dir="rtl"] .select2-selection--single .select2-selection__arrow').css('border-right', '1px solid #aaa');
-            $('.select2-container--classic.select2-container--open .select2-selection--single').css('border', '1px solid #ffffff');
-            $('.select2-container--classic.select2-container--open .select2-selection--single .select2-selection__arrow b').css('border-color', 'transparent transparent #303030 transparent');
-            $('.select2-container--classic.select2-container--open.select2-container--above .select2-selection--single').css({
-                'background-image': 'linear-gradient(to bottom, #ffffff 0%, #eeeeee 50%)',
-                "filter": "progid: DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee', GradientType=0)"
-            });
-            $('.select2-container--classic.select2-container--open.select2-container--below .select2-selection--single').css({
-                'background-image': 'linear-gradient(to bottom, #eeeeee 50%, #ffffff 100%)',
-                'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#ffffff', GradientType=0)"
-            });
-            $('.select2-container--classic .select2-selection--multiple').css('background-color', 'black');
-            $('.select2-container--classic .select2-selection--multiple:focus').css('border', '1px solid #303030');
-            $('.select2-container--classic .select2-selection--multiple .select2-selection__choice').css('background-color', '#e4e4e4');
-            $('.select2-container--classic .select2-selection--multiple .select2-selection__choice__remove').css('color', '#eee');
-            $('.select2-container--classic .select2-selection--multiple .select2-selection__choice__remove:hover').css('color', '#eee');
-            $('.select2-container--classic .select2-dropdown').css('background-color', 'black');
-            $('.select2-container--classic .select2-results__option[aria-disabled=true]').css('color', 'white');
-            $('.select2-container--classic .select2-results__option--highlighted[aria-selected]').css('color', 'black');
-            $('.select2-container--classic.select2-container--open .select2-dropdown').css('border-color', '#ffffff');
-
-
-        } else {
-            // Particlelinks.changeColor(0x00ff00);
-            scene.fog = new THREE.FogExp2(0x0000ff, 0.001);
-            // scene.fog.color.setHex(0x00ffff);
-            renderer.setClearColor(0xe4e4e4);//背景色
-            globe.children[0].material.color.setHex(0x0086a7);//球
-            $('body').css('background-color', '#FFFFFF');
-            $("a:link,a:visited,a:hover").css('color', '#000');
-            $("#countries").css({
-                'background-color': 'rgba(255,255,255,0.6)',
-                'color': 'black'
-            });
-            // $("#categories").css('background-color', 'rgba(255,255,255,0.6)');
-            $(".chosenCountry").css('background-color', 'rgba(255,255,255,0.6)');
-            // $(".chooseCategory").css({
-            //     'background-color': '#000000',
-            //     'color': '#FFFFFF'
-            // });
-            // $('.categoryButton').css('color', 'white');
-            $(".chosenButton").css('color', 'black');
-            // $(".categorySelected").css({
-            //     'background-color': 'black',
-            //     'color': 'white'
-            // });
-            $(".title,.titleup,.titleTop,.titleTop2").css('color', '#000000');
-            $(".subtitle2,.subtitle").css('color', '#EEE');
-            $("#pointer,#upperBar,#bottomBar").css('background-color', 'rgba(255,255,255,0.6)');
-            $("#watchsvg").css('fill', 'black');
-            $("#annotation").css({
-                'color': 'black',
-                'background-color': 'rgba(255,255,255,0.8)'
-            });
-            $("#description,#choice,#beginExplore,#beginStory").css('color', 'black');
-            $("#storyline,#fullscreen,#showAbout,#showLabels,#contrastbutton,#backgroundButton").css({
-                'color': 'black',
-                'border-top': '1px solid #000000',
-                'border-bottom': '1px solid #000000'
-            });
-            $("#aboutText").css({
-                'background': 'rgba(255,255,255,0.8)',
-                'color': 'black'
-            });
-            $("#storyline:hover,#fullscreen:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover").css('border-right', '2px solid #000');
-            $('.selectedMode').css('border', '1px solid black');
-            $('#storyPrompt').css('background-color', 'rgba(255,255,255,0.4)');
-            $('#productlabel').css({
-                'background-color': 'rgba(255,255,255,0.6)',
-                'color': 'black'
-            });
-            $('.modeSelector').css({
-                'border': '1px solid #e4e4e4',
-                'color': 'black'
-            });
-            $('modeSelector:hover').css('border', '1px black solid');
-            $('#sideBar').css('background', '#e4e4e4');
-            $('#nextlevel,#annotation,#title,#subtitle,#subtitle2').css('text-shadow', '0 0 0.3em #000');
-            $('#modeDescription').css('background-color', 'rgba(255,255,255,0.8');
-            $('.optionSeparator,.midSeparator').css('background', 'white');
-            $('#loadingBar').css('background-color', 'black');
-
-
-            //select2
-            $('.t').css('color', '#aaa');
-            $(".select2-dropdown .select2-close-mask .select2-container--default .select2-selection--single").css('background-color', 'white');
-            // $('.select2-container--default .select2-selection--single').css('border', '1px solid #303030');
-            $('.select2-container--default .select2-selection--single .select2-selection__rendered').css('color', '#222');
-            $('.select2-container--default .select2-selection--single .select2-selection__placeholder').css('color', '#222');
-            $('.select2-container--default.select2-container--disabled .select2-selection--single').css('background-color', '#222');
-            $('.select2-container--default .select2-selection--multiple').css({
-                'background-color': 'white',
-                'border': '1px solid #aaa'
-            });
-            $('.select2-container--default .select2-selection--multiple .select2-selection__placeholder').css('color', '#222');
-            $('.select2-container--default .select2-selection--multiple .select2-selection__choice').css({
-                'background-color': '#2a2a2a',
-                'border': '1px solid #444'
-            });
-            $('.select2-container--default .select2-selection--multiple .select2-selection__choice__remove').css('color', '#222');
-            $('.select2-container--default.select2-container--focus .select2-selection--multiple').css('border', 'solid white 1px');
-            $('.select2-container--default.select2-container--disabled .select2-selection--multiple').css('background-color', '#222');
-            $('.select2-container--default .select2-search--dropdown .select2-search__field').css('border', '1px solid #444');
-            $('.select2-container--default .select2-results__option[aria-disabled=true]').css('background-color', '#fafafa');
-            $('.select2-container--default .select2-results__option--highlighted[aria-selected]').css('border-right', '2px solid #000');
-            $('.select2-container--classic .select2-selection--single').css({
-                'background-color': '#090909',
-                'border': '1px solid #444',
-                'background-image': 'linear-gradient(to bottom, #000000 50%, #444444 100%)',
-                'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#111111', endColorstr='#444444', GradientType=0)"
-            });
-            $('.select2-container--classic .select2-selection--single:focus').css('border', '1px solid #000');
-            $('.select2-container--classic .select2-selection--single .select2-selection__rendered').css('color', '#222');
-            $('.select2-container--classic .select2-selection--single .select2-selection__placeholder').css('color', '#222');
-            $('.select2-container--classic .select2-selection--single .select2-selection__arrow').css({
-                'background-color': '#333',
-                'border-left': '1px solid #444',
-                'background-image': 'linear-gradient(to bottom, #222 50%, #444 100%)',
-                'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#222', endColorstr='#444', GradientType=0)"
-            });
-            $('.select2-container--classic .select2-selection--single .select2-selection__arrow b').css('border-color', '#c0c0c0 transparent transparent transparent');
-            $('.select2-container--classic[dir="rtl"] .select2-selection--single .select2-selection__arrow').css('border-right', '1px solid #555');
-            $('.select2-container--classic.select2-container--open .select2-selection--single').css('border', '1px solid #000');
-            $('.select2-container--classic.select2-container--open .select2-selection--single .select2-selection__arrow b').css('border-color', 'transparent transparent #cfcfcf transparent');
-            $('.select2-container--classic.select2-container--open.select2-container--above .select2-selection--single').css({
-                'background-image': 'linear-gradient(to bottom, #000 0%, #222 50%)',
-                "filter": "progid: DXImageTransform.Microsoft.gradient(startColorstr='#000', endColorstr='#222', GradientType=0)"
-            });
-            $('.select2-container--classic.select2-container--open.select2-container--below .select2-selection--single').css({
-                'background-image': 'linear-gradient(to bottom, #222 50%, #000 100%)',
-                'filter': "progid: DXImageTransform.Microsoft.gradient(startColorstr='#222', endColorstr='#000', GradientType=0)"
-            });
-            $('.select2-container--classic .select2-selection--multiple').css('background-color', 'white');
-            $('.select2-container--classic .select2-selection--multiple:focus').css('border', '1px solid #dfdfdf');
-            $('.select2-container--classic .select2-selection--multiple .select2-selection__choice').css('background-color', '#2a2a2a');
-            $('.select2-container--classic .select2-selection--multiple .select2-selection__choice__remove').css('color', '#222');
-            $('.select2-container--classic .select2-selection--multiple .select2-selection__choice__remove:hover').css('color', '#222');
-            $('.select2-container--classic .select2-dropdown').css('background-color', 'white');
-            $('.select2-container--classic .select2-results__option[aria-disabled=true]').css('color', 'black');
-            $('.select2-container--classic .select2-results__option--highlighted[aria-selected]').css('color', 'white');
-            $('.select2-container--classic.select2-container--open .select2-dropdown').css('border-color', '#000');
-        }
-    });
-
-
-    $('#nextButton').on("click", function () {
-        StoryLine()
-    });
-
-    $('.titleTop2').click(function () {
-        positions = geometry.attributes.position.array;
-        for (var v = 0; v < particles; v++) {
-            positions[v * 3 + 2] = 3000;
-        }
-        increment = 3;
-    });
-
-    $("#storyPrompt").on("click", "#beginExplore", function () {
+    $("#storyPrompt").on("click", "#beginStory", function () {
         $("#storyPrompt").stop().fadeOut();
         cameraControls.loaded();
         $("#UI").fadeIn();
-        values = parseURL.decode_url();
-        if (values.length != 0) {
-            switch (values[0][1]) {
-                case "gridSphere":
-                case "gridmap":
-                case "towers":
-                    switcher(values[0][1], false, 25);
-                    filterCountry = values[1][1];
-                    targetCountry(values[1][1], true, true);
-                    break;
-                case "productsphere":
-                case "productspace":
-                case "productspace3D":
-                    switcher(values[0][1], false, 25);
-                    filterProduct = values[1][1];
-                    targetNode(products[values[1][1]]);
-                    break;
-            }
-        }
     });
 
-    $("#storyPrompt").on("click", "#beginStory", function () {
+    function existstory(){
+        $("#storyPrompt").stop().fadeOut();
         cameraControls.loaded();
         $("#UI").fadeIn();
-        $("#storyPrompt").stop().stop().fadeOut();
-        switcher("gridSphere");
-        StoryLine();
-    });
+    }
 
     //高亮与正常模式之间的切换
     $("#contrastbutton").click(function () {
@@ -2581,186 +1788,6 @@ window.onload = function () {
         }
     }
 
-    //进入story状态
-    function StoryLine() {
-        $("#sideBar").stop().fadeOut();
-        $("#categories").stop().fadeOut();
-        $("#annotation").stop().fadeIn();
-        $("#nextlevel").stop().fadeIn();
-        $("#pointer").css({top: -100, left: 0});
-        $("#storyline").html("◙ 停止动画");
-
-        Labels.setLabels(false);
-        storyMode = true;
-        filterCountry = null;
-
-        var story = [
-            {
-                "div": 1,
-                "setup": "wind",
-                "delay": 3,
-                "title": "经济复杂性的全球化",
-                "subtitle": "本网站通过对每个国家的出口商品的可视化来说明各国的经济发展程度"
-            },
-            {
-                "div": 2,
-                "setup": "step3",
-                "delay": 4,
-                "title": "这是世界的总体经济",
-                "subtitle": "每个像素都代表不同的产品"
-            },
-            {
-                "div": 3,
-                "setup": "hide",
-                "delay": 3,
-                "title": "以瑞士手表做对照",
-                "subtitle": "瑞士手表的均价是 $685"
-            },
-            {
-                "div": 4,
-                "setup": "centroids3D",
-                "delay": 5,
-                "title": "每个点代表 1 亿的贸易额",
-                "subtitle": "相当于 150000 个瑞士手表"
-            },
-            {
-                "div": 5,
-                "setup": "gridSphere",
-                "delay": 5,
-                "title": "每种颜色代表一个行业",
-                "subtitle": "手表占瑞士出口额的 5%"
-            },
-            {
-                "div": 6,
-                "setup": "gridSphere",
-                "delay": 4,
-                "title": "这是瑞士的十大贸易伙伴",
-                "subtitle": "总计2630亿美元的商品"
-            },
-            {
-                "div": 7,
-                "setup": "gridmap",
-                "delay": 4,
-                "title": "并非所有国家在每个行业都有出口",
-                "subtitle": "你可以对比 <span style='color:#17becf'>机械（发动机，集成电路，电话）</span> 和 <span style='color:#FFC41C'>蔬菜（咖啡，大豆，小麦）</span>得出此结论"
-            },
-            {
-                "div": 8,
-                "setup": "productsphere",
-                "delay": 4,
-                "title": "产品依赖于不同的生产能力",
-                "subtitle": "有些行业的产品之间有很多的联系，比如 <span style='color:#17becf'>机械y</span>, 而不是 <span style='color:#FFC41C'>蔬菜</span>.<br/>我们称之为产品空间"
-            },
-            {
-                "div": 9,
-                "setup": "gridSphere",
-                "delay": 4,
-                "title": "准备好去探索了吗?",
-                "subtitle": "通过本网站您可以发掘产品和国家之间的生产相似性."
-            }];
-
-        if (story[step]) {
-            switcher(story[step]["setup"], false, 25);
-            $("#annotation").stop().fadeOut("fast", function () {
-                $("#annotation").html("<span class='title'>" + story[step - 1]["title"] + "</span><br/><div class='subtitle'>" + story[step - 1]["subtitle"] + "</div>");
-                $("#annotation").stop().fadeIn("fast");
-            });
-            $(".selectionBox").hide();
-
-            switch (story[step]["div"]) {
-                case 1:
-                    $.each(categories, function (col, val) {
-                        val.active = true
-                    });
-                    break;
-                case 2:
-                    Labels.setLabels(true);
-                    break;
-                case 3:
-                    $("#watch").stop().fadeIn("slow");
-                    $.each(categories, function (col, val) {
-                        if (col == "#17becf")
-                            val.active = true;
-                        else val.active = false;
-                    });
-
-                    Labels.setLabels(true);
-                    break;
-                case 4:
-                    $("#watch").stop().fadeOut("slow");
-                    Labels.setLabels(true);
-                    $.each(categories, function (col, val) {
-                        val.active = true;
-                    });
-
-                    targetCountry("CH", false, true);
-
-                    Labels.setLabels(true);
-                    cameraControls.setZoom(200);
-
-                    break;
-                case 5:
-                    //$("#categories").stop().fadeIn();
-                    targetCountry("CH", false, true);
-                    cameraControls.setZoom(220);
-
-                    Labels.setLabels(true);
-                    break;
-                case 6:
-
-                    targetCountry("CH", true, true);
-                    Labels.setLabels(true);
-                    cameraControls.setZoom(350);
-                    $.each(categories, function (col, val) {
-                        if (col == "#FFC41C" || col == "#17becf") val.active = true;
-                        else val.active = false;
-                    });
-
-                    break;
-                case 7:
-                    constantSize = true;
-                    changePointSize(5);
-                    break;
-                case 8:
-                    constantSize = false;
-                    animatePointSize(false);
-                    $.each(categories, function (col, val) {
-                        val.active = true;
-                    });
-                    break;
-                case 9:
-                    break;
-            }
-            //window.setTimeout(StoryLine,story[step]["delay"]*1000);
-
-            step++;
-
-        } else {
-            exitStoryline();
-        }
-    }
-
-    //退出story模式的时候展示的方法
-    function exitStoryline() {
-        $("#storyline").html("► 介绍");
-        $("#categories").stop().fadeIn();
-        $("#nextlevel").stop().fadeOut();
-        $("#annotation").empty();
-        $("#annotation").stop().fadeOut();
-        $("#watch").stop().fadeOut("slow");
-        $("#sideBar").stop().fadeIn();
-        $.each(categories, function (col, val) {
-            val.active = true;
-        });
-        switcher("gridSphere", false, 5);//我认为这个地方应该修改成先从url获取
-        storyMode = false;
-        Labels.setLabels(true);
-        step = 0;
-        constantSize = false;
-        animatePointSize(false);
-    }
-
-    //
     function animateOverlay(percentage) {
         //对于第一二种模式
         if (currentSetup === "gridmap" || currentSetup === "gridSphere") {
@@ -2849,43 +1876,6 @@ window.onload = function () {
         cameraControls.update();
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
-
     }
 
 };
-
-
-//没有被用过的方法
-function changeColor(co, white) {
-    var v = 0;
-    var colors = geometry.attributes.customColor.array;
-    var color = new THREE.Color();
-    oldColors = [];
-    $.each(countries, function (p, o) {
-        if (co == p) {
-            if (white) {
-                for (var j = 0; j < o.particles; j++) {
-                    colors[v * 3 + 0] = 255;
-                    colors[v * 3 + 1] = 255;
-                    colors[v * 3 + 2] = 255;
-                    v++;
-                }
-            } else {
-                for (var key in o["products"]) {
-                    productValue = o["products"][key];
-                    productInfo = products[key];
-                    color = new THREE.Color(productInfo.color);
-                    for (var s = 0; s < Math.round(productValue / dollars); s++) {
-                        colors[v * 3 + 0] = color.r;
-                        colors[v * 3 + 1] = color.g;
-                        colors[v * 3 + 2] = color.b;
-                        v++;
-                    }
-                }
-            }
-        } else {
-            v += o.particles;
-        }
-    });
-    geometry.attributes.customColor.needsUpdate = true;
-}
