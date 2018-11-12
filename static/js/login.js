@@ -241,6 +241,11 @@ $('#reg').click(function () {
                 $('#reg').removeAttr('disabled');
                 $('#userCue').html(res);
             }
+            else if(res=="error"){
+                $('#reg').attr('value', 'create an account');
+                $('#reg').removeAttr('disabled');
+                $('#userCue').html("Something was wrong with the path");
+            }
         },
         error: function () {
             alert("获取数据失败！");
