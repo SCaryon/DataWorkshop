@@ -1293,6 +1293,8 @@ def graphgoo_home():
 def graph_layout2d(layout):
     global graph_object
     html = 'graph_layout2d/' + layout + '_layout2d.html'
+    print(graph_object['nodes'])
+    print(graph_object['matrix'])
     return render_template(html, nodes=graph_object['nodes'],
                            matrix=graph_object['matrix'])
 
@@ -1303,7 +1305,7 @@ def graph_layout2d(layout):
 def streaming_data():
     global time_data_object
     time_data_object = {}
-    final_data = csv.reader(open('./static/data1.csv'))
+    final_data = csv.reader(open('./static/data/streaming_data/data1.csv'))
     year = []
     num = []
     values = []
