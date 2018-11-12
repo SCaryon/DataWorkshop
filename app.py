@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 import os,shutil
 import smtplib
 import csv
-# from model import user, db, login, mailconfirm, methoduse
+from model import user, db, login, mailconfirm, methoduse
 import os, shutil
 import smtplib
 from email.mime.text import MIMEText
