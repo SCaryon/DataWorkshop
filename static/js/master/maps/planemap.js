@@ -231,7 +231,7 @@ window.onload = function () {
             particleSystem.frustrumCulled = true;
             scene.add(particleSystem);
             loaded = true;
-            switcher("gridmap", false, 3);
+            switcher("gridmap", false, 5);
             Particlelinks = new ParticleLinks(13000, clock, darkMode);
             links = Particlelinks.getMesh();
             scene.add(links);
