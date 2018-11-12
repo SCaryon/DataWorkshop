@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GraphGoo</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="../static/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/font-awesome.min.css">
+
+    <!-- MAIN CSS-->
+    <link rel="stylesheet" href="../static/css/tooplate-style.css">
+    <link rel="stylesheet" href="../static/css/graphgoo_homepage.css">
+
+</head>
+<body>
+
+<!-- MENU -->
+<div class="navbar custom-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+        <!-- NAVBAR HEADER -->
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+            <!-- lOGO -->
+            <a href="#" class="navbar-brand">DaGoo!</a>
+        </div>
+
+        <!-- MENU LINKS -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/graphgoo_home" class="smoothScroll">Home</a></li>
+                <li><a href="/products" class="smoothScroll">Products</a></li>
+                <li><a href="#" class="smoothScroll">Contact us</a></li>
+                <li>
+                    <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
+                </li>
+                {% if user %}
+                    <li class="user_img"><a class="page-scroll" href="/user/">
+                        <div class="to3" style="margin-top: -10px;">
+                            <div class="to2">
+                                <div class="to1">
+                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    </li>
+                    <li><a href="/login/" class="page-scroll">Quit</a></li>
+                {% else %}
+                    <li>
+                        <a href="/login/" class="">Log in/Sign up</a>
+                    </li>
+                {% endif %}
+                {% if user %}
+                    {% if user.permission==100 %}
+                        <li>
+                            <a href="/admin/?manager={{ user.username }}" class="">manage</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            {% if user %}
+                <script>
+
+                    var permi = '' +{{ user.permission }};
+                    switch (permi) {
+                        case "1":
+                            $('.to3').css('background-color', '#aac4bc');
+                            break;
+                        case "2":
+                            $('.to3').css('background-color', '#ae853b');
+                            break;
+                        case "3":
+                            $('.to3').css('background-color', '#dfdc5d');
+                            break;
+                        case "100":
+                            $('.to3').css('background-color', '#ede4b8');
+                            break;
+                        default:
+                            $('.to3').css('background-color', 'white');
+                    }
+                </script>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<!--- ---->
+<section id="graph_layout2d" class="parallax-section">
+	<div class="container">
+        <div class="row" id="radial_layout">
+
+        </div>
+  </div>
+</section>
+
+<div class="getdata">
+    <ul id="graph_nodes">
+        {% for item in nodes %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    <ul id="graph_matrix">
+        {% for item in matrix %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- SCRIPTS -->
+<script src="../static/js/jquery.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/js/jquery.parallax.js"></script>
+<script src="../static/js/modernizr.custom.js"></script>
+<script src="../static/js/smoothscroll.js"></script>
+<script src="../static/js/main.js"></script>
+<script src="../static/js/custom.js"></script>
+<script src="../static/js/d3.v3.min.js"></script>
+<script src="../static/js/circleGraph.js"></script>
+<!--radial layout-->
+<script>
+    function generate_nondirected_tree(graph_matrix,root){
+
+        if(root==-1){
+            var root_num=-1;//表示根节点
+            var max_out_edge_nums=0;
+            for(var i=0;i<graph_matrix.length;i++){//按行访问，取最多边的节点作为根节点
+                var out_nums=0;
+             for(var j=i+1;j<graph_matrix[i].length;j++)//对该列的每一行数据都进行判断，判断该节点是否有入边
+             {
+                 if(!isNaN(graph_matrix[i][j]))
+                 {
+                     out_nums++;
+                 }
+             }
+                 if(max_out_edge_nums<out_nums)
+                 {
+                     max_out_edge_nums=out_nums;
+                     root_num=i;
+                 }
+            }
+            if(root_num==-1)
+            {return 0;}
+            else
+            {
+return generate_nondirected_tree(graph_matrix,root_num);
+            }
+        }
+        else{
+            var children=[];
+        for(var i=root+1;i<graph_matrix[root].length;i++)
+            if(!isNaN(graph_matrix[root][i])){
+                var child=generate_nondirected_tree(graph_matrix,i);
+                children.push(child);
+                    }
+                    var this_child={};
+            this_child['children']=children;
+            this_child['name']=nodes[root];
+                    return this_child;
+        }
+    }
+    var nodes = new Array();
+    arr = document.getElementById("graph_nodes").getElementsByTagName('li');
+    for (i = 0; i < arr.length; i++) {
+        nodes.push(arr[i].innerHTML);
+    }
+    var graph_matrix = new Array();
+    var arr = document.getElementById('graph_matrix').getElementsByTagName('li');
+    var temp = [];
+    for (i = 0; i < arr.length; i++) {
+        temp.push(arr[i].innerHTML)
+    }
+    for (i = 0; i < temp.length; i++) {
+        var temp1 = temp[i].replace('[', '');
+        var temp2 = temp1.replace(']', '');
+        var temp3 = temp2.split(",");
+        var numArray = temp3.map((value) => {
+            return parseFloat(value);
+        });
+        graph_matrix.push(numArray)
+    }
+    var line_width=6;
+    var svg_wdith=600;
+    var svg_height=600;
+    var circle_r=10;//cirlce 半径
+var diameter = 960;
+var pre_name="http://dbpedia.org/ontology/"//这个还是要根据用户的csv确定的
+var tree = d3.layout.tree()
+  .size([360, diameter / 2])
+  .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+
+var svg = d3.select("#radial_layout").append("svg")
+  .attr('viewBox', -diameter/2 + " " + (-diameter/2) + " " + diameter + " " + diameter)
+    .attr('background','white')//---------------------------------可能这个地方不能用background
+    .attr('width',svg_wdith)
+    .attr('height',svg_height);
+
+var zoomable_layer = svg.append('g');
+
+///*
+ zoom = d3.behavior.zoom()
+  .scaleExtent([0,4])
+  .on('zoom', function() {
+    zoomable_layer
+      .attr('transform', "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")");
+  });
+
+svg.call(zoom);
+//*/
+
+var bundle = d3.layout.bundle();
+
+var line = d3.svg.line.radial()
+    .interpolate("bundle")
+    .tension(0.85)
+    .radius(function(d) { return distanceFromZero(d); })
+    .angle(function(d) { return d.x / 180 * Math.PI; });
+
+function distanceFromZero(d) {
+    if (d.depth === 0)
+        return 0;
+    else
+        return (d.y * (1 / Math.sqrt(d.depth)) * 2)/2;
+}
+var graph={};
+var radial_nodes=new Array();
+var radial_links=new Array();
+for(var i=0;i<nodes.length;i++)
+    {
+var node={};
+node['name']=nodes[i];
+node['id']=i;
+radial_nodes.push(node);
+    }
+graph['nodes']=radial_nodes;
+for(var i=0;i<graph_matrix.length;i++)
+for(var j=i+1;j<graph_matrix[i].length;j++)
+    if(!isNaN(graph_matrix[i][j])){
+        var link={};
+        link['source']=i;
+        link['target']=j;
+        link['size']=graph_matrix[i][j];
+        radial_links.push(link);
+    }
+graph['links']=radial_links;
+var root=generate_nondirected_tree(graph_matrix,-1);
+    nodeID2Label = {};
+    graph.nodes.forEach(function(d) {
+      nodeID2Label[d.id] = d.name;
+    });
+
+    var nodes = tree.nodes(root);
+    var node = zoomable_layer.selectAll(".node")
+        .data(nodes)
+      .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + distanceFromZero(d) + ")"; });
+
+    node.append("circle")
+      .attr("r", circle_r)
+        .attr('fill','red');
+
+    node.append("title")
+      .text(function(d) { return d.name; });
+
+    for (i = 0; i < graph.links.length; i++) {
+      for (j = 0; j < nodes.length; j++) {
+        var weighted_name=nodes[j].name//.replace(pre_name, "")//在weighted_ontology.json里面的节点的name
+        if (nodeID2Label[graph.links[i].source] == weighted_name) {
+          graph.links[i].source = nodes[j];
+        }
+
+        if (nodeID2Label[graph.links[i].target] == weighted_name)
+          graph.links[i].target = nodes[j];
+      }
+    }
+
+    var links = tree.links(nodes);
+    var link = zoomable_layer.selectAll(".link")
+        .data(bundle(graph.links))
+      .enter().insert("path", ".node")
+        .attr("class", "link")
+        .attr("stroke-width", line_width)
+        .attr("d", line)
+    .attr('stroke', '#CCC')
+        .on("mouseover",function(d){
+     d3.select(this) //在传给任何D3方法的匿名函数中，如果想操作当前元素，只要引用this就行
+       .transition(300)
+       .attr("stroke","orange")
+         .append("text")
+    .text(function(d){
+        console.log(d[0].name);
+        return d[0].name+ " -> " + d[1].name;
+    })
+   })
+       .on("mouseout",function(d){
+          d3.select(this)
+            .transition(300)
+            .attr("stroke",'#CCC');
+  });
+
+
+
+//d3.select(self.frameElement).style("height", diameter + "px");
+
+    function generate_directed_tree(graph_matrix,root){
+        if(root==-1){
+            for(var i=0;i<graph_matrix[0].length;i++){//按列访问
+                var root_num=-1;//表示根节点
+                var is_root=true;
+             for(var j=0;j<graph_matrix.length;j++)//对该列的每一行数据都进行判断，判断该节点是否有入边
+                 if(!isNaN(graph_matrix[j][i]))
+                 {
+                     is_root=false;
+                     break;
+                 }
+                 if(is_root)
+                     root_num=i;
+            }
+            if(root_num==-1)
+            {return 0;}
+            else
+            {
+var this_child={};
+this_child['children']=generate_tree(graph_matrix,root_num);
+this_child['name']=nodes['root_num'];
+return this_child;
+            }
+        }
+        else{
+            var children=[];
+        for(var i=0;i<graph_matrix[root].length;i++)
+            if(!isNaN(graph_matrix[root][i])){
+                if(root==i)
+                    continue;//对于自反，需要去除掉
+                var child=generate_tree(graph_matrix,i);
+                children.push(child);
+                    }
+                    var this_child={};
+            this_child['children']=children;
+            this_child['name']=nodes[root];
+                    return this_child;
+        }
+    }
+</script>
+</body>
+</html>

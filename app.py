@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 import os,shutil
 import smtplib
 import csv
-# from model import user, db, login, mailconfirm, methoduse
+from model import user, db, login, mailconfirm, methoduse
 import os, shutil
 import smtplib
 from email.mime.text import MIMEText
@@ -13,7 +13,7 @@ import ast
 import numpy as np
 import pandas as pd
 import copy
-from flask import Flask, request, json, redirect, render_template, url_for, flash, session, g, jsonify
+from flask import Flask, request, json, redirect, render_template, url_for, flash, session, g, jsonify, current_app
 from statistics import Statistics
 from projection import ProjectionWay
 from cluster import ClusterWay, EvaluationWay
@@ -46,14 +46,14 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 # 设定session的保存时间，当session.permanent=True的时候
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-
+app.config['NODES'] = []
+app.config['MATRIX'] = []
 
 global final_data_object
 final_data_object = {}
 global text_object
 text_object={}
-global graph_object
-graph_object = {}
+
 
 def data_list_to_dictionary(list_key, list_value):
     if len(list_key) != len(list_value):
@@ -189,16 +189,6 @@ def create_differ_type_data(fea_list, da_list, type):
 @app.route('/')
 @app.route('/index')
 def index():
-    global final_data_object
-    # initialization
-    final_data_object = {}
-
-    data_list = pd.read_csv('./examples/test.csv', encoding='gbk')
-    feature_list = data_list.columns
-    feature_list = feature_list.tolist()
-    data_list = np.array(data_list).tolist()
-    create_differ_type_data(feature_list, data_list, 0)
-
     if session.get('email'):
         email=session.get('email')
         user1=user.query.filter_by(email=email).first()
@@ -214,13 +204,8 @@ def user_login():
     return render_template('login.html')
 
 
-@app.route('/master/',methods=['GET','POST'])
-def master():
-    return render_template('master.html')
-
-
 # 验证密码
-@app.route('/login/pass/', methods=['GET','POST'])
+@app.route('/login/pass/', methods=['GET', 'POST'])
 def login_pass():
     # 添加数据到session中
     data = request.get_json('data')
@@ -304,23 +289,25 @@ def mycopyfile(srcfile, dstfile):
 def login_signup():
     data = request.get_json('data')
     email = data['email']
-    cur_dir = ".\\static\\user"
+    cur_dir = "./static/user"
     if os.path.isdir(cur_dir):
-        os.makedirs('.\\static\\user\\' + email)
-        cur_dir = cur_dir + "\\" + email
-        print(cur_dir, "\\img")
-        os.makedirs(cur_dir + "\\img")
-        os.makedirs(cur_dir + "\\code")
-        os.makedirs(cur_dir + "\\report")
-        os.makedirs(cur_dir + "\\olddata")
-        cur_dir = cur_dir + "\\code"
-        os.makedirs(cur_dir + "\\Clean")
-        os.makedirs(cur_dir + "\\Statistic")
-        os.makedirs(cur_dir + "\\Mining")
-        os.makedirs(cur_dir + "\\Visualiztion")
-        srcfile = 'static\\user\\service\\img\\user_img.jpg'
-        dstfiel = 'static\\user\\' + email + '\\img\\user_img.jpg'
+        os.makedirs('./static/user/' + email)
+        cur_dir = cur_dir + "/" + email
+        print(cur_dir, "/img")
+        os.makedirs(cur_dir + "/img")
+        os.makedirs(cur_dir + "/code")
+        os.makedirs(cur_dir + "/report")
+        os.makedirs(cur_dir + "/olddata")
+        cur_dir = cur_dir + "/code"
+        os.makedirs(cur_dir + "/Clean")
+        os.makedirs(cur_dir + "/Statistic")
+        os.makedirs(cur_dir + "/Mining")
+        os.makedirs(cur_dir + "/Visualiztion")
+        srcfile = 'static/user/service/img/user_img.jpg'
+        dstfiel = 'static/user/' + email + '/img/user_img.jpg'
         mycopyfile(srcfile, dstfiel)
+    else:
+        return "error"
     verify = data['verify']
     confirm1 = mailconfirm.query.filter_by(email=email, num=verify).first()
     if confirm1 is not None and confirm1.invalid > datetime.now():  # 首先看验证码是否正确
@@ -411,7 +398,7 @@ def user_user():
         user1 = user.query.filter_by(email=email).first()
         if user1 is not None:
             email = user1.email
-            cur_dir = '.\\static\\user\\' + email
+            cur_dir = './static/user/' + email
             print(cur_dir)
             if os.path.exists(cur_dir):
                 return render_template('user/user.html', user=user1)
@@ -458,7 +445,7 @@ def user_change():
 def user_change_img():
     file = request.files['file']
     if file and allowed_file(file.filename):
-        old_file = 'static\\user\\' + session.get('email') + '\\img\\user_img.jpg'
+        old_file = 'static/user/' + session.get('email') + '/img/user_img.jpg'
         if os.path.exists(old_file):
             os.remove(old_file)
         file.save(old_file)
@@ -479,6 +466,31 @@ def admin_id(id):
     id = id.replace('>', '')
     return render_template('admin/' + id + '.html')
 
+
+#product master begin
+@app.route('/master/', methods=['GET', 'POST'])
+def master():
+    return render_template('master/master.html')
+
+
+@app.route('/master/index/', methods=['GET', 'POST'])
+def master_index():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('master/masterindex.html', user=user1)
+    else:
+        return render_template('master/masterindex.html')
+
+
+@app.route('/master/<id>', methods=['GET', 'POST'])
+def master_id(id):
+    id = id.replace('<', '')
+    id = id.replace('>', '')
+    return render_template('master/masterproduct.html', mode=id)
+#product master end
 
 # 地图方法begin
 # 进入地图的index界面
@@ -674,9 +686,10 @@ def text_home():
 @app.route('/data_workshop', methods=['GET', 'POST'])
 def data_workshop():
     global final_data_object
+    final_data_object = {}
     if request.method == 'POST':
         # initialization
-        final_data_object = {}
+
         # get json data
         json_data = request.form.get('json_data')
         temp = json.loads(json_data)
@@ -688,7 +701,36 @@ def data_workshop():
         clean_flag = jsonify(clean_flag)
         return clean_flag
     else:
-        return render_template('datagoo_homepage.html')
+        data_list = pd.read_csv('./examples/car.csv')
+        feature_list = data_list.columns
+        feature_list = feature_list.tolist()
+        data_list = np.array(data_list).tolist()
+        create_differ_type_data(feature_list, data_list, 0)
+        return render_template('tablegoo_homepage.html',
+                               features_dictionary=final_data_object['features_dictionary'],
+                               no_identifiers_data_list=final_data_object['no_identifiers_data_list'],
+                               no_identifiers_data_list_transform=final_data_object[
+                                   'no_identifiers_data_list_transform'],
+                               no_identifiers_data_dictionary=final_data_object['no_identifiers_data_dictionary'],
+                               data_dictionary=final_data_object['data_dictionary'],
+                               data_list=final_data_object['data_list'],
+                               mean=final_data_object['statistics_data']['mean'],
+                               median=final_data_object['statistics_data']['median'],
+                               mode=final_data_object['statistics_data']['mode'],
+                               min=final_data_object['statistics_data']['min'],
+                               max=final_data_object['statistics_data']['max'],
+                               var=final_data_object['statistics_data']['var'],
+                               corr=final_data_object['statistics_data']['corr'],
+                               features_list=final_data_object['features_list'][1:],
+
+                               cluster_embedding_data=final_data_object['cluster_embedding_data'],
+                               n_clusters=final_data_object['n_clusters'],
+                               cluster_method=final_data_object['cluster_method'],
+                               embedding_method=final_data_object['embedding_method'],
+                               attributions_analysis_data=final_data_object['attributions_analysis_data'],
+                               anomaly_detection_data=final_data_object['anomaly_detection_data'],
+                               regression_data=final_data_object['regression_data'],
+                               visualization_method=final_data_object['visualization_method'])
 
 
 @app.route('/home')
@@ -959,13 +1001,13 @@ def User_code():
     global upload_path
     if request.method == 'POST':
         f = request.files['file']
-        #basepath = os.path.dirname(__file__) + '\\static\\user\\' + session.get('email') + "\\user_code"  # 文件所要放入的路径
+        #basepath = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/user_code"  # 文件所要放入的路径
         basepath = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')# upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if (request.form.get('label') == 'zip'):
             filename = os.path.join(basepath,'User_embedding.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
             # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
-            f.save(basepath + '\\User_embedding.zip')
+            f.save(basepath + '/User_embedding.zip')
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
                 # print(file)  # 打印zip归档中目录
@@ -993,7 +1035,7 @@ def User_code():
 def User_method():
     #run user's embedding way
     current_path = os.getcwd()
-    # os.chdir(os.path.dirname(__file__)+'\\static\\user\\'+session.get('email')+"\\user_code")  # 切换成用户代码的路径
+    # os.chdir(os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code")  # 切换成用户代码的路径
     target_url = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
     os.chdir(target_url)
     draw_id = str(request.get_json()['draw_id'])
@@ -1041,16 +1083,16 @@ def cluster_code():
     if request.method == 'POST':
         f = request.files['file']
         #1361377791@qq.com
-        #basepath = os.path.dirname(__file__)+'\\static\\user\\'+session.get('email')+"\\user_code"
+        #basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
         #  文件所要放入的路径
-        basepath = os.path.join("/home/ubuntu/dagoo",'static','user','1361377791@qq.com','user_code') #+ '\\static\\user\\1361377791@qq.com\\user_code'  # 文件所要放入的路径
+        basepath = os.path.join("/home/ubuntu/dagoo",'static','user','1361377791@qq.com','user_code') #+ '/static/user/1361377791@qq.com/user_code'  # 文件所要放入的路径
 
         #upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if(request.form.get('label')=='zip'):
             filename =  os.path.join(basepath,'User_cluster.zip')  # 要解压的文件
             filedir =basepath   # 解压后放入的目录
             #如果他是压缩文件，就对它进行解压，不是的话就不进行操作
-            f.save(basepath + '\\User_cluster.zip')
+            f.save(basepath + '/User_cluster.zip')
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
                 #print(file)  # 打印zip归档中目录
@@ -1081,7 +1123,7 @@ def cluster_code():
 def User_cluster():
     # 首先修改当前的工作路径，执行完程序后改回原来的工作路径
     current_path = os.getcwd()
-    #os.chdir(os.path.dirname(__file__)+'\\static\\user\\'+session.get('email')+"\\user_code")  # 切换成用户代码的路径
+    #os.chdir(os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code")  # 切换成用户代码的路径
     target_url=os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
     os.chdir(target_url)
     draw_id = str(request.get_json()['draw_id'])
@@ -1171,7 +1213,7 @@ def OCR():
     if request.method == 'POST':
         f = request.files['file']
         filename=f.filename
-        base_path = os.path.dirname(__file__) + '\\static\\user\\' + session.get('email') + "\\img"# 当前文件所在路径
+        base_path = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
         upload_path = os.path.join(base_path, '', secure_filename(filename))
         f.save(upload_path)
         #C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
@@ -1196,7 +1238,7 @@ def OCR():
 def picture_OCR():
     if request.method == 'POST':
         f = request.files['image']
-        base_path = os.path.dirname(__file__)#os.path.dirname(__file__) + '\\static\\user\\' + session.get('email') + "\\img"# 当前文件所在路径
+        base_path = os.path.dirname(__file__)#os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
         upload_path = os.path.join(base_path, '', secure_filename('temp.jpg'))
         f.save(upload_path)
         #C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
@@ -1208,17 +1250,14 @@ def picture_OCR():
 
 @app.route('/graphgoo', methods=['POST', 'GET'])
 def graphgoo():
-    global graph_object
     if request.method == 'POST':
-        graph_object = {}
+        graph_nodes = []
+        graph_matrix = []
         json_data = request.form.get('json_data')
         temp = json.loads(json_data)
         del temp[0]
-        graph_nodes = []
-        graph_matrix = []
+        del temp[-1]
         for temp_list in temp:
-            if not temp_list[0]:
-                continue
             graph_nodes.append(temp_list[0])
             del temp_list[0]
             row = []
@@ -1226,53 +1265,266 @@ def graphgoo():
                 try:
                     t = ast.literal_eval(str)
                 except:
-                    t = 'o'
+                    t = 'NaN'
                 finally:
                     row.append(t)
             graph_matrix.append(row)
-        graph_object['nodes'] = graph_nodes
-        graph_object['matrix'] = graph_matrix
+        current_app.config.update(
+            NODES = graph_nodes,
+            MATRIX = graph_matrix
+        )
         return jsonify(True)
     else:
-        graph_object = {}
-        csv_reader = csv.reader(open('./examples/graph.csv'))
-        graph_nodes = []
-        graph_matrix = []
-        for temp_list in csv_reader:
-            if not temp_list[0]:
+        data_list = pd.read_csv('./examples/graph.csv')
+        graph_nodes = data_list.columns
+        graph_nodes = graph_nodes.tolist()
+        graph_matrix = np.array(data_list).tolist()
+        del graph_nodes[0]
+        for temp_list in range(len(graph_nodes)):
+            if not graph_matrix[0]:
                 continue
-            graph_nodes.append(temp_list[0])
-            del temp_list[0]
-            row = []
-            for str in temp_list:
-                try:
-                    t = ast.literal_eval(str)
-                except:
-                    t = 'o'
-                finally:
-                    row.append(t)
-            graph_matrix.append(row)
-        graph_object['nodes'] = graph_nodes
-        graph_object['matrix'] = graph_matrix
-        return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
+            del graph_matrix[temp_list][0]
+        current_app.config.update(
+            NODES=graph_nodes,
+            MATRIX=graph_matrix
+        )
+        return render_template('graphgoo_homepage.html')
 
 
 @app.route('/graphgoo_home')
 def graphgoo_home():
-    global graph_object
-    return render_template('graphgoo_homepage.html', nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
+    return render_template('graphgoo_homepage.html')
 
 
 @app.route('/graph_layout2d/<layout>')
 def graph_layout2d(layout):
-    global graph_object
+    graph_nodes = current_app.config['NODES']
+    graph_matrix = current_app.config['MATRIX']
     html = 'graph_layout2d/' + layout + '_layout2d.html'
-    return render_template(html, nodes=graph_object['nodes'],
-                           matrix=graph_object['matrix'])
+    return render_template(html, nodes=graph_nodes, matrix=graph_matrix)
+
+
+@app.route('/streaming_data', methods=['GET', 'POST'])
+def streaming_data():
+    global time_data_object
+    time_data_object = {}
+    final_data = csv.reader(open('./static/data/streaming_data/data1.csv'))
+    year = []
+    num = []
+    values = []
+    for i in final_data:
+        if (len(i) == 0):
+            break
+        year.append(int(i[0]))
+        num.append(float(i[1]))
+        values.append(float(i[2]))
+    time_data_object = {}
+    time_data_object['year'] = year
+    time_data_object['num'] = num
+    time_data_object['values'] = values
+    return render_template('time.html', attr=final_data_object)
+
+
+@app.route('/time_upload', methods=['GET', 'POST'])
+def time_upload():
+    global time_data_object
+    time_data_object = {}
+    if request.method == 'POST':
+        time_data_object = {}
+        json_data = request.form.get('json_data')
+        final_data = json.loads(json_data)
+        features_list = final_data[0]
+        for feature in features_list:
+            time_data_object[feature] = []
+        del final_data[0]
+        for i in range(len(final_data) - 1):
+            if (len(final_data[i]) != len(final_data[i])):
+                return 'error!exist none'
+        for i in range(len(final_data)):
+            if (len(final_data[i]) == 0):
+                break
+            if '' in final_data[i]:
+                continue
+            for j in range(len(final_data[i])):  # 对每一行都进行数据提取
+                time_data_object[features_list[j]].append(float(final_data[i][j]))
+        themeriver_data = []
+        for item in range(len(time_data_object['year'])):
+            year = time_data_object['year'][item]
+            for feature in time_data_object.keys():
+                if feature != 'year':
+                    feature_data = float(time_data_object[feature][item])
+                    data = [year, feature_data, feature]
+                    themeriver_data.append(data)
+        themeriver = {}
+        themeriver['data'] = themeriver_data
+        themeriver_features = []
+        features = time_data_object.keys()
+        for feature in features:
+            if feature != 'year':
+                themeriver_features.append(feature)
+        themeriver['features'] = themeriver_features
+        return jsonify(themeriver)
+
+
+@app.route('/time/ex/', methods=['POST', 'GET'])
+def Exponential_smoothing():
+    # global time_data_object
+    if request.method == 'POST':
+        alpha = .70  # 设置alphe，即平滑系数
+        year = time_data_object['year']
+        attribution = request.get_json()['attribution']
+        if attribution is not None:
+            number = time_data_object[attribution]
+        else:
+            number = time_data_object['values']
+        data = []
+        for i in range(len(time_data_object['year'])):
+            data_i = [year[i], number[i]]
+            data.append(data_i)
+        for i in range(len(year)):
+            abcyear = int(year[i])
+        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+        initial_line = np.array(
+            [0, number[0]])  # 初始化，由于平滑指数是根据上一期的数值进行预测的，原始数据中的最早数据为1995，没有1994年的数据，这里定义1994年的数据和1995年数据相同
+        initial_data = np.insert(data, 0, values=initial_line, axis=0)  # 插入初始化数据
+        initial_year, initial_number = initial_data.T  # 插入初始化年
+        s_single = np.zeros(initial_number.shape)
+        s_single[0] = initial_number[0]
+        for i in range(1, len(s_single)):
+            s_single[i] = alpha * initial_number[i] + (1 - alpha) * s_single[i - 1]
+        s_double = np.zeros(s_single.shape)
+        s_double[0] = s_single[0]
+        for i in range(1, len(s_double)):
+            s_double[i] = alpha * s_single[i] + (1 - alpha) * s_double[
+                i - 1]  # 计算二次平滑字数，二次平滑指数是在一次指数平滑的基础上进行的，三次指数平滑以此类推
+
+        a_double = 2 * s_single - s_double  # 计算二次指数平滑的a
+        b_double = (alpha / (1 - alpha)) * (s_single - s_double)  # 计算二次指数平滑的b
+        s_pre_double = np.zeros(s_double.shape)  # 建立预测轴
+        for i in range(1, len(initial_year)):
+            s_pre_double[i] = a_double[i - 1] + b_double[i - 1]  # 循环计算每一年的二次指数平滑法的预测值，下面三次指数平滑法原理相同
+        pre_next_year = a_double[-1] + b_double[-1] * 1  # 预测下一年
+        pre_next_two_year = a_double[-1] + b_double[-1] * 2  # 预测下两年
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_double = np.insert(s_pre_double, len(s_pre_double), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)  # 组合预测值
+        s_triple = np.zeros(s_double.shape)
+        s_triple[0] = s_double[0]
+        for i in range(1, len(s_triple)):
+            s_triple[i] = alpha * s_double[i] + (1 - alpha) * s_triple[i - 1]
+
+        a_triple = 3 * s_single - 3 * s_double + s_triple
+        b_triple = (alpha / (2 * ((1 - alpha) ** 2))) * (
+                (6 - 5 * alpha) * s_single - 2 * ((5 - 4 * alpha) * s_double) + (4 - 3 * alpha) * s_triple)
+        c_triple = ((alpha ** 2) / (2 * ((1 - alpha) ** 2))) * (s_single - 2 * s_double + s_triple)
+
+        s_pre_triple = np.zeros(s_triple.shape)
+
+        for i in range(1, len(initial_year)):
+            s_pre_triple[i] = a_triple[i - 1] + b_triple[i - 1] * 1 + c_triple[i - 1] * (1 ** 2)
+
+        pre_next_year = a_triple[-1] + b_triple[-1] * 1 + c_triple[-1] * (1 ** 2)
+        pre_next_two_year = a_triple[-1] + b_triple[-1] * 2 + c_triple[-1] * (2 ** 2)
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_triple = np.insert(s_pre_triple, len(s_pre_triple), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)
+
+        new_year = np.insert(year, len(year), values=pre_year, axis=0)
+        output = np.array([new_year, s_pre_double, s_pre_triple])
+        result = []
+        for a in range(1, len(new_year)):
+            result.append(str(new_year[a]))
+            result.append(str(s_pre_triple[a]))
+        re_result = ':'.join(result)
+        return re_result
+
+
+@app.route('/time/ar/', methods=['POST', 'GET'])
+def Arithmetic_averaging():
+    if request.method == 'POST':
+        # data = np.loadtxt(r'./static/data1.txt')#用numpy读取数据
+        # year, time_id, number = data.T#将数据分别赋值给year, time_id, number
+
+        year = time_data_object['year']
+        attribution = request.get_json()['attribution']
+        if attribution is not None:
+            number = np.array(time_data_object[attribution])
+        else:
+            number = time_data_object['values']
+        data = []
+        for i in range(len(time_data_object['year'])):
+            data_i = [year[i], number[i]]
+            data.append(data_i)
+        for i in range(len(year)):
+            abcyear = year[i]
+        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+        s_single = np.zeros(number.shape)
+        s_single[0] = number[0]
+        for i in range(1, len(s_single)):
+            s_single[i] = sum(number[:i]) / i
+        # 计算一次平滑
+        s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
+        pre_next_year = sum(number[:]) / len(number)  # 预测下一年
+        pre_next_two_year = (sum(number[:]) + pre_next_year) / (len(number) + 1)  # 预测下两年
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)  # 组合预测值
+        new_year = np.insert(year, len(year), values=pre_year, axis=0)
+        result = []
+        for a in range(1, len(new_year)):
+            result.append(str(new_year[a]))
+            result.append(str(s_pre_single[a]))
+        re_result = ':'.join(result)
+        return re_result
+
+
+def simplle_smoothing(s):
+    s2 = np.zeros(s.shape)
+    s2[0:5] = s[0:5]
+    for i in range(5, len(s2)):
+        s2[i] = sum(s[i - 5:i]) / 5
+    return s2
+
+
+@app.route('/time/mo/', methods=['POST', 'GET'])
+def Moving_averaging():
+    if request.method == 'POST':
+        year = time_data_object['year']
+        attribution = request.get_json()['attribution']
+        if attribution is not None:
+            number = np.array(time_data_object[attribution])
+        else:
+            number = time_data_object['values']
+        data = []
+        for i in range(len(time_data_object['year'])):
+            data_i = [year[i], number[i]]
+            data.append(data_i)
+        for i in range(len(year)):
+            abcyear = year[i]
+        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+        s_single = np.zeros(number.shape)
+        s_single[0:5] = number[0:5]
+        for i in range(5, len(s_single)):
+            s_single[i] = sum(number[i - 5:i]) / 5
+        # 计算一次平滑
+        s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
+        yearnumbertotal = len(year)
+        select = yearnumbertotal - 5
+        select1 = yearnumbertotal - 4
+        pre_next_year = sum(number[select:]) / 5  # 预测下一年
+        pre_next_two_year = (sum(number[select1:]) + pre_next_year) / 5  # 预测下两年
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)  # 组合预测值
+        new_year = np.insert(year, len(year), values=pre_year, axis=0)
+        result = []
+        for a in range(1, len(new_year)):
+            result.append(str(new_year[a]))
+            result.append(str(s_pre_single[a]))
+        re_result = ':'.join(result)
+        return re_result
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
 

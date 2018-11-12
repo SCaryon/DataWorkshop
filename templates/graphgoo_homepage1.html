@@ -99,98 +99,95 @@
         </h1>
     </div>
 	<div class="container">
-        <div class="row" style="text-align: center">
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+        <div class="row">
+            <div class="col-lg-2">
                 <h5>
                     Circular Layout
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='circular') }}"><img src="../static/img/circular2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2">
                 <h5>
                     Chord Diagram
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='chord') }}"><img src="../static/img/chord2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2">
                 <h5>
                     Tree Layout
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='tree') }}"><img src="../static/img/tree2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width:14%;height: 300px;">
-                <h5>
-                    Pack Layout
-                </h5>
-                <a href="{{ url_for('graph_layout2d', layout='pack') }}"><img src="../static/img/pack2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2">
                 <h5>
                     Radial layout
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='radial') }}"><img src="../static/img/radial2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2">
                 <h5>
                     Grid Layout
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='grid') }}"><img src="../static/img/grid2d.html" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2">
                 <h5>
                     Hierarchical Layout
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='hierarchical') }}"><img src="../static/img/hierarchical2d.html" style="width: 150px;height: 150px;"></a>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-2">
+                <h5>
+                    Pack Layout
+                </h5>
+                <a href="{{ url_for('graph_layout2d', layout='pack') }}"><img src="../static/img/pack2d.PNG" style="width: 150px;height: 150px;"></a>
+            </div>
+            <div class="col-lg-2">
+                <h5>
+                    Dagre Layout
+                </h5>
+                <a href=""><img src="" style="width: 150px;height: 150px;"></a>
+            </div>
+            <div class="col-lg-2">
+                <h5>
+                    Layout
+                </h5>
+                <a href=""><img src="" style="width: 150px;height: 150px;"></a>
+            </div>
+            <div class="col-lg-2">
+                <h5>
+                    Layout
+                </h5>
+                <a href=""><img src="" style="width: 150px;height: 150px;"></a>
+            </div>
+            <div class="col-lg-2">
+                <h5>
+                    Layout
+                </h5>
+                <a href="#"><img src="" style="width: 150px;height: 150px;"></a>
+            </div>
+            <div class="col-lg-2">
+                <h5>
+                    Layout
+                </h5>
+                <a href="#"><img src="" style="width: 150px;height: 150px;"></a>
+            </div>
+        </div>
+        <div class="row" id="circular_layout">
+        </div>
   </div>
-
 </section>
-
-<div class="getdata">
-    <ul id="graph_nodes">
-        {% for item in nodes %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="graph_matrix">
-        {% for item in matrix %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
-</div>
 
 <script src="../static/js/jquery.js"></script>
 <script src="../static/js/bootstrap.min.js"></script>
 <script src="../static/js/jquery.parallax.js"></script>
 <script src="../static/js/modernizr.custom.js"></script>
-<script src="../static/js/smoothscroll.js"></script>
+<script src="../static/js/SmoothScroll.js"></script>
 <script src="../static/js/main.js"></script>
 <script src="../static/js/custom.js"></script>
 <script src="../static/js/d3.v3.min.js"></script>
-<script>
-    nodes = new Array();
-    arr = document.getElementById("graph_nodes").getElementsByTagName('li');
-    temp = [];
-    for (i = 0; i < arr.length; i++) {
-        nodes.push(arr[i].innerHTML);
-    }
-    var graph_matrix = new Array();
-    arr = document.getElementById('graph_matrix').getElementsByTagName('li');
-    temp = [];
-    for (i = 0; i < arr.length; i++) {
-        temp.push(arr[i].innerHTML)
-    }
-    for (i = 0; i < temp.length; i++) {
-        temp1 = temp[i].replace('[', '');
-        temp2 = temp1.replace(']', '');
-        temp3 = temp2.split(",");
-        numArray = temp3.map((value) => {
-            return parseFloat(value);
-        });
-        graph_matrix.push(numArray)
-    }
-</script>
 
 </body>
 </html>
