@@ -694,7 +694,7 @@
 
                 var draw_count = (draw_counts[attr]).pop();
                 user_data[attr][draw_count] = array;
-                user_data_way[attr][draw_count]="way: "+options.val()+"<br>attribution: "+$('#attribution_selector option:selected').val();
+                user_data_way[attr][draw_count]="way: "+options.val()+"   attribution: "+$('#attribution_selector option:selected').val();
                 $("#attribution_" + attr).empty();//清空画布
                 draw_prediction(user_data[attr], user_data_way[attr],attr);
                 var selected_attribution=$('#attribution_selector option:selected').val().toString();
