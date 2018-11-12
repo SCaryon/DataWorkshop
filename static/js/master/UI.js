@@ -82,89 +82,6 @@ function UI() {
     });
 
 
-    /*下面是左边的选择展示模式的按钮的添加*/
-    // ring = true;
-    // buttons = [];
-    // divX = 45;
-    // divY = 60;
-    // step = 30;
-    // ring = false;
-    // buttons.push({
-    //     "id": "gridSphereButton",
-    //     "title": "全球视图",
-    //     "img": "images/master/icon/globe2.png",
-    //     "desc": "以3D球的形式,通过将出口额以点的形式放置在国家内来展示一个国家的出口量"
-    // });
-    // buttons.push({
-    //     "id": "gridButton",
-    //     "title": "地图视图",
-    //     "img": "images/master/icon/map2.png",
-    //     "desc": "以2D平面的形式,通过将出口额以点的形式放置在国家内来展示一个国家的出口量"
-    // });
-    // buttons.push({
-    //     "id": "towersButton",
-    //     "title": "堆积视图",
-    //     "img": "images/master/icon/stacks32.png",
-    //     "desc": "将一个国家的产品出口量堆叠在地图中来展示该国家的出口量,每行表示 $2.5B"
-    // });
-    // buttons.push({
-    //     "id": "productButton3",
-    //     "title": "3D产品空间",
-    //     "img": "images/master/icon/graph2.png",
-    //     "desc": "产品空间的3D版本,通过单击节点来跳转"
-    // });
-    // buttons.push({
-    //     "id": "productButton",
-    //     "title": "产品空间",
-    //     "img": "images/master/icon/graph22.png",
-    //     "desc": "显示其类别中的所有产品，排列在称为产品空间的相似性图表中。"
-    // });
-    // buttons.push({
-    //     "id": "productButton2",
-    //     "title": "产品堆积",
-    //     "img": "images/master/icon/stack2.png",
-    //     "desc": "按类别堆叠产品"
-    // });
-    // buttons.push({
-    //     "id": "groupButton",
-    //     "title": "分类展示",
-    //     "img": "images/master/icon/stack.png",
-    //     "desc": "按照产品类别将产品的分布分别展示"
-    // });
-    //
-    //
-    // newDiv = "<table>";
-    // for (var i = 0; i < buttons.length; i++) {
-    //     option = buttons[i];
-    //     option.rank = i;
-    //     angle = 0;
-    //     if (i % 2 == 0 && i > 0) {
-    //         newDiv += "</tr><tr>";
-    //     }
-    //     newDiv += "<td>" +
-    //         "<div class='modeSelector' style='-webkit-transform: rotateY(" + angle + "deg);" +
-    //         "transform: rotateY(" + angle + "deg);'id='" + option.id + "'>" +
-    //         "<img style='max-width:58px;margin: 0 auto;' src='/static/" + option.img + "'/>" +
-    //         "<div class='optionTitle'>" + option.title + "</div></div></td>";
-    // }
-    // newDiv += "</tr></table>";
-    //
-    // $("#visualizations").html(newDiv);
-    // $("#gridSphereButton").addClass("selectedMode");
-    // $("#visualizations").on("mouseover", ".modeSelector", function () {
-    //     for (var i = 0; i < buttons.length; i++) {
-    //         if (buttons[i].id === $(this).prop('id')) {
-    //             $("#modeDescription").show();
-    //             $("#modeDescription").html(buttons[i].desc);
-    //             offset = $(this).offset();
-    //             $("#modeDescription").css({'top': offset.top, 'left': '140px', 'z-index': '100'});
-    //         }
-    //     }
-    // });
-    // $("#visualizations").on("mouseout", ".modeSelector", function () {
-    //     $("#modeDescription").hide();
-    // });
-
     //改变整体色调
     $("#backgroundButton").click(function () {
         myThis.darkMode = !myThis.darkMode;
@@ -189,7 +106,7 @@ function UI() {
                 'background-color': 'rgba(0,0,0,0.8)'
             });
             $("#description,#choice,#beginExplore,#beginStory").css('color', 'white');
-            $("#storyline,#fullscreen,#showAbout,#showLabels,#contrastbutton,#backgroundButton,#selectcate,#selectcate_1").css({
+            $("#storyline,#fullscreen,#backhome,#showAbout,#showLabels,#contrastbutton,#backgroundButton,#selectcate,#selectcate_1").css({
                 'color': 'white',
                 'border-top': '1px solid #121314',
                 'border-bottom': '1px solid #121314'
@@ -199,7 +116,7 @@ function UI() {
                 'color': 'white'
             });
 
-            $("#storyline:hover,#fullscreen:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover,#selectcate:hover,#selectcate_1:hover").css('border-right', '2px solid #FFF')
+            $("#storyline:hover,#fullscreen:hover,#backhome:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover,#selectcate:hover,#selectcate_1:hover").css('border-right', '2px solid #FFF')
             $('.selectedMode').css('border', '1px solid white');
             $('#storyPrompt').css('background-color', 'rgba(0,0,0,0.4)');
             $('#productlabel').css({
@@ -237,7 +154,7 @@ function UI() {
                 'background-color': 'rgba(255,255,255,0.8)'
             });
             $("#description,#choice,#beginExplore,#beginStory").css('color', 'black');
-            $("#storyline,#fullscreen,#showAbout,#showLabels,#contrastbutton,#backgroundButton").css({
+            $("#storyline,#fullscreen,#backhome,#showAbout,#showLabels,#contrastbutton,#backgroundButton").css({
                 'color': 'black',
                 'border-top': '1px solid #000000',
                 'border-bottom': '1px solid #000000'
@@ -246,7 +163,7 @@ function UI() {
                 'background': 'rgba(255,255,255,0.8)',
                 'color': 'black'
             });
-            $("#storyline:hover,#fullscreen:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover").css('border-right', '2px solid #000');
+            $("#storyline:hover,#fullscreen:hover,#backhome:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover").css('border-right', '2px solid #000');
             $('.selectedMode').css('border', '1px solid black');
             $('#storyPrompt').css('background-color', 'rgba(255,255,255,0.4)');
             $('#productlabel').css({

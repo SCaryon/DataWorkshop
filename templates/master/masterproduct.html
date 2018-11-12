@@ -73,6 +73,7 @@
                 </div>
             </div>
             <div class="optionSeparator">&nbsp;</div>
+            <div id="backhome" onclick="window.location.href='/'">返回主页</div>
             <div id="showAbout">关于</div>
             <div id="fullscreen">全屏模式</div>
             {% if mode=="globmap" or mode=="planemap" or mode=="towermap" %}
@@ -164,6 +165,7 @@
 
 
 
+
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -174,6 +176,7 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
+
 
 
 
@@ -226,6 +229,7 @@
 
 
 
+
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -245,6 +249,7 @@
       gl_FragColor = vec4(color.xyz, opacity);
 
     }
+
 
 
 
