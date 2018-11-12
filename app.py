@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 import os,shutil
 import smtplib
 import csv
-from model import user, db, login, mailconfirm, methoduse
+#from model import user, db, login, mailconfirm, methoduse
 import os, shutil
 import smtplib
 from email.mime.text import MIMEText
@@ -30,13 +30,13 @@ import pytesseract
 #用于文字识别
 
 #用于执行c和java程序
-# from jpype import *
+from jpype import *
 from ctypes import *
 import platform
 #用于执行c和java程序
 
 #用于执行病毒查杀
-import pyclamd
+#import pyclamd
 
 
 app = Flask(__name__)
