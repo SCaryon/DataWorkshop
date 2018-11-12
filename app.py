@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 import os,shutil
 import smtplib
 import csv
-from model import user, db, login, mailconfirm, methoduse
+# from model import user, db, login, mailconfirm, methoduse
 import os, shutil
 import smtplib
 from email.mime.text import MIMEText
@@ -1301,7 +1301,7 @@ def graph_layout2d(layout):
     graph_nodes = current_app.config['NODES']
     graph_matrix = current_app.config['MATRIX']
     html = 'graph_layout2d/' + layout + '_layout2d.html'
-    return render_template(html, graph_nodes=graph_nodes, graph_matrix=graph_matrix)
+    return render_template(html, nodes=graph_nodes, matrix=graph_matrix)
 
 
 @app.route('/streaming_data', methods=['GET', 'POST'])
