@@ -1,42 +1,41 @@
-from datetime import timedelta, datetime
-import os,shutil
-import smtplib
-import csv
-from model import user, db, login, mailconfirm, methoduse
-import os, shutil
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.header import Header
-import random
 import ast
-import numpy as np
-import pandas as pd
 import copy
-from flask import Flask, request, json, redirect, render_template, url_for, flash, session, g, jsonify, current_app
-from statistics import Statistics
-from projection import ProjectionWay
-from cluster import ClusterWay, EvaluationWay
-from anomaly import AnonalyMethod
-from regression import fitSLR
+import csv
+import os
+import platform
+import random
+import shutil
+import smtplib
 import sys
-from io import StringIO
-from werkzeug.utils import secure_filename
 import zipfile
-
-#用于文字识别
-from PIL import Image
-import pytesseract
-#用于文字识别
-
-#用于执行c和java程序
+# 用于执行c和java程序
 # from jpype import *
 from ctypes import *
-import platform
-#用于执行c和java程序
+from datetime import timedelta, datetime
+from email.header import Header
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from io import StringIO
 
-#用于执行病毒查杀
+import numpy as np
+import pandas as pd
+# 用于执行病毒查杀
 import pyclamd
+import pytesseract
+# 用于文字识别
+from PIL import Image
+from flask import Flask, request, json, render_template, session, jsonify, current_app
+from werkzeug.utils import secure_filename
+
+from anomaly import AnonalyMethod
+from cluster import ClusterWay, EvaluationWay
+from model import user, db, login, mailconfirm
+from projection import ProjectionWay
+from regression import fitSLR
+from statistics import Statistics
+
+# 用于文字识别
+# 用于执行c和java程序
 
 
 app = Flask(__name__)
@@ -52,7 +51,7 @@ app.config['MATRIX'] = []
 global final_data_object
 final_data_object = {}
 global text_object
-text_object={}
+text_object = {}
 
 
 def data_list_to_dictionary(list_key, list_value):
@@ -179,7 +178,8 @@ def create_differ_type_data(fea_list, da_list, type):
         data_embedding[i].append(lll)
     final_data_object['attributions_analysis_data'] = data_embedding
 
-    final_data_object['anomaly_detection_data'] = AnonalyMethod.clfdetection(final_data_object['cluster_embedding_data'])
+    final_data_object['anomaly_detection_data'] = AnonalyMethod.clfdetection(
+        final_data_object['cluster_embedding_data'])
 
     final_data_object['visualization_method'] = 'Radviz'
 
@@ -190,8 +190,8 @@ def create_differ_type_data(fea_list, da_list, type):
 @app.route('/index')
 def index():
     if session.get('email'):
-        email=session.get('email')
-        user1=user.query.filter_by(email=email).first()
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
         print(user1)
         return render_template('datagoo_homepage.html', user=user1)
     else:
@@ -467,7 +467,7 @@ def admin_id(id):
     return render_template('admin/' + id + '.html')
 
 
-#product master begin
+# product master begin
 @app.route('/master/', methods=['GET', 'POST'])
 def master():
     return render_template('master/master.html')
@@ -490,7 +490,9 @@ def master_id(id):
     id = id.replace('<', '')
     id = id.replace('>', '')
     return render_template('master/masterproduct.html', mode=id)
-#product master end
+
+
+# product master end
 
 # 地图方法begin
 # 进入地图的index界面
@@ -501,7 +503,7 @@ def geo_index():
         user1 = user.query.filter_by(email=email).first()
         if user1 is None:
             return "false"
-        return render_template('geo_Index.html',user=user1)
+        return render_template('geo_Index.html', user=user1)
     else:
         return render_template('geo_Index.html')
 
@@ -569,7 +571,7 @@ def geo_admin_upload():
         return "false"
 
 
-#海量点分布
+# 海量点分布
 @app.route('/geo/points/', methods=['GET', 'POST'])
 def geo_points():
     global final_data_object
@@ -584,12 +586,12 @@ def geo_points():
             return render_template('geo_points.html')
     else:  # 读取默认的数据
         final_data = csv.reader(open('./static/user/service/olddata/geo_points.csv'))
-        point=[]
+        point = []
         for i in final_data:
-            dic=dict(zip(['longitude','latitude','value','name'],i))
+            dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
             point.append(dic)
         final_data_object = {}
-        final_data_object['points']=point
+        final_data_object['points'] = point
         if session.get('email'):
             email = session.get('email')
             user1 = user.query.filter_by(email=email).first()
@@ -601,19 +603,19 @@ def geo_points():
 
 
 # 读取用户上传的点数据
-@app.route('/geo/points/upload/',methods=['GET','POST'])
+@app.route('/geo/points/upload/', methods=['GET', 'POST'])
 def geo_points_upload():
     global final_data_object
     if request.method == 'POST':
         json_data = request.form.get('json_data')
         temp = json.loads(json_data)
         final_data = temp
-        point=[]
+        point = []
         for i in final_data:
-            dic=dict(zip(['longitude','latitude','value','name'],i))
+            dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
             point.append(dic)
-        final_data_object={}
-        final_data_object['points']=point
+        final_data_object = {}
+        final_data_object['points'] = point
         return 'true'
     else:
         return 'false'
@@ -787,7 +789,8 @@ def mining_cluster():
     labels = initial_labels.tolist()
     final_data_object['n_clusters'] = np.unique(labels).size
 
-    embedding = getattr(ProjectionWay(), final_data_object['embedding_method'])(final_data_object['no_identifiers_data_list'])
+    embedding = getattr(ProjectionWay(), final_data_object['embedding_method'])(
+        final_data_object['no_identifiers_data_list'])
     samples, features = embedding['data'].shape
     data_embedding = embedding['data'].tolist()
     for i in range(samples):
@@ -836,10 +839,11 @@ def mining_embedding():
     labels = initial_labels.tolist()
     final_data_object['n_clusters'] = np.unique(labels).size
 
-    print("before:",final_data_object['embedding_method'])
-    final_data_object['embedding_method']=request.get_json()['embedding_method']
-    print('after',final_data_object['embedding_method'])
-    embedding = getattr(ProjectionWay(), final_data_object['embedding_method'])(final_data_object['no_identifiers_data_list'])
+    print("before:", final_data_object['embedding_method'])
+    final_data_object['embedding_method'] = request.get_json()['embedding_method']
+    print('after', final_data_object['embedding_method'])
+    embedding = getattr(ProjectionWay(), final_data_object['embedding_method'])(
+        final_data_object['no_identifiers_data_list'])
     samples, features = embedding['data'].shape
     data_embedding = embedding['data'].tolist()
     for i in range(samples):
@@ -901,24 +905,24 @@ def cluster():
         return render_template('cluster_2.html')
 
 
-@app.route('/cluster/cluster_way',methods=['POST', 'GET'])
+@app.route('/cluster/cluster_way', methods=['POST', 'GET'])
 def cluster_way():
-    #run cluster way except user's way
+    # run cluster way except user's way
     parameters = {}
     draw_id = str(request.get_json()['draw_id'])
     body = 'page-top' + draw_id
     node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
     if request.get_json()['exist'] != 'none':
         for key in request.get_json():
-            if key!='cluster_method':#要保证参数数组里面只有参数，没有方法名
+            if key != 'cluster_method':  # 要保证参数数组里面只有参数，没有方法名
                 parameters[key] = request.get_json()[key]
         # n_clusters = int(request.get_json()['cluster'])
         # use_method = int(request.get_json()['method'])
-    parameters['data'] = final_data_object['no_identifiers_data_list']#用户输入的数据csv
+    parameters['data'] = final_data_object['no_identifiers_data_list']  # 用户输入的数据csv
 
-    cluster_method=request.get_json()['cluster_method']
+    cluster_method = request.get_json()['cluster_method']
     result = getattr(ClusterWay(), cluster_method)(parameters)
-    clustering=result['clustering']
+    clustering = result['clustering']
     if result.get('labels') is None:
         initial_labels = clustering.labels_
     else:
@@ -934,8 +938,9 @@ def cluster_way():
         lll = labels[i]
         data_pca[i].append(lll)
 
-    this_html=render_template("cluster.html", data=data_pca, data_obj=final_data_object['data_dictionary'], clusters=clusters,
-                           method=cluster_method + draw_id, body_id=body, body_draw_id=node_id)
+    this_html = render_template("cluster.html", data=data_pca, data_obj=final_data_object['data_dictionary'],
+                                clusters=clusters,
+                                method=cluster_method + draw_id, body_id=body, body_draw_id=node_id)
     return this_html
 
 
@@ -997,14 +1002,15 @@ def projection_way():
 
 @app.route('/User_code', methods=['POST', 'GET'])
 def User_code():
-    #save user's embedding file
+    # save user's embedding file
     global upload_path
     if request.method == 'POST':
         f = request.files['file']
-        #basepath = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/user_code"  # 文件所要放入的路径
-        basepath = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')# upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
+        # basepath = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/user_code"  # 文件所要放入的路径
+        basepath = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com',
+                                'user_code')  # upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if (request.form.get('label') == 'zip'):
-            filename = os.path.join(basepath,'User_embedding.zip')  # 要解压的文件
+            filename = os.path.join(basepath, 'User_embedding.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
             # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
             f.save(basepath + '/User_embedding.zip')
@@ -1013,18 +1019,18 @@ def User_code():
                 # print(file)  # 打印zip归档中目录
                 fz.extract(file, filedir)
         if (request.form.get('label') == 'py'):
-            #python
-            user_cluster_url =os.path.join(basepath,'User_embedding.py')
-        if (request.form.get('label') == 'jar'):#java
-            user_cluster_url = os.path.join(basepath,'User_embedding.jar')
-        if (request.form.get('label') == 'so'):#c/c++
-            user_cluster_url = os.path.join(basepath,'User_embedding.so')
+            # python
+            user_cluster_url = os.path.join(basepath, 'User_embedding.py')
+        if (request.form.get('label') == 'jar'):  # java
+            user_cluster_url = os.path.join(basepath, 'User_embedding.jar')
+        if (request.form.get('label') == 'so'):  # c/c++
+            user_cluster_url = os.path.join(basepath, 'User_embedding.so')
         if user_cluster_url is not None:
             f.save(user_cluster_url)
             cd = pyclamd.ClamdAgnostic()
             is_virus = cd.scan_file(user_cluster_url)
             if is_virus is None:
-                #return redirect(url_for('cluster_code'))
+                # return redirect(url_for('cluster_code'))
                 return 'upload the embedding code file successfully !'
             else:
                 os.remove(user_cluster_url)
@@ -1033,14 +1039,14 @@ def User_code():
 
 @app.route('/projection/User_method', methods=['POST', 'GET'])
 def User_method():
-    #run user's embedding way
+    # run user's embedding way
     current_path = os.getcwd()
     # os.chdir(os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code")  # 切换成用户代码的路径
     target_url = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
     os.chdir(target_url)
     draw_id = str(request.get_json()['draw_id'])
     if os.path.exists(os.path.join(target_url, 'User_embedding.py')):
-        file_object = open(os.path.join(target_url,'User_embedding.py'))
+        file_object = open(os.path.join(target_url, 'User_embedding.py'))
         try:
             code = file_object.read()
             codeOut = StringIO()
@@ -1055,7 +1061,7 @@ def User_method():
             codeErr.close()
         finally:
             file_object.close()
-            #os.remove('User_code.py')
+            # os.remove('User_code.py')
         return render_template("projection.html", data=User_data, data_obj=final_data_object['data_dictionary'],
                                method='User_method' + draw_id)
 
@@ -1064,7 +1070,7 @@ def User_method():
         startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s" % (os.path.join(target_url, 'User_embedding.jar')))
         user_way_class = JClass('exercise.user_way')
         user_way = user_way_class()
-        User_data_jar=user_way.run()
+        User_data_jar = user_way.run()
         shutdownJVM()
         os.chdir(current_path)  # 切换回原来的工作路径
         return render_template("projection.html", data=User_data_jar, data_obj=final_data_object['data_dictionary'],
@@ -1072,7 +1078,7 @@ def User_method():
     if os.path.exists(os.path.join(target_url, 'User_embedding.so')):
         if platform.system() == 'Linux':
             user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_embedding.so'))
-            User_data_so = user_way.run()#返回结果
+            User_data_so = user_way.run()  # 返回结果
         os.chdir(current_path)  # 切换回原来的工作路径
         return render_template("projection.html", data=User_data_so, data_obj=final_data_object['data_dictionary'],
                                method='User_method' + draw_id)
@@ -1082,29 +1088,30 @@ def User_method():
 def cluster_code():
     if request.method == 'POST':
         f = request.files['file']
-        #1361377791@qq.com
-        #basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
+        # 1361377791@qq.com
+        # basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
         #  文件所要放入的路径
-        basepath = os.path.join("/home/ubuntu/dagoo",'static','user','1361377791@qq.com','user_code') #+ '/static/user/1361377791@qq.com/user_code'  # 文件所要放入的路径
+        basepath = os.path.join("/home/ubuntu/dagoo", 'static', 'user', '1361377791@qq.com',
+                                'user_code')  # + '/static/user/1361377791@qq.com/user_code'  # 文件所要放入的路径
 
-        #upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
-        if(request.form.get('label')=='zip'):
-            filename =  os.path.join(basepath,'User_cluster.zip')  # 要解压的文件
-            filedir =basepath   # 解压后放入的目录
-            #如果他是压缩文件，就对它进行解压，不是的话就不进行操作
+        # upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
+        if (request.form.get('label') == 'zip'):
+            filename = os.path.join(basepath, 'User_cluster.zip')  # 要解压的文件
+            filedir = basepath  # 解压后放入的目录
+            # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
             f.save(basepath + '/User_cluster.zip')
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
-                #print(file)  # 打印zip归档中目录
+                # print(file)  # 打印zip归档中目录
                 fz.extract(file, filedir)
             return 'upload the cluster code file successfully !'
         else:
             if (request.form.get('label') == 'py'):  # python
-                user_cluster_url = os.path.join(basepath,'User_cluster.py')
+                user_cluster_url = os.path.join(basepath, 'User_cluster.py')
             if (request.form.get('label') == 'jar'):  # java
-                user_cluster_url = os.path.join(basepath,'User_cluster.jar')
+                user_cluster_url = os.path.join(basepath, 'User_cluster.jar')
             if (request.form.get('label') == 'so'):  # c/c++
-                user_cluster_url = os.path.join(basepath,'User_cluster.so')
+                user_cluster_url = os.path.join(basepath, 'User_cluster.so')
             if user_cluster_url is not None:
                 f.save(user_cluster_url)
                 cd = pyclamd.ClamdAgnostic()
@@ -1117,21 +1124,19 @@ def cluster_code():
                     return 'virus!!!'
 
 
-
-
 @app.route('/cluster/User_cluster', methods=['POST', 'GET'])
 def User_cluster():
     # 首先修改当前的工作路径，执行完程序后改回原来的工作路径
     current_path = os.getcwd()
-    #os.chdir(os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code")  # 切换成用户代码的路径
-    target_url=os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
+    # os.chdir(os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code")  # 切换成用户代码的路径
+    target_url = os.path.join('/home/ubuntu/dagoo', 'static', 'user', '1361377791@qq.com', 'user_code')
     os.chdir(target_url)
     draw_id = str(request.get_json()['draw_id'])
     body = 'page-top' + draw_id
     node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
-    print(os.path.exists(os.path.join(target_url,'User_cluster.py')))
-    if os.path.exists(os.path.join(target_url,'User_cluster.py')):
-        file_object = open(os.path.join(target_url,'User_cluster.py'))
+    print(os.path.exists(os.path.join(target_url, 'User_cluster.py')))
+    if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
+        file_object = open(os.path.join(target_url, 'User_cluster.py'))
         try:
             code = file_object.read()
             codeOut = StringIO()
@@ -1159,21 +1164,20 @@ def User_cluster():
         os.chdir(current_path)  # 切换回原来的工作路径
         return render_template("cluster.html", data=data_pca, data_obj=final_data_object['data_dictionary'],
                                method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
-    if os.path.exists(os.path.join(target_url,'User_cluster.jar')):
-
+    if os.path.exists(os.path.join(target_url, 'User_cluster.jar')):
         # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
-        startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s" % (os.path.join(target_url,'User_cluster.jar')))
+        startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s" % (os.path.join(target_url, 'User_cluster.jar')))
         user_way_class = JClass('exercise.user_way')
         user_way = user_way_class()
-        data_pca=user_way.run()
+        data_pca = user_way.run()
         shutdownJVM()
         os.chdir(current_path)  # 切换回原来的工作路径
         return render_template("cluster.html", data=data_pca, data_obj=final_data_object['data_dictionary'],
                                method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
-    if os.path.exists(os.path.join(target_url,'User_cluster.so')):
+    if os.path.exists(os.path.join(target_url, 'User_cluster.so')):
         if platform.system() == 'Linux':
-            user_way = cdll.LoadLibrary(os.path.join(target_url,'User_cluster.so'))
-            data_pca = user_way.run()#返回结果
+            user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_cluster.so'))
+            data_pca = user_way.run()  # 返回结果
         os.chdir(current_path)  # 切换回原来的工作路径
         return render_template("cluster.html", data=data_pca, data_obj=final_data_object['data_dictionary'],
                                method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
@@ -1186,7 +1190,14 @@ def clean():
 
 @app.route('/products', methods=['POST', 'GET'])
 def products():
-    return render_template("products.html")
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('products.html', user=user1)
+    else:
+        return render_template('products.html')
 
 
 @app.route('/clean_table', methods=['POST', 'GET'])
@@ -1194,14 +1205,15 @@ def clean_table():
     source_arr = np.mat(final_data_object['data_list'])
     data_transform = source_arr.T
     data_list_transform = data_transform.tolist()
-    return render_template("clean_table.html",data=final_data_object['data_list'],frame=final_data_object['features_list'],data_list=data_list_transform)
+    return render_template("clean_table.html", data=final_data_object['data_list'],
+                           frame=final_data_object['features_list'], data_list=data_list_transform)
 
 
-@app.route('/cluster/save_user_way',methods=['POST','GET'])
+@app.route('/cluster/save_user_way', methods=['POST', 'GET'])
 def save_user_way():
-    if request.method=='POST':
+    if request.method == 'POST':
         name = request.form.get('user_cluster_name')
-        role=request.form.get('role')
+        role = request.form.get('role')
         print(name)
         print(role)
         return 'save your cluster way successfully! '
@@ -1212,16 +1224,16 @@ def OCR():
     # text=pytesseract.image_to_string(Image.open('show.jpg'),lang='chi_sim') #设置为中文文字的识别
     if request.method == 'POST':
         f = request.files['file']
-        filename=f.filename
-        base_path = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+        filename = f.filename
+        base_path = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"  # 当前文件所在路径
         upload_path = os.path.join(base_path, '', secure_filename(filename))
         f.save(upload_path)
-        #C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
+        # C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
         text = pytesseract.image_to_string(Image.open(upload_path), lang='eng')  # 设置为英文或阿拉伯字母的识别
-        result=text.replace('\n', ' ')
+        result = text.replace('\n', ' ')
         print(result)
         return 'success!'
-    #return render_template("draw_text.html",result=result)
+    # return render_template("draw_text.html",result=result)
     '''
      if(filename.find('.pdf')):
             from wand.image import Image as wand_Image
@@ -1238,10 +1250,11 @@ def OCR():
 def picture_OCR():
     if request.method == 'POST':
         f = request.files['image']
-        base_path = os.path.dirname(__file__)#os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+        base_path = os.path.dirname(
+            __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
         upload_path = os.path.join(base_path, '', secure_filename('temp.jpg'))
         f.save(upload_path)
-        #C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
+        # C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
         text = pytesseract.image_to_string(Image.open(upload_path), lang='eng')  # 设置为英文或阿拉伯字母的识别
         result = text.replace('\n', ' ').replace(',', ' ').replace('.', ' ')
         print(result)
@@ -1270,8 +1283,8 @@ def graphgoo():
                     row.append(t)
             graph_matrix.append(row)
         current_app.config.update(
-            NODES = graph_nodes,
-            MATRIX = graph_matrix
+            NODES=graph_nodes,
+            MATRIX=graph_matrix
         )
         return jsonify(True)
     else:
@@ -1527,4 +1540,3 @@ def Moving_averaging():
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True)
-
