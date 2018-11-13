@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="/static/css/user.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="/static/css/cluster_css.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/streaming_data.css">
     <link rel="stylesheet" type="text/css" href="/static/css/parallel.css">
 
     <script src="/static/js/jscolor.js"></script>
@@ -513,6 +513,36 @@
     });
 </script>
 
+<!-->
+<script>
+    function initial_elements(attr){
+        var this_draw_bar = document.getElementById("draw_bar");
+
+        var draw_inf = document.createElement('div');
+         draw_inf.setAttribute('class','draw_inf');
+
+        var draw_attribution = document.createElement('div');//放画图的svg
+        draw_attribution.setAttribute('id', "attribution_" + attr);
+        draw_attribution.setAttribute('class','draw');
+        draw_attribution.style.display='inline-block';
+
+         draw_inf.appendChild(draw_attribution);//把画布放进去
+
+        var draw_inf_body = document.createElement('div');
+         draw_inf_body.setAttribute('class','draw_inf_body');
+
+
+         var way_inf = document.createElement('div');
+         way_inf.setAttribute('class','cluster_way_inf');
+         way_inf.setAttribute('value',attr);
+         way_inf.innerHTML='analysis attribution: '+attr;
+         draw_inf_body.appendChild(way_inf);//把图是信息放入inf_body
+
+         draw_inf.appendChild(draw_inf_body);//把inf_body放进去
+
+        this_draw_bar.appendChild(draw_inf);
+    }
+</script>
 <!--获取方法和参数，画图-->
 <script>
     function delete_this(id, attribution,order) {//在user_data里面删除该曲线所对应数组，然后重新绘制全体曲线
@@ -521,7 +551,7 @@
         user_data[attribution_value][order] = [];
         draw_counts[attribution_value].push(order);
         $("#attribution_"+attribution_value).empty();
-        if ((draw_counts[attribution_value]).length < 6) {
+        if ((draw_counts[attribution_value]).length < 4) {
             draw_prediction(user_data[attribution_value],user_data_way[attribution_value],attribution_value);
         }
     }
@@ -580,7 +610,7 @@
         ;
 
 //定义两个颜色
-        var colors = [d3.rgb(0, 0, 255), d3.rgb(0, 255, 0),d3.rgb(255,0, 0),d3.rgb(255, 255, 255),d3.rgb(0, 0, 255), d3.rgb(0, 255, 0)];
+        var colors = [d3.rgb(0, 0, 255), d3.rgb(0, 255, 0),d3.rgb(255,0, 0),d3.rgb(255, 255, 255)];
 
         var svg = d3.select("#attribution_" + attr)
             .append("svg")
@@ -674,14 +704,10 @@
             success: function (res) {//返回数据根据结果进行相应的处理
                 var attr = $('#attribution_selector option:selected').val();
                 if ($("#attribution_" + attr).length <= 0) {
-                    var this_draw_bar = document.getElementById("draw_bar");
-                    var draw_attribution = document.createElement('div');
-                    draw_attribution.setAttribute('id', "attribution_" + attr);
-                    draw_attribution.style.display='inline-block';
-                    this_draw_bar.appendChild(draw_attribution);
-                    user_data[attr]=[[], [], [], [], [], []];
-                    user_data_way[attr]=[[], [], [], [], [], []];
-                    draw_counts[attr]=[5, 4, 3, 2, 1, 0]
+                    initial_elements(attr);
+                    user_data[attr]=[[], [], [], []];
+                    user_data_way[attr]=[[], [], [], []];
+                    draw_counts[attr]=[3, 2, 1, 0]
                 }
                 var res_array = res.split(':');
                 var i = 0;
@@ -703,7 +729,6 @@
             },
             error: function (res) {
                 alert(res);
-                draw_counts.push(draw_count);
             }
         });
     };
