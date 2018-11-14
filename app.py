@@ -522,7 +522,7 @@ def geo_admin():
         else:
             return render_template('geo_admin.html', attr=final_data_object['attr'])
     else:  # 读取默认的数据
-        final_data = csv.reader(open('./static/user/service/olddata/dist_code.csv'))
+        final_data = csv.reader(open('./examples/dist_code.csv'))
         province = []
         data = []
         for i in final_data:
@@ -585,7 +585,7 @@ def geo_points():
         else:
             return render_template('geo_points.html')
     else:  # 读取默认的数据
-        final_data = csv.reader(open('./static/user/service/olddata/geo_points.csv'))
+        final_data = csv.reader(open('./examples/geo_points.csv'))
         point = []
         for i in final_data:
             dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
