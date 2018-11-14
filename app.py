@@ -1239,12 +1239,12 @@ def picture_OCR():
         f = request.files['image']
         base_path = os.path.dirname(
             __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
-        upload_path = os.path.join(base_path, '', secure_filename('temp.jpg'))
+        upload_path = os.path.join(base_path, '', secure_filename('image_by_upload.jpg'))
         f.save(upload_path)
         # C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
         text = pytesseract.image_to_string(Image.open(upload_path), lang='eng')  # 设置为英文或阿拉伯字母的识别
         result = text.replace('\n', ' ').replace(',', ' ').replace('.', ' ')
-        print(result)
+        os.remove(upload_path)
         return result
 
 
