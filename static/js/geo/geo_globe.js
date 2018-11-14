@@ -91,7 +91,7 @@ window.onload = function () {
 
 
         UserInterface = new UI();
-        UserInterface.addSpinner();
+        // UserInterface.addSpinner();
 
         document.body.appendChild(renderer.domElement);
 
