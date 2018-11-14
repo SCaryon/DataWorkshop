@@ -495,28 +495,25 @@ window.onload = function () {
 
     //鼠标指到这个国家里面的时候调用的方法，将当前高亮的国家转回普通，然后将当前国家的边界高亮
     function highLightCountry(country, on) {
-        if (currentSetup != "productspace" && currentSetup != "productspace3D" && currentSetup != "productsphere") {
-            //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
-            if (countryOverlay) {
-                for (var i = 0; i < countryOverlay.length; i++) {
-                    currentMesh = scene.getObjectById(countryOverlay[i], true);
-                    if (currentMesh) {
-                        currentMesh.material.linewidth = 1;
-                        currentMesh.material.opacity = 0.6;
-                    }
+        //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
+        if (countryOverlay) {
+            scene.remove(countryOverlay);
+            countryOverlay = new THREE.Object3D();
+        }
+        if (on) {
+            meshes = country.polygons;
+            if (!countryOverlay) countryOverlay = new THREE.Object3D();
+            if (meshes != null)
+                for (var i = 0; i < meshes.length; i++) {
+                    currentMesh = shape.children[0].getObjectById(meshes[i], true).geometry.vertices;
+                    geoMeshline = new GeoMeshLine(currentMesh, {
+                        resolution: [window.innerWidth, window.innerHeight],
+                        color: 0xFFFFFF,
+                        lineWidth: 6,
+                    });
+                    countryOverlay.add(geoMeshline);
                 }
-            }
-            if (on) {
-                    meshes = country.polygons;
-                    if (!countryOverlay) countryOverlay = [];
-                    if (meshes != null)
-                        for (var i = 0; i < meshes.length; i++) {
-                            currentMesh = shape.children[0].getObjectById(meshes[i], true);
-                            currentMesh.material.linewidth = 5;
-                            currentMesh.material.opacity = 1;
-                            countryOverlay.push(meshes[i]);
-                        }
-            }
+            scene.add(countryOverlay);
         }
     }
 
