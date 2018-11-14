@@ -86,11 +86,6 @@ function drawThreeGeo(json, radius, shape,scene, options) {
             throw new Error('The geoJSON is not valid.');
         }        
     }
-    /*var material = new THREE.MeshBasicMaterial( options);
-    var mesh = new THREE.Line( segments, material );
-
-    scene.add( mesh );
-    return mesh;    */
     lines.scale.set(.7,.7,.7);
     return [lines,formID];
 }       
@@ -232,7 +227,6 @@ function drawParticle(x, y, z, options) {
     var particle_material = new THREE.ParticleSystemMaterial(options);
     var particle = new THREE.ParticleSystem(particle_geom, particle_material);
     this.scene.add(particle);
-    // console.log(particle_geom);
     clearArrays();
 }
 
@@ -245,7 +239,6 @@ function drawLine(x_values, y_values, z_values, options) {
     var line = new THREE.Line(line_geom, line_material);
     formID[edgeID].push(line.id);
     lines.add(line);
-    // console.log(line);
     
     clearArrays();
 }

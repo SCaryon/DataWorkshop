@@ -39,14 +39,14 @@ $.fn.csv2arr = function (callback) {
                 else if ($('input[name=select]:checked').val() == 'Geographical') {
                     //console.log("成功进入geo");
                     $.ajax({
-                        url: '/index/geography/',
+                        url: '/geo/admin/upload/',
                         type: 'POST',
                         data: {json_data: JSON.stringify(res)},
                         dataType: 'html',
                         success: function (res) {
                             if (res == "true") {
                                 alert('success !');
-                                window.location.href = '/geo/';
+                                window.location.href = '/geo/admin/';
                             } else {
                                 alert('Unknown error.');
                             }

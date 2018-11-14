@@ -136,7 +136,7 @@ window.onload = function () {
 
             temp = drawThreeGeo(json, 400, 'plane', scene, {
                 color: 0x7e7e7e,
-                linewidth: 2,
+                linewidth: 1,
                 transparent: true,
                 opacity: 0.7
             });
@@ -145,6 +145,13 @@ window.onload = function () {
             overlay = new THREE.Mesh(new THREE.PlaneGeometry(560, 280, 1, 1), overlayMaterial);
             shape.add(overlay);
             planeShapeIDs = temp[1];//边界线ID
+
+            // geoMeshline = new GeoMeshLine(json, {
+            //     resolution: [window.innerWidth, window.innerHeight],
+            //     color: 0x00ffff,
+            //     lineWidth: 2
+            // });
+            // scene.add(geoMeshline);
 
             renderer.render(scene, camera);
         });
@@ -368,10 +375,10 @@ window.onload = function () {
                         var avgLong = lon1 + Math.atan2(By, Math.cos(lat1) + Bx) * 180 / Math.PI;
 
                         //如果是二维的就提供首尾两点，三维的需要好几个点来确定一条曲线
-                            height = 0;
-                            color.setHSL(1, 1, 1);
-                            segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
-                            segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
+                        height = 0;
+                        color.setHSL(1, 1, 1);
+                        segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
+                        segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
 
                         line = Spline(segments, color.getHex(), 5 - j / 2);//返回一条线
                         Particlelinks.assignPositions(line.geometry.vertices, j, val.e);
@@ -503,24 +510,23 @@ window.onload = function () {
     function highLightCountry(country, on) {
         //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
         if (countryOverlay) {
-            for (var i = 0; i < countryOverlay.length; i++) {
-                currentMesh = scene.getObjectById(countryOverlay[i], true);
-                if (currentMesh) {
-                    currentMesh.material.linewidth = 1;
-                    currentMesh.material.opacity = 0.6;
-                }
-            }
+            scene.remove(countryOverlay);
+            countryOverlay = new THREE.Object3D();
         }
         if (on) {
             meshes = country.polygons;
-            if (!countryOverlay) countryOverlay = [];
+            if (!countryOverlay) countryOverlay = new THREE.Object3D();
             if (meshes != null)
                 for (var i = 0; i < meshes.length; i++) {
-                    currentMesh = shape.children[0].getObjectById(meshes[i], true);
-                    currentMesh.material.linewidth = 5;
-                    currentMesh.material.opacity = 1;
-                    countryOverlay.push(meshes[i]);
+                    currentMesh = shape.children[0].getObjectById(meshes[i], true).geometry.vertices;
+                    geoMeshline = new GeoMeshLine(currentMesh, {
+                        resolution: [window.innerWidth, window.innerHeight],
+                        color: 0xFFFFFF,
+                        lineWidth: 6,
+                    });
+                    countryOverlay.add(geoMeshline);
                 }
+            scene.add(countryOverlay);
         }
     }
 
@@ -593,9 +599,9 @@ window.onload = function () {
                         index = cat["total"];
                         if (!cat.active) {
 
-                                destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
-                                destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight;
-                                destination[v * 3 + 2] = 0;
+                            destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
+                            destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight;
+                            destination[v * 3 + 2] = 0;
 
                         }
                         v++;

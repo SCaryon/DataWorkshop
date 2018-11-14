@@ -552,7 +552,7 @@ window.onload = function () {
                 for (var i = 0; i < meshes.length; i++) {
                     currentMesh = globe.children[2].getObjectById(meshes[i], true).geometry.vertices;
                     // console.log(meshes,currentMesh);
-                    geoMeshline = new GeoMeshLine3D(currentMesh, {
+                    geoMeshline = new GeoMeshLineThunder(currentMesh, {
                         resolution: [window.innerWidth, window.innerHeight],
                         color: 0xFFFFFF,
                         lineWidth: 6,
