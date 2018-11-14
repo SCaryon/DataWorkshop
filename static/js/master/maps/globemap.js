@@ -380,36 +380,36 @@ window.onload = function () {
                         var avgLong = lon1 + Math.atan2(By, Math.cos(lat1) + Bx) * 180 / Math.PI;
 
                         //如果是二维的就提供首尾两点，三维的需要好几个点来确定一条曲线
-                            theta = (90 - country2.lon) * Math.PI / 180;
-                            phi = (country2.lat) * Math.PI / 180;
-                            sx = globeSize * Math.sin(theta) * Math.cos(phi);
-                            sy = globeSize * Math.sin(theta) * Math.sin(phi);
-                            sz = globeSize * Math.cos(theta);
+                        theta = (90 - country2.lon) * Math.PI / 180;
+                        phi = (country2.lat) * Math.PI / 180;
+                        sx = globeSize * Math.sin(theta) * Math.cos(phi);
+                        sy = globeSize * Math.sin(theta) * Math.sin(phi);
+                        sz = globeSize * Math.cos(theta);
 
-                            theta2 = (90 - country.lon) * Math.PI / 180;
-                            phi2 = (country.lat) * Math.PI / 180;
-                            tx = globeSize * Math.sin(theta2) * Math.cos(phi2);
-                            ty = globeSize * Math.sin(theta2) * Math.sin(phi2);
-                            tz = globeSize * Math.cos(theta2);
+                        theta2 = (90 - country.lon) * Math.PI / 180;
+                        phi2 = (country.lat) * Math.PI / 180;
+                        tx = globeSize * Math.sin(theta2) * Math.cos(phi2);
+                        ty = globeSize * Math.sin(theta2) * Math.sin(phi2);
+                        tz = globeSize * Math.cos(theta2);
 
-                            avgX = (sx + tx) / 2;
-                            avgY = (sy + ty) / 2;
-                            avgZ = (sz + tz) / 2;
-                            dist = Math.sqrt(Math.pow(sx - tx, 2) + Math.pow(sy - ty, 2) + Math.pow(sz - tz, 2));
-                            //extrude=1+dist/globeSize/2;
-                            extrude = 1 + Math.pow(dist, 2) / 90000;
-                            intrude = 0.995;
-                            extrudeCenter = 1 + ((extrude - 1) * 1.5);
-                            var A = new THREE.Vector3(sx, sy, sz);
-                            segments.push(A.multiplyScalar(intrude));//multiplyScalar将A与常熟intrude相乘
-                            var C = new THREE.Vector3(sx + (tx - sx) / 3, sy + (ty - sy) / 3, sz + (tz - sz) / 3);
-                            segments.push(C.multiplyScalar(extrude));
-                            var E = new THREE.Vector3(sx + (tx - sx) / 2, sy + (ty - sy) / 2, sz + (tz - sz) / 2);
-                            segments.push(E.multiplyScalar(extrudeCenter));
-                            var D = new THREE.Vector3(sx + (tx - sx) * 2 / 3, sy + (ty - sy) * 2 / 3, sz + (tz - sz) * 2 / 3);
-                            segments.push(D.multiplyScalar(extrude));
-                            var B = new THREE.Vector3(tx, ty, tz);
-                            segments.push(B.multiplyScalar(intrude));
+                        avgX = (sx + tx) / 2;
+                        avgY = (sy + ty) / 2;
+                        avgZ = (sz + tz) / 2;
+                        dist = Math.sqrt(Math.pow(sx - tx, 2) + Math.pow(sy - ty, 2) + Math.pow(sz - tz, 2));
+                        //extrude=1+dist/globeSize/2;
+                        extrude = 1 + Math.pow(dist, 2) / 90000;
+                        intrude = 0.995;
+                        extrudeCenter = 1 + ((extrude - 1) * 1.5);
+                        var A = new THREE.Vector3(sx, sy, sz);
+                        segments.push(A.multiplyScalar(intrude));//multiplyScalar将A与常熟intrude相乘
+                        var C = new THREE.Vector3(sx + (tx - sx) / 3, sy + (ty - sy) / 3, sz + (tz - sz) / 3);
+                        segments.push(C.multiplyScalar(extrude));
+                        var E = new THREE.Vector3(sx + (tx - sx) / 2, sy + (ty - sy) / 2, sz + (tz - sz) / 2);
+                        segments.push(E.multiplyScalar(extrudeCenter));
+                        var D = new THREE.Vector3(sx + (tx - sx) * 2 / 3, sy + (ty - sy) * 2 / 3, sz + (tz - sz) * 2 / 3);
+                        segments.push(D.multiplyScalar(extrude));
+                        var B = new THREE.Vector3(tx, ty, tz);
+                        segments.push(B.multiplyScalar(intrude));
                         line = Spline(segments, color.getHex(), 5 - j / 2);//返回一条线
                         Particlelinks.assignPositions(line.geometry.vertices, j, val.e);
                         //links.add(line);
@@ -540,30 +540,52 @@ window.onload = function () {
 
     //鼠标指到这个国家里面的时候调用的方法，将当前高亮的国家转回普通，然后将当前国家的边界高亮
     function highLightCountry(country, on) {
-        if (currentSetup != "productspace" && currentSetup != "productspace3D" && currentSetup != "productsphere") {
-            //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
-            if (countryOverlay) {
-                for (var i = 0; i < countryOverlay.length; i++) {
-                    currentMesh = scene.getObjectById(countryOverlay[i], true);
-                    if (currentMesh) {
-                        currentMesh.material.linewidth = 1;
-                        currentMesh.material.opacity = 0.6;
-                    }
-                }
-            }
-            if (on) {
-                    meshes = country.polygons3D;
-                    if (!countryOverlay) countryOverlay = [];
-                    if (meshes != null)
-                        for (var i = 0; i < meshes.length; i++) {
-                            currentMesh = globe.children[2].getObjectById(meshes[i], true);
-                            currentMesh.material.linewidth = 5;
-                            currentMesh.material.opacity = 1;
-                            countryOverlay.push(meshes[i]);
-                        }
-
-            }
+        //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
+        if (countryOverlay) {
+            scene.remove(countryOverlay);
+            countryOverlay = new THREE.Object3D();
         }
+        if (on) {
+            meshes = country.polygons3D;
+            if (!countryOverlay) countryOverlay = new THREE.Object3D();
+            if (meshes != null)
+                for (var i = 0; i < meshes.length; i++) {
+                    currentMesh = globe.children[2].getObjectById(meshes[i], true).geometry.vertices;
+                    // console.log(meshes,currentMesh);
+                    geoMeshline = new GeoMeshLine3D(currentMesh, {
+                        resolution: [window.innerWidth, window.innerHeight],
+                        color: 0xFFFFFF,
+                        lineWidth: 6,
+                    });
+                    // scene.add(geoMeshline);
+                    countryOverlay.add(geoMeshline);
+                }
+            scene.add(countryOverlay);
+        }
+
+
+        // //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
+        // if (countryOverlay) {
+        //     for (var i = 0; i < countryOverlay.length; i++) {
+        //         currentMesh = scene.getObjectById(countryOverlay[i], true);
+        //         if (currentMesh) {
+        //             currentMesh.material.linewidth = 1;
+        //             currentMesh.material.opacity = 0.6;
+        //         }
+        //     }
+        // }
+        // if (on) {
+        //     meshes = country.polygons3D;
+        //     if (!countryOverlay) countryOverlay = [];
+        //     if (meshes != null)
+        //         for (var i = 0; i < meshes.length; i++) {
+        //             currentMesh = globe.children[2].getObjectById(meshes[i], true);
+        //             currentMesh.material.linewidth = 5;
+        //             currentMesh.material.opacity = 1;
+        //             countryOverlay.push(meshes[i]);
+        //         }
+        //
+        // }
     }
 
     /*鼠标按下的反应
