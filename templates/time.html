@@ -554,6 +554,11 @@
         if ((draw_counts[attribution_value]).length < 4) {
             draw_prediction(user_data[attribution_value],user_data_way[attribution_value],attribution_value);
         }
+        else{
+
+            var draw_div=$("#attribution_"+attribution_value).parent('.draw_inf');
+            draw_div.remove();
+        }
     }
 
     function draw_selected_tag(way, attribution, order) {//order表示该曲线的数据在数组中所在的位置
