@@ -161,11 +161,6 @@
 		gl_PointSize = size * ( 300.0 / length( mvPosition.xyz ) );
 		gl_Position = projectionMatrix * mvPosition;
 	}
-
-
-
-
-
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -176,10 +171,6 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
-
-
-
-
 </script>
 
 
@@ -249,12 +240,6 @@
       gl_FragColor = vec4(color.xyz, opacity);
 
     }
-
-
-
-
-
-
 </script>
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 

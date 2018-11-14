@@ -467,29 +467,11 @@ def admin_id(id):
     return render_template('admin/' + id + '.html')
 
 
-# product master begin
-@app.route('/master/', methods=['GET', 'POST'])
-def master():
-    return render_template('master/master.html')
-
-
-@app.route('/master/index/', methods=['GET', 'POST'])
-def master_index():
-    if session.get('email'):
-        email = session.get('email')
-        user1 = user.query.filter_by(email=email).first()
-        if user1 is None:
-            return "false"
-        return render_template('master/masterindex.html', user=user1)
-    else:
-        return render_template('master/masterindex.html')
-
-
 @app.route('/master/<id>', methods=['GET', 'POST'])
 def master_id(id):
     id = id.replace('<', '')
     id = id.replace('>', '')
-    return render_template('master/masterproduct.html', mode=id)
+    return render_template('master/templates/masterproduct.html', mode=id)
 
 
 # product master end
@@ -503,9 +485,9 @@ def geo_index():
         user1 = user.query.filter_by(email=email).first()
         if user1 is None:
             return "false"
-        return render_template('geo_Index.html', user=user1)
+        return render_template('geo/geo_Index.html', user=user1)
     else:
-        return render_template('geo_Index.html')
+        return render_template('geo/geo_Index.html')
 
 
 # 行政热力图
@@ -518,9 +500,9 @@ def geo_admin():
             user1 = user.query.filter_by(email=email).first()
             if user1 is None:
                 return "false"
-            return render_template('geo_admin.html', user=user1, attr=final_data_object['attr'])
+            return render_template('geo/geo_admin.html', user=user1, attr=final_data_object['attr'])
         else:
-            return render_template('geo_admin.html', attr=final_data_object['attr'])
+            return render_template('geo/geo_admin.html', attr=final_data_object['attr'])
     else:  # 读取默认的数据
         final_data = csv.reader(open('./examples/dist_code.csv'))
         province = []
@@ -541,9 +523,9 @@ def geo_admin():
             user1 = user.query.filter_by(email=email).first()
             if user1 is None:
                 return "false"
-            return render_template('geo_admin.html', user=user1, attr=final_data_object['attr'])
+            return render_template('geo/geo_admin.html', user=user1, attr=final_data_object['attr'])
         else:
-            return render_template('geo_admin.html', attr=final_data_object['attr'])
+            return render_template('geo/geo_admin.html', attr=final_data_object['attr'])
 
 
 # 读取用户上传的行政区数据
@@ -565,7 +547,7 @@ def geo_admin_upload():
         final_data_object['province'] = province
         final_data_object['data'] = final_data
         final_data_object['attr'] = attr
-        print("province:", province, ",\nattr:", attr, ",\ndata", final_data)
+        # print("province:", province, ",\nattr:", attr, ",\ndata", final_data)
         return "true"
     else:
         return "false"
@@ -581,9 +563,9 @@ def geo_points():
             user1 = user.query.filter_by(email=email).first()
             if user1 is None:
                 return "false"
-            return render_template('geo_points.html', user=user1)
+            return render_template('geo/geo_points.html', user=user1)
         else:
-            return render_template('geo_points.html')
+            return render_template('geo/geo_points.html')
     else:  # 读取默认的数据
         final_data = csv.reader(open('./examples/geo_points.csv'))
         point = []
@@ -597,9 +579,9 @@ def geo_points():
             user1 = user.query.filter_by(email=email).first()
             if user1 is None:
                 return "false"
-            return render_template('geo_points.html', user=user1)
+            return render_template('geo/geo_points.html', user=user1)
         else:
-            return render_template('geo_points.html')
+            return render_template('geo/geo_points.html')
 
 
 # 读取用户上传的点数据
@@ -1539,4 +1521,4 @@ def Moving_averaging():
 
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run(processes=10)

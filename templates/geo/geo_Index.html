@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-    <title>DaGoo Products</title>
+    <title>GeoGoo</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="description" content="">
@@ -12,14 +12,22 @@
 
     <link rel="stylesheet" href="/static/css/bootstrap.css">
     <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="/static/css/tooplate-style.css">
     <link rel="stylesheet" href="/static/css/parallel.css">
     <link rel="stylesheet" href="/static/css/radviz.css">
     <link rel="stylesheet" href="/static/css/scatter.css">
     <link rel="stylesheet" href="/static/css/my_style.css">
+    <link rel="stylesheet" href="//cdnjs.loli.net/ajax/libs/mdui/0.4.1/css/mdui.min.css">
 
     <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+    <style>
+        table{
+            width: 500px;
+            border: 1px;
+        }
+    </style>
 
 </head>
 <style>
@@ -48,7 +56,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/" class="smoothScroll">Home</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
-                <li><a href="#" class="smoothScroll">Gallery</a></li>
+                <li><a href="#visual_charts" class="smoothScroll">Gallery</a></li>
                 <li><a href="#" class="smoothScroll">Contact us</a></li>
                 <li>
                     <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
@@ -58,7 +66,7 @@
                         <div class="to3" style="margin-top: -10px;">
                             <div class="to2">
                                 <div class="to1">
-                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
+                                    <img class="to" src="//static/user/{{ user.email }}/img/user_img.jpg">
                                 </div>
                             </div>
                         </div>
@@ -106,11 +114,10 @@
 </div>
 
 <!-- HOME -->
-<div class="parallax-section" style="background-color: black;height: 2000px;">
-    <div class="container" style="color:white; align:center; ">
-        <div style="width: 80%;  text-align: center; padding-top: 150px; margin: 0 auto">
-
-            <div class="leftDiv">
+<div class="parallax-section" style="background-color: black;">
+    <div class="container" style="color:white; text-align:left; ">
+        <div style="width: 80%;  text-align: center; padding-top: 150px;margin: 0 auto;">
+             <div class="leftDiv">
                 <a href="/master/<globemap>"><img src="/static/images/master/icon/globemap.png" style="width:150px;" alt=""/></a>
             </div>
             <div class="rightDiv">
@@ -176,73 +183,149 @@
             </div>
             </br>
 
-
             <div class="leftDiv">
-                <a href="/master/<product3D>"><img src="/static/images/master/icon/product3D.png" style="width:150px;" alt=""/></a>
+                <a href="/geo/admin/"><img src="/static/images/geo/geo.png" style="width:150px;" alt=""/></a>
             </div>
             <div class="rightDiv">
                 <br>
-                <a href="/master/<product3D>" style="color: white; font-size: 16px;"> Product3D! </a>
-                —— good at table data analysis.
-                <br> Imported data type: table data
-                <br> Table format for unloaped files:
-                <br> First lines: attributes; First column: identifiers; The rest: data
-                <br> Functions with table data:
-                <br> Analysis and Visual Charts
+                <a href="/geo/admin/" style="color: white; font-size: 16px;"> Administrative heat map </a>
+                —— adept at area geographical data analysis.
+                <br> Imported data type: geographical data
+                <br> Table format for unloaded files:
+                <br> First lines: attributes; First column: areas; The rest: data
+                <br> Functions with geographical data:
+                <br> Chinese administrative heat map with each attribute
 
             </div>
             </br>
 
-
             <div class="leftDiv">
-                <a href="/master/<product2D>"><img src="/static/images/master/icon/product2D.png" style="width:150px;" alt=""/></a>
+                <a href="/geo/points/"><img src="/static/images/geo/geo_point.png" style="width:150px;" alt=""/></a>
             </div>
             <div class="rightDiv">
-                <br>
-                <a href="/master/<product2D>" style="color: white; font-size: 16px;"> Product2D! </a>
-                —— good at table data analysis.
-                <br> Imported data type: table data
-                <br> Table format for unloaped files:
-                <br> First lines: attributes; First column: identifiers; The rest: data
-                <br> Functions with table data:
-                <br> Analysis and Visual Charts
+
+                <a href="/geo/points/" style="color: white; font-size: 16px;"> Point distribution </a>
+                —— skilled in point geographical data analysis.
+                <br> Imported data type: geographical data
+                <br> Table format for unloaded files:
+                <br> First column: Latitude Second column: longitude; Third column: value; Fourth column: name
+                <br> Functions with geographical data:
+                <br> Show the value for every point by radius on Chinese geography
 
             </div>
-            </br>
-
+            <br>
 
             <div class="leftDiv">
-                <a href="/master/<producttower>"><img src="/static/images/master/icon/producttower.png" style="width:150px;" alt=""/></a>
+                <a href="/geo/line/"><img src="/static/images/geo/geo_line.png" style="width:150px;" alt=""/></a>
             </div>
             <div class="rightDiv">
-                <br>
-                <a href="/master/<producttower>" style="color: white; font-size: 16px;"> ProductTower! </a>
-                —— good at table data analysis.
-                <br> Imported data type: table data
-                <br> Table format for unloaped files:
-                <br> First lines: attributes; First column: identifiers; The rest: data
-                <br> Functions with table data:
-                <br> Analysis and Visual Charts
+                <br/>
+                <a href="/geo/line/" style="color: white; font-size: 16px;"> Line distribution </a>
+                —— good at geographical data analysis.
+                <br> Imported data type: geographical data
+                <br> Table format for unloaded files:
+                <br> First column: source; Second column: destination; Third column: value
+                <br> Functions with geographical data:
+                <br> Chinese map with line distribution
 
             </div>
-            </br>
-
-
-
         </div>
-
-
     </div>
 </div>
-</section>
 
 
+<div  style="background-color: black; color: white">
+    <br>
+<br>
+<br>
+    <h3 style="margin: 0 auto">Examples for geography data</h3>
+    <div class="mdui-tab mdui-tab-centered" mdui-tab>
+        <a href="#admin" class="mdui-ripple mdui-tab-active">Administrative heat map</a>
+        <a href="#point" class="mdui-ripple">Point distribution</a>
+        <a href="#line" class="mdui-ripple">Line distribution</a>
+    </div>
+    <div id="admin" class="mdui-p-a-2" style="width:500px; margin: 0 auto">
+        <table>
+            <tr>
+                <th>name</th>
+                <th>economic</th>
+                <th>population</th>
+                <th>area</th>
+            </tr>
+            <tr>
+                <th>山东</th>
+                <td>12</td>
+                <td>15</td>
+                <td>75</td>
+            </tr>
+            <tr>
+                <th>淄博</th>
+                <td>1.2</td>
+                <td>1.7</td>
+                <td>8.9</td>
+            </tr>
+            <tr>
+                <th>章丘</th>
+                <td>0.5</td>
+                <td>1.1</td>
+                <td>0.9</td>
+            </tr>
+        </table>
+    </div>
+    <div id="point" class="mdui-p-a-2" style="width:500px; margin: 0 auto">
+        <table>
+            <tr>
+                <td>105.005</td>
+                <td>32.349</td>
+                <td>634</td>
+                <td>这里是世界上最美丽的地方</td>
+            </tr>
+            <tr>
+                <td>104.602</td>
+                <td>32.067</td>
+                <td>5234</td>
+                <td>小镇的交通非常拥挤</td>
+            </tr>
+            <tr>
+                <td>105.042</td>
+                <td>32.402</td>
+                <td>3.2</td>
+                <td>污染严重</td>
+            </tr>
+            <tr>
+                <td>103.715</td>
+                <td>31.211</td>
+                <td>5434</td>
+                <td>早上的交通非常繁忙</td>
+            </tr>
+        </table>
+    </div>
+    <div id="line" class="mdui-p-a-2" style="width:500px; margin: 0 auto">
+        <table>
+            <tr>
+                <td>北京</td>
+                <td>上海</td>
+                <td>2018/11/07 12:30</td>
+            </tr>
+            <tr>
+                <td>西安</td>
+                <td>合肥</td>
+                <td>or 37</td>
+            </tr>
+            <tr>
+                <td>临沂</td>
+                <td>石家庄</td>
+                <td>or $572</td>
+            </tr>
+            <tr>
+                <td>深圳</td>
+                <td>福州</td>
+                <td>or any other text</td>
+            </tr>
+        </table>
+    </div>
 </div>
-</div>
-
-
-</section>
-
+<!-- SCRIPTS -->
 <script src="/static/js/jquery.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/jquery.parallax.js"></script>
@@ -250,6 +333,19 @@
 <script src="/static/js/smoothscroll.js"></script>
 <script src="/static/js/main.js"></script>
 <script src="/static/js/custom.js"></script>
+<script src="/static/js/upload.js"></script>
+<script src="/static/js/tab.js"></script>
+<script src="https://cdn.bootcss.com/PapaParse/4.4.0/papaparse.js"></script>
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="http://www.xdocin.com/xdoc.js"></script>
+<script type="text/javascript" src="http://www.xdocin.com/baiduTemplate.js"></script>
+<script src="/static/js/parallel.js"></script>
+<script src="/static/js/radviz.js"></script>
+<script src="/static/js/scatter.js"></script>
+<script src="/static/js/fisheye.js"></script>
+<script src="//cdnjs.loli.net/ajax/libs/mdui/0.4.1/js/mdui.min.js"></script>
 
 </body>
 </html>
