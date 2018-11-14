@@ -34,7 +34,8 @@
 
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/" class="smoothScroll">Upload File</a></li>
+                <li><a href="/" class="smoothScroll">Home</a></li>
+                <li><a data-toggle="modal" data-target="#myModal" class="btn btn-lg">Upload File</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
                 <li><a href="#" class="smoothScroll">Contact us</a></li>
             </ul>
@@ -93,27 +94,6 @@
                 </h5>
                 <a href="{{ url_for('graph_layout2d', layout='hierarchical') }}"><img src="../static/img/hierarchical2d.html" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
-                <h5>
-                    Product3D
-                </h5>
-                <a href="/master/<product3D>"><img src="/static/images/master/icon/product3D.png" style="width: 150px;height: 150px;"/></a>
-            </div>
-
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
-                <h5>
-                    Product2D
-                </h5>
-                <a href="/master/<product2D>"><img src="/static/images/master/icon/product2D.png" style="width: 150px;height: 150px;"/></a>
-            </div>
-
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
-                <h5>
-                    ProductTower
-                </h5>
-                <a href="/master/<producttower>"><img src="/static/images/master/icon/producttower.png" style="width: 150px;height: 150px;"/></a>
-            </div>
-
         </div>
   </div>
 
@@ -132,37 +112,39 @@
     </ul>
 </div>
 
+<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                <h4 id="myModalLabel" class="modal-title">Upload File</h4>
+            </div>
+            <div class="modal-body">
+                <input class="button_blue" id="file_path" name="file_path" type="button"
+                           onclick="path.click()" value="File Upload">
+                <input type="file" id="path" style="display:none" name="csvfile"
+                           onchange="file_path.value=this.value">
+                <input class="button_blue" type="button" onclick="read_file()" value="Submit">
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default">Close</button>
+                <input class="button_blue" type="button" onclick="read_file()" value="Submit">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="../static/js/jquery.js"></script>
 <script src="../static/js/bootstrap.min.js"></script>
 <script src="../static/js/jquery.parallax.js"></script>
 <script src="../static/js/modernizr.custom.js"></script>
-<script src="../static/js/smoothscroll.js"></script>
+<script src="../static/js/SmoothScroll.js"></script>
 <script src="../static/js/main.js"></script>
 <script src="../static/js/custom.js"></script>
 <script src="../static/js/d3.v3.min.js"></script>
-<script>
-    nodes = new Array();
-    arr = document.getElementById("graph_nodes").getElementsByTagName('li');
-    temp = [];
-    for (i = 0; i < arr.length; i++) {
-        nodes.push(arr[i].innerHTML);
-    }
-    var graph_matrix = new Array();
-    arr = document.getElementById('graph_matrix').getElementsByTagName('li');
-    temp = [];
-    for (i = 0; i < arr.length; i++) {
-        temp.push(arr[i].innerHTML)
-    }
-    for (i = 0; i < temp.length; i++) {
-        temp1 = temp[i].replace('[', '');
-        temp2 = temp1.replace(']', '');
-        temp3 = temp2.split(",");
-        numArray = temp3.map((value) => {
-            return parseFloat(value);
-        });
-        graph_matrix.push(numArray)
-    }
-</script>
+<script src="../static/js/graph_upload.js"></script>
+<script src="../static/js/papaparse.js"></script>
+<script src="../static/js/jschardet.min.js"></script>
 
 </body>
 </html>
