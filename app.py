@@ -20,7 +20,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 # 用于执行病毒查杀
-import pyclamd
+#import pyclamd
 import pytesseract
 # 用于文字识别
 from PIL import Image
@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
-from model import user, db, login, mailconfirm
+#from model import user, db, login, mailconfirm
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
