@@ -523,6 +523,7 @@ window.onload = function () {
                         resolution: [window.innerWidth, window.innerHeight],
                         color: 0xFFFFFF,
                         lineWidth: 2,
+                        opacity:0.5
                     });
                     countryOverlay.add(geoMeshline);
                 }

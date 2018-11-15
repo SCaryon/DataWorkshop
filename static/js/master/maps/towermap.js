@@ -266,7 +266,7 @@ window.onload = function () {
         //包括IE6在内的浏览器是使用onmousewheel，而FireFox浏览器一个人使用DOMMouseScroll
         renderer.domElement.addEventListener('DOMMouseScroll', mousewheel, false);
         $(renderer.domElement).dblclick(function (e) {
-                cameraControls.zoom(10);
+            cameraControls.zoom(10);
         });
 
         if (darkMode)
@@ -366,10 +366,10 @@ window.onload = function () {
                         var avgLong = lon1 + Math.atan2(By, Math.cos(lat1) + Bx) * 180 / Math.PI;
 
                         //如果是二维的就提供首尾两点，三维的需要好几个点来确定一条曲线
-                            height = 0;
-                            color.setHSL(1, 1, 1);
-                            segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
-                            segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
+                        height = 0;
+                        color.setHSL(1, 1, 1);
+                        segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
+                        segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
 
                         line = Spline(segments, color.getHex(), 5 - j / 2);//返回一条线
                         Particlelinks.assignPositions(line.geometry.vertices, j, val.e);
@@ -542,9 +542,9 @@ window.onload = function () {
         filterCountry = co;
         var target = countries[co];
         if (target) {
-                        if (linksOn)
-                            addLinks("countries2D", co);
-                        cameraControls.center(target.lat * 1.55, target.lon * 1.55, 0);
+            if (linksOn)
+                addLinks("countries2D", co);
+            cameraControls.center(target.lat * 1.55, target.lon * 1.55, 0);
         }
     }
 
@@ -632,45 +632,45 @@ window.onload = function () {
 
             $(".selectionBox").stop().fadeIn();//停止正在运行的动画并渐进出现
 
-                //普通的塔状视图，可旋转
-                    previousMode = "2D";
-                    if (!reset)
-                        cameraControls.rotate(-Math.PI / 2, 3 * Math.PI / 4);
-                    scene.add(shape);
-                    var v = 0;
-                    loaded = false;
-                    zoomlock = false;
-                    var xaxis = 0, yaxis = 0, zaxis = 0;
-                    var randomCity, country = null;
-                    for (var i = 0; i < countryIndex; i++) {
-                        zaxis = 0;
-                        $.each(countries, function (p, o) {
-                            if (i == o.id) {
-                                country = o;
-                                code = p;
-                            }
-                        });
-                        xaxis = 0;
-                        yaxis = 0;
-                        // boxSize = Object.keys(country["products"]).length / 10000;
-                        //堆积成长宽各为5的Tower
-                        for (var j = 0; j < country.particles; j++) {
-                            if (xaxis > 5) {
-                                yaxis++;
-                                xaxis = 0;
-                            }
-                            if (yaxis > 5) {
-                                zaxis++;
-                                yaxis = 0;
-                            }
-                            destination[v * 3 + 0] = (country.lat) * 1.55 + (xaxis - 2.5) / 3;
-                            destination[v * 3 + 1] = (country.lon) * 1.55 + (yaxis - 2.5) / 3;
-                            destination[v * 3 + 2] = zaxis / 3;
-                            v++;
-                            xaxis++;
-                        }
+            //普通的塔状视图，可旋转
+            previousMode = "2D";
+            if (!reset)
+                cameraControls.rotate(-Math.PI / 2, 3 * Math.PI / 4);
+            scene.add(shape);
+            var v = 0;
+            loaded = false;
+            zoomlock = false;
+            var xaxis = 0, yaxis = 0, zaxis = 0;
+            var randomCity, country = null;
+            for (var i = 0; i < countryIndex; i++) {
+                zaxis = 0;
+                $.each(countries, function (p, o) {
+                    if (i == o.id) {
+                        country = o;
+                        code = p;
                     }
-                    loaded = true;
+                });
+                xaxis = 0;
+                yaxis = 0;
+                // boxSize = Object.keys(country["products"]).length / 10000;
+                //堆积成长宽各为5的Tower
+                for (var j = 0; j < country.particles; j++) {
+                    if (xaxis > 5) {
+                        yaxis++;
+                        xaxis = 0;
+                    }
+                    if (yaxis > 5) {
+                        zaxis++;
+                        yaxis = 0;
+                    }
+                    destination[v * 3 + 0] = (country.lat) * 1.55 + (xaxis - 2.5) / 3;
+                    destination[v * 3 + 1] = (country.lon) * 1.55 + (yaxis - 2.5) / 3;
+                    destination[v * 3 + 2] = zaxis / 3;
+                    v++;
+                    xaxis++;
+                }
+            }
+            loaded = true;
 
         }
         particlesPlaced = 0;
@@ -749,19 +749,18 @@ window.onload = function () {
 
     //根据当前的比例尺设定point的大小
     function animatePointSize(reset) {
-                testZoom = Math.round(Math.log(431 - particleSystem.position.z));
-            levels = [0.23, 0.23, 0.4, 0.8, 1, 1.3, 1.35, 1.38, 1.4, 1.41, 1.413, 1.4];
-            if (testZoom !== currentZoom || reset) {
-                currentZoom = testZoom;
-                var sizes = geometry.attributes.size.array;
-                for (var v = 0; v < particles / percentage; v++) {
-                    sizes[v] = levels[currentZoom];
-                }
-                geometry.attributes.size.needsUpdate = true;
+        testZoom = Math.round(Math.log(431 - particleSystem.position.z));
+        levels = [0.23, 0.23, 0.4, 0.8, 1, 1.3, 1.35, 1.38, 1.4, 1.41, 1.413, 1.4];
+        if (testZoom !== currentZoom || reset) {
+            currentZoom = testZoom;
+            var sizes = geometry.attributes.size.array;
+            for (var v = 0; v < particles / percentage; v++) {
+                sizes[v] = levels[currentZoom];
             }
+            geometry.attributes.size.needsUpdate = true;
+        }
 
     }
-
 
 
     //动画
