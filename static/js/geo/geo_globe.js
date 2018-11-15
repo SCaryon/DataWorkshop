@@ -9,12 +9,12 @@ window.onload = function () {
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
+    var globe = null;//存储sphere的边界信息
     var contrast = false;
     var percentage = 1;
     var loaded = false;//是否加载完毕
     var zoomlock = false;//禁止改变地图比例
     var selectedID = 0;//当前选中的节点（hover即选中）
-    var shape = null;//存储plane的边界信息
     var products = {};//存储产品，包括atlasid，color，id,name,sales,x,x3,y,y3,z3
     var countries = {};
     var trades = {};
@@ -91,7 +91,7 @@ window.onload = function () {
 
 
         UserInterface = new UI();
-        UserInterface.addSpinner();
+        // UserInterface.addSpinner();
 
         document.body.appendChild(renderer.domElement);
 
@@ -122,7 +122,6 @@ window.onload = function () {
         var count = 0;
         countryIndex = 0;
         var countryHTML = "";
-        var planeShapeIDs;
         var sphereShapeIDs;
 
         //载入边界信息
@@ -135,17 +134,35 @@ window.onload = function () {
                 blending: THREE.AdditiveBlending//决定物体如何与背景进行融合,提供一种半透明的眩光。
             });
 
-            temp = drawThreeGeo(json, 400, 'plane', scene, {
+            globe = new THREE.Object3D();
+            if (darkMode) {
+                globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x000000,
+                        opacity: 0.2
+                    })));
+            } else {
+                globe.add(new THREE.Mesh(new THREE.SphereGeometry(globeSize - 2, 32, 32),
+                    new THREE.MeshBasicMaterial({
+                        color: 0x04042a,
+                        opacity: 0.2
+                    })));
+            }
+
+            overlaySphere = new THREE.Mesh(new THREE.SphereGeometry(globeSize + 2, 32, 32), overlayMaterial);
+            overlaySphere.rotation.y = -Math.PI / 2;
+            globe.add(overlaySphere);
+            //画地图边界信息
+            temp = drawThreeGeo(json, globeSize * 1.45, 'sphere', scene, {
                 color: 0x7e7e7e,
                 linewidth: 2,
+                blending: THREE.AdditiveBlending,
                 transparent: true,
                 opacity: 0.7
             });
-            shape = new THREE.Object3D();
-            shape.add(temp[0]);//边界线
-            overlay = new THREE.Mesh(new THREE.PlaneGeometry(560, 280, 1, 1), overlayMaterial);
-            shape.add(overlay);
-            planeShapeIDs = temp[1];//边界线ID
+            sphereShapeIDs = temp[1];
+            globe.add(temp[0]);
+            globe.updateMatrix();
             renderer.render(scene, camera);
         });
 
@@ -156,9 +173,9 @@ window.onload = function () {
             $.each(corejson.countries, function (co, country) {
                 countries[co] = country;
             });
-            $.each(planeShapeIDs, function (shapeid, shapes) {
+            $.each(sphereShapeIDs, function (shapeid, shapes) {
                 if (countries[shapeid])
-                    countries[shapeid]["polygons"] = planeShapeIDs[shapeid];
+                    countries[shapeid]["polygons3D"] = sphereShapeIDs[shapeid];
             });
             $.each(corejson.products, function (pid, product) {
                 products[pid] = product;
@@ -231,7 +248,7 @@ window.onload = function () {
             particleSystem.frustrumCulled = true;
             scene.add(particleSystem);
             loaded = true;
-            switcher("towers", false, 3);
+            switcher("gridSphere", false, 5);
             Particlelinks = new ParticleLinks(13000, clock, darkMode);
             links = Particlelinks.getMesh();
             scene.add(links);
@@ -265,9 +282,6 @@ window.onload = function () {
         renderer.domElement.addEventListener("onmousewheel", mousewheel, false);
         //包括IE6在内的浏览器是使用onmousewheel，而FireFox浏览器一个人使用DOMMouseScroll
         renderer.domElement.addEventListener('DOMMouseScroll', mousewheel, false);
-        $(renderer.domElement).dblclick(function (e) {
-            cameraControls.zoom(10);
-        });
 
         if (darkMode)
             scene.add(new THREE.AmbientLight(0xFFFFFF));//环境光
@@ -366,22 +380,49 @@ window.onload = function () {
                         var avgLong = lon1 + Math.atan2(By, Math.cos(lat1) + Bx) * 180 / Math.PI;
 
                         //如果是二维的就提供首尾两点，三维的需要好几个点来确定一条曲线
-                        height = 0;
-                        color.setHSL(1, 1, 1);
-                        segments.push(new THREE.Vector3(country2.lat * 1.55, country2.lon * 1.55, height));
-                        segments.push(new THREE.Vector3(country.lat * 1.55, country.lon * 1.55, height));
+                        theta = (90 - country2.lon) * Math.PI / 180;
+                        phi = (country2.lat) * Math.PI / 180;
+                        sx = globeSize * Math.sin(theta) * Math.cos(phi);
+                        sy = globeSize * Math.sin(theta) * Math.sin(phi);
+                        sz = globeSize * Math.cos(theta);
 
+                        theta2 = (90 - country.lon) * Math.PI / 180;
+                        phi2 = (country.lat) * Math.PI / 180;
+                        tx = globeSize * Math.sin(theta2) * Math.cos(phi2);
+                        ty = globeSize * Math.sin(theta2) * Math.sin(phi2);
+                        tz = globeSize * Math.cos(theta2);
+
+                        avgX = (sx + tx) / 2;
+                        avgY = (sy + ty) / 2;
+                        avgZ = (sz + tz) / 2;
+                        dist = Math.sqrt(Math.pow(sx - tx, 2) + Math.pow(sy - ty, 2) + Math.pow(sz - tz, 2));
+                        //extrude=1+dist/globeSize/2;
+                        extrude = 1 + Math.pow(dist, 2) / 90000;
+                        intrude = 0.995;
+                        extrudeCenter = 1 + ((extrude - 1) * 1.5);
+                        var A = new THREE.Vector3(sx, sy, sz);
+                        segments.push(A.multiplyScalar(intrude));//multiplyScalar将A与常熟intrude相乘
+                        var C = new THREE.Vector3(sx + (tx - sx) / 3, sy + (ty - sy) / 3, sz + (tz - sz) / 3);
+                        segments.push(C.multiplyScalar(extrude));
+                        var E = new THREE.Vector3(sx + (tx - sx) / 2, sy + (ty - sy) / 2, sz + (tz - sz) / 2);
+                        segments.push(E.multiplyScalar(extrudeCenter));
+                        var D = new THREE.Vector3(sx + (tx - sx) * 2 / 3, sy + (ty - sy) * 2 / 3, sz + (tz - sz) * 2 / 3);
+                        segments.push(D.multiplyScalar(extrude));
+                        var B = new THREE.Vector3(tx, ty, tz);
+                        segments.push(B.multiplyScalar(intrude));
                         line = Spline(segments, color.getHex(), 5 - j / 2);//返回一条线
                         Particlelinks.assignPositions(line.geometry.vertices, j, val.e);
                         //links.add(line);
                         if (chosenCountry === "ALL") return false;
                     }
+
                 });
             }
         });
 
         links = Particlelinks.getMesh();
         scene.add(links);
+
     }
 
     //在三维的空间里画线
@@ -411,6 +452,11 @@ window.onload = function () {
         return (new THREE.Line(geometry, material, THREE.LineSegments));
     }
 
+    //？？？？对于粒子系统
+    function animateLinks() {
+        Particlelinks.animate();
+    }
+
     //在非产品空间移除连线
     function hideLinks() {
         scene.remove(links);
@@ -436,8 +482,7 @@ window.onload = function () {
         //如果是鼠标拖拽
         if (isDragging) {
             UserInterface.changeCursor("grabbing", cameraControls.isLocked());
-            if (previousMode === "3D" || currentSetup === "towers")
-                cameraControls.setTarget(mouseCoord.x - moveX, mouseCoord.y - moveY);
+            cameraControls.setTarget(mouseCoord.x - moveX, mouseCoord.y - moveY);
             mouseCoord.x = moveX;
             mouseCoord.y = moveY;
 
@@ -501,16 +546,18 @@ window.onload = function () {
             countryOverlay = new THREE.Object3D();
         }
         if (on) {
-            meshes = country.polygons;
+            meshes = country.polygons3D;
             if (!countryOverlay) countryOverlay = new THREE.Object3D();
             if (meshes != null)
                 for (var i = 0; i < meshes.length; i++) {
-                    currentMesh = shape.children[0].getObjectById(meshes[i], true).geometry.vertices;
-                    geoMeshline = new GeoMeshLine(currentMesh, {
+                    currentMesh = globe.children[2].getObjectById(meshes[i], true).geometry.vertices;
+                    // console.log(meshes,currentMesh);
+                    geoMeshline = new GeoMeshLine3D(currentMesh, {
                         resolution: [window.innerWidth, window.innerHeight],
                         color: 0xFFFFFF,
-                        lineWidth: 2,
+                        lineWidth: 3,
                     });
+                    // scene.add(geoMeshline);
                     countryOverlay.add(geoMeshline);
                 }
             scene.add(countryOverlay);
@@ -543,8 +590,10 @@ window.onload = function () {
         var target = countries[co];
         if (target) {
             if (linksOn)
-                addLinks("countries2D", co);
-            cameraControls.center(target.lat * 1.55, target.lon * 1.55, 0);
+                addLinks("countries3D", co);
+            if (center)
+                cameraControls.rotate(-(target.lat * Math.PI / 180 + Math.PI), -(target.lon * Math.PI / 180 - Math.PI) + 0.01);
+            //console.log(countries[co].lat * Math.PI / 180+Math.PI+" "+(countries[co].lon * Math.PI / 180+Math.PI);
         }
     }
 
@@ -585,16 +634,10 @@ window.onload = function () {
                     for (var s = 0; s < Math.round(country["products"][product] / dollars); s++) {
                         index = cat["total"];
                         if (!cat.active) {
-                            if (previousMode === "3D") {
-                                tetha = (categories[products[product].color].id) / 15 * Math.PI * 2;
-                                destination[v * 3 + 0] = 3000 * Math.cos(tetha);
-                                destination[v * 3 + 1] = 3000 * Math.sin(tetha);
-                                destination[v * 3 + 2] = 0;//globeSize*1.05+Math.random()*3;
-                            } else if (previousMode === "2D") {
-                                destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
-                                destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight;
-                                destination[v * 3 + 2] = 0;
-                            }
+                            tetha = (categories[products[product].color].id) / 15 * Math.PI * 2;
+                            destination[v * 3 + 0] = 3000 * Math.cos(tetha);
+                            destination[v * 3 + 1] = 3000 * Math.sin(tetha);
+                            destination[v * 3 + 2] = 0;
                         }
                         v++;
                     }
@@ -620,64 +663,174 @@ window.onload = function () {
 
                 cameraControls.center(0, 0, 0);
                 cameraSpeed = 5;
-                shape.position.set(0, 0, 0);
             }
 
             var v = 0;
-            scene.remove(shape);
-
+            scene.remove(globe);
             Labels.resetLabels(countries, darkMode);
             zoomlock = false;
             scene.remove(links);
 
             $(".selectionBox").stop().fadeIn();//停止正在运行的动画并渐进出现
 
-            //普通的塔状视图，可旋转
-            previousMode = "2D";
+
+            //普通的3D网格球
+            previousMode = "3D";
+            cameraControls.globe();
             if (!reset)
-                cameraControls.rotate(-Math.PI / 2, 3 * Math.PI / 4);
-            scene.add(shape);
+                cameraControls.rotate(-Math.PI / 2, Math.PI);
+            particleSystem.position.set(0, 0, 0);
+            globe.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+            particleSystem.rotation.z = -Math.PI / 2;
+            scene.add(globe);
             var v = 0;
             loaded = false;
             zoomlock = false;
-            var xaxis = 0, yaxis = 0, zaxis = 0;
             var randomCity, country = null;
-            for (var i = 0; i < countryIndex; i++) {
-                zaxis = 0;
+            var ray = globeSize;
+            var theta, phi;
+
+            var randomCity, code, country = null;
+            var shapecount = 0;
+            var inc = 0;
+            var particleCount = 0;
+
+
+            //求这个国家的正中心点和周长
+            function shapeCentroid(poly) {
+                var totalx = 0, totaly = 0, totalz = 0, perimeter = 0;
+                for (var l = 0; l < poly.length; l++) {
+                    totalx += poly[l].x;
+                    totaly += poly[l].y;
+                    totalz += poly[l].z;
+                    if (l < poly.length - 1) {
+                        perimeter += Math.sqrt(Math.pow(poly[l].x - poly[l + 1].x, 2) +
+                            Math.pow(poly[l].y - poly[l + 1].y, 2) +
+                            Math.pow(poly[l].z - poly[l + 1].z, 2));
+                    }
+                }
+                return [totalx / poly.length * 0.7, totaly / poly.length * 0.7, totalz / poly.length * 0.7, perimeter];
+            }
+
+            for (var i = 0; i < countryIndex; i++) {//对每个国家
+                //找到对应的country
                 $.each(countries, function (p, o) {
                     if (i == o.id) {
                         country = o;
                         code = p;
                     }
                 });
-                xaxis = 0;
-                yaxis = 0;
-                // boxSize = Object.keys(country["products"]).length / 10000;
-                //堆积成长宽各为5的Tower
-                for (var j = 0; j < country.particles; j++) {
-                    if (xaxis > 5) {
-                        yaxis++;
-                        xaxis = 0;
+                IDs = country.polygons3D;
+                var dotspacing = Math.pow(country.particles / country.area, 0.5) * 40;
+                /* 确定随机粒子分布的方法 */
+                if (IDs) {
+                    var p = 0;
+                    while (p < country.particles) {//对每个粒子
+                        for (var k = 0; k < IDs.length; k++) {//对每个边界线
+                            countryline = globe.children[2].getObjectById(IDs[k], true);//在globe中寻找到该边界线
+                            test = shapeCentroid(countryline.geometry.vertices);//找到该边界线（国界线）的中心点
+                            for (var j = 0; j < countryline.geometry.vertices.length - 1; j++) {//对边界线上的每个点
+                                r = Math.floor(Math.random() * (countryline.geometry.vertices.length - 1));
+                                vector = countryline.geometry.vertices[r];
+                                vector2 = countryline.geometry.vertices[r + 1];//任取线上两点
+                                AveLen = Math.sqrt(Math.pow(vector.x - vector2.x, 2) + Math.pow(vector.y - vector2.y, 2) + Math.pow(vector.z - vector2.z, 2)) / test[3] * countryline.geometry.vertices.length;
+                                for (var u = 0; u < AveLen; u++) {
+                                    rand = Math.random();
+
+                                    newx = -(vector.x + rand * (vector2.x - vector.x)) * 0.7;
+                                    newy = (vector.z + rand * (vector2.z - vector.z)) * 0.7;
+                                    newz = (vector.y + rand * (vector2.y - vector.y)) * 0.7;
+                                    theta = (90 - country.lon) * Math.PI / 180;
+                                    phi = (country.lat) * Math.PI / 180 + Math.PI / 2;
+                                    //rand=0.5+(Math.random()-0.5)*Math.random();
+                                    rand = 0.25 + (Math.random() - 0.25) * Math.random();
+                                    offsetX = 0, offsetY = 0, offsetZ = 0;
+                                    //对有多个边界线的国家进行分类讨论，确定它们的偏移量
+                                    if (k == 1 && code == "CN") offsetZ = 27;
+                                    if (k === 9 && code == "RU") offsetZ = 50;
+                                    if (k === 0 && code == "MX") {
+                                        if (r > 10 && r < 44) {
+                                            offsetX = -60;
+                                            offsetY = -15;
+                                        }
+                                    }
+                                    if (k === 0 && code == "TH") {
+                                        if (r > 6 && r < 24) {
+                                            offsetZ = 12;
+                                            offsetY = -3;
+                                        }
+                                    }
+                                    if (k === 0 && code == "IN") offsetY = -15;
+                                    if (k === 0 && code == "AE") offsetZ = 3;
+                                    if (k === 0 && code == "BR") offsetX = 50;
+                                    if (k === 1 && code == "GB") offsetX = 2;
+                                    if (k === 5 && code == "US") offsetY = 14;
+                                    if (k === 1 && code == "JP") offsetX = -10;
+                                    if (k === 10 && code == "CA") offsetZ = 20;
+                                    if (k === 2 && code == "IT") {
+
+                                        if (r < 5) offsetZ = -5;
+                                        if (r > 25 && r < 35) offsetZ = 5;
+                                        if (r > 40 && r < 47) offsetZ = -5;
+                                        offsetX = offsetZ;
+                                    }
+                                    newx2 = -test[0] + (2 * Math.random() - 1) * rand - offsetX;
+                                    newy2 = test[2] + (2 * Math.random() - 1) * rand - offsetY;
+                                    newz2 = test[1] + (2 * Math.random() - 1) * rand - offsetZ;
+                                    //len=Math.sqrt(Math.pow(vector.x-newx2,2)+Math.pow(vector.y-newy2,2)+Math.pow(vector.z-newz2,2));
+
+                                    //mod=1+country.area/150000000;
+                                    mod = 1;
+                                    newx2 = newx2 * (mod);
+                                    newy2 = newy2 * (mod);
+                                    newz2 = newz2 * (mod);
+
+                                    if (p < country.particles) {
+                                        newpoint = {
+                                            "x": newx + rand * (newx2 - newx),
+                                            "y": newy + rand * (newy2 - newy),
+                                            "z": newz + rand * (newz2 - newz)
+                                        };
+                                        len = Math.sqrt(newpoint.x * newpoint.x + newpoint.y * newpoint.y + newpoint.z * newpoint.z);
+
+                                        newpoint.x *= globeSize / len;
+                                        newpoint.y *= globeSize / len;
+                                        newpoint.z *= globeSize / len;
+                                        newpoint2 = {"x": test[0], "y": test[2], "z": test[1]};
+                                        polytest = false;
+                                        if (polytest) {
+                                            destination[v * 3 + 0] = 0;
+                                            destination[v * 3 + 1] = 0;
+                                            destination[v * 3 + 2] = 0;
+                                        } else {
+                                            destination[v * 3 + 0] = Math.round(newpoint.x * dotspacing) / dotspacing;
+                                            destination[v * 3 + 1] = Math.round(newpoint.y * dotspacing) / dotspacing;
+                                            destination[v * 3 + 2] = Math.round(newpoint.z * dotspacing) / dotspacing;
+                                        }
+                                        v++;
+                                        p++;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
-                    if (yaxis > 5) {
-                        zaxis++;
-                        yaxis = 0;
+                } else {
+                    for (var r = 0; r < country.particles; r++) {
+                        destination[v * 3 + 0] = 0;
+                        destination[v * 3 + 1] = 0;
+                        destination[v * 3 + 2] = 0;
+                        v++;
                     }
-                    destination[v * 3 + 0] = (country.lat) * 1.55 + (xaxis - 2.5) / 3;
-                    destination[v * 3 + 1] = (country.lon) * 1.55 + (yaxis - 2.5) / 3;
-                    destination[v * 3 + 2] = zaxis / 3;
-                    v++;
-                    xaxis++;
                 }
             }
             loaded = true;
-
         }
         particlesPlaced = 0;
         currentSetup = to;
         $("#countrySection").show();
         $("#productSection").hide();
-
         hideCategories();
     }
 
@@ -746,22 +899,81 @@ window.onload = function () {
         $("#UI").fadeIn();
     }
 
+    //高亮与正常模式之间的切换
+    $("#contrastbutton").click(function () {
+        if (!contrast) {
+            $(this).html("正常");
+            contrast = true;
+            constantSize = true;
+            changePointSize(3);
+
+            lines = globe.children[2];
+            for (var i = 0; i < lines.children.length; i++) {
+                lines.children[i].material.linewidth = 6
+            }
+
+        } else {
+            $(this).html("高亮");
+            contrast = false;
+            constantSize = false;
+
+            lines = globe.children[2];
+            for (var i = 0; i < lines.children.length; i++) {
+                lines.children[i].material.linewidth = 2
+            }
+            animatePointSize(true);
+        }
+    });
 
     //根据当前的比例尺设定point的大小
     function animatePointSize(reset) {
-        testZoom = Math.round(Math.log(431 - particleSystem.position.z));
-        levels = [0.23, 0.23, 0.4, 0.8, 1, 1.3, 1.35, 1.38, 1.4, 1.41, 1.413, 1.4];
-        if (testZoom !== currentZoom || reset) {
-            currentZoom = testZoom;
-            var sizes = geometry.attributes.size.array;
-            for (var v = 0; v < particles / percentage; v++) {
-                sizes[v] = levels[currentZoom];
+        if (currentSetup !== "productspace" && currentSetup !== "productsphere" && currentSetup !== "productspace3D" && !constantSize) {
+            if (previousMode === "2D")
+                testZoom = Math.round(Math.log(431 - particleSystem.position.z));
+            else {
+                zoom = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+                testZoom = Math.round(Math.log(zoom - globeSize - 20));
             }
-            geometry.attributes.size.needsUpdate = true;
+            levels = [0.23, 0.23, 0.4, 0.8, 1, 1.3, 1.35, 1.38, 1.4, 1.41, 1.413, 1.4];
+            if (testZoom !== currentZoom || reset) {
+                currentZoom = testZoom;
+                var sizes = geometry.attributes.size.array;
+                for (var v = 0; v < particles / percentage; v++) {
+                    sizes[v] = levels[currentZoom];
+                }
+                geometry.attributes.size.needsUpdate = true;
+            }
         }
-
     }
 
+    //改变点的大小，在产品空间的时候不起作用
+    function changePointSize(size) {
+        var sizes = geometry.attributes.size.array;
+        for (var v = 0; v < particles / percentage; v++) {
+            sizes[v] = size;
+        }
+        geometry.attributes.size.needsUpdate = true;
+    }
+
+    function animateOverlay(percentage) {
+        //对于第一二种模式
+        var test = true;
+        //测试目录中每个类型的活跃度
+        $.each(categories, function (col, val) {
+            if (!val.active) test = false;
+        });
+        if (test) {
+            overlay = globe.children[1];
+            //如果所有点都安放好的话，边界就改变透明度
+            if (percentage === 0) {//如果还有没安放好的点的话
+                overlayMaterial.opacity = Math.min(((cameraControls.getZoom() - 175) / 300), 0.6);
+            } else {
+                overlayMaterial.opacity = Math.min(percentage / 100, 0.6);
+            }
+        } else {
+            overlayMaterial.opacity = 0;
+        }
+    }
 
     //动画
     function animate() {
@@ -772,7 +984,7 @@ window.onload = function () {
         if (loaded) {
             if (links)
                 links.position.set(particleSystem.position.x, particleSystem.position.y, particleSystem.position.z);
-
+            animateLinks();
 
             var positions = geometry.attributes.position.array;
             var currentColor = new THREE.Color();
@@ -817,6 +1029,9 @@ window.onload = function () {
                         positions[v * 3 + 2] = destination[v * 3 + 2];
                     }
                 }
+                animateOverlay(particlesPlaced / particles);
+            } else {
+                animateOverlay(0);
             }
             geometry.attributes.position.needsUpdate = true;
             animatePointSize(false);
@@ -825,5 +1040,4 @@ window.onload = function () {
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     }
-
 };

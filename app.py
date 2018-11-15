@@ -20,7 +20,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 # 用于执行病毒查杀
-#import pyclamd
+# import pyclamd
 import pytesseract
 # 用于文字识别
 from PIL import Image
@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
-#from model import user, db, login, mailconfirm
+# from model import user, db, login, mailconfirm
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
@@ -471,7 +471,7 @@ def admin_id(id):
 def master_id(id):
     id = id.replace('<', '')
     id = id.replace('>', '')
-    return render_template('master/templates/masterproduct.html', mode=id)
+    return render_template('masterproduct.html', mode=id)
 
 
 # product master end
@@ -612,6 +612,11 @@ def geo_get():
 @app.route('/geo/line/', methods=['GET', 'POST'])
 def geo_line():
     return "true"
+
+
+@app.route('/geo/globe', methods=['GET', 'POST'])
+def geo_globe():
+    return render_template("geo/geo_globe.html")
 
 
 # 地图方法end

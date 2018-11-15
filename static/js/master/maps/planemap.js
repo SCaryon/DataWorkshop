@@ -522,7 +522,8 @@ window.onload = function () {
                     geoMeshline = new GeoMeshLine(currentMesh, {
                         resolution: [window.innerWidth, window.innerHeight],
                         color: 0xFFFFFF,
-                        lineWidth: 6,
+                        lineWidth: 2,
+                        opacity:0.5
                     });
                     countryOverlay.add(geoMeshline);
                 }
