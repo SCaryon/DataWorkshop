@@ -240,13 +240,31 @@
 
 </style>
 
-<div id="main" style="width: 600px;height:400px;"></div>
+<div id="echarts_river_pie">
+    <form class="upload" style='float:right;margin-top:100px'>
+                        <input type="file" id="time_csvfile" style="display:none" name="time_csvfile"
+                               onchange="data_file_path.value=this.value">
+                        <div id="data_file_path" name="data_file_path" class="fas fa-plus-circle"
+                             onclick="time_csvfile.click()" data-title='select your file'></div>
+                        <div class='fas fa-upload' onclick="read_time_file()" data-title='upload your file'></div>
+                        <div data-title='save your way' style="font-weight: 900">
+                            <a data-toggle="modal" data-target="#login" href=""
+                               style="color:black;display:inline-block">
+                                <span class="glyphicon glyphicon-log-in"></span></a>
+                        </div>
+                    </form>
+                    <!--用户上传自己的方法并给它命名-->
+    <div id="main" style="margin-top:100px;display:inline-block;width: 600px;height:400px;"></div>
+    <div id="data_pie" style="margin-top:100px;display:inline-block;width: 500px;height:400px;"></div>
+</div>
 <script type="text/javascript">
     var themeriver_data = [
         ['2015/11/08', 10, 'DQ'],
         ['2015/11/09', 15, 'DQ'],
         ['2015/11/10', 35, 'DQ'],
-        // ['2015/11/11',38,'DQ'],['2015/11/12',22,'DQ'],['2015/11/13',16,'DQ'],
+        ['2015/11/11',38,'DQ'],
+        ['2015/11/12',22,'DQ'],
+        ['2015/11/13',16,'DQ'],
         ['2015/11/14', 7, 'DQ'],
         ['2015/11/15', 2, 'DQ'],
         ['2015/11/16', 17, 'DQ'],
@@ -259,7 +277,9 @@
         ['2015/11/23', 32, 'DQ'],
         ['2015/11/24', 26, 'DQ'],
         ['2015/11/25', 22, 'DQ'],
-        // ['2015/11/26',16,'DQ'],['2015/11/27',22,'DQ'],['2015/11/28',10,'DQ'],
+        ['2015/11/26',16,'DQ'],
+        ['2015/11/27',22,'DQ'],
+        ['2015/11/28',10,'DQ'],
         ['2015/11/08', 35, 'TY'],
         ['2015/11/09', 36, 'TY'],
         ['2015/11/10', 37, 'TY'],
@@ -353,14 +373,42 @@
         ['2015/11/26', 16, 'DD'],
         ['2015/11/27', 22, 'DD'],
         ['2015/11/28', 10, 'DD']
-    ]
+    ];
+    var themeriver_data1= [
+        ['2015', 10, 'DQ'],
+        ['2016', 15, 'DQ'],
+        ['2017', 35, 'DQ'],
+        // ['2015/11/11',38,'DQ'],['2015/11/12',22,'DQ'],['2015/11/13',16,'DQ'],
+        // ['2015/11/26',16,'DQ'],['2015/11/27',22,'DQ'],['2015/11/28',10,'DQ'],
+        ['2015', 35, 'TY'],
+        ['2016', 42, 'TY'],
+        ['2017', 42, 'TY'],
+        ['2015', 35, 'SS'],
+        ['2016', 34, 'SS'],
+        ['2017', 28, 'SS'],
+        ['2015', 16, 'QG'],
+        ['2016', 22, 'QG'],
+        ['2017', 10, 'QG'],
+        ['2015', 16, 'SY'],
+        ['2016', 22, 'SY'],
+        ['2017', 10, 'SY'],
+        ['2015', 10, 'DD'],
+        ['2016', 15, 'DD'],
+        ['2017', 10, 'DD']
+    ];
     var theme_features = ['DQ', 'TY', 'SS', 'QG', 'SY', 'DD'];
-
+    var origin_pie_data=[
+                {value:10, name:'DQ'},
+                {value:35, name:'TY'},
+                {value:21, name:'SS'},
+                {value:10, name:'DD'},
+                {value:10, name:'SY'},
+            ];
     function themeriver(features = theme_features, theme_data = themeriver_data) {
-        var myChart = echarts.init(document.getElementById('main'));
+        themeriver_Chart = echarts.init(document.getElementById('main'));
         option = {
-
             tooltip: {
+                showContent: false,
                 trigger: 'axis',
                 axisPointer: {
                     type: 'line',
@@ -375,10 +423,17 @@
                 data: features//
             },
             singleAxis: {
-                // top: '8%',
+                top: 50,
+                bottom:50,
                 axisTick: {},
                 axisLabel: {},
                 type: 'time',
+                axisPointer: {
+            animation: true,
+            label: {
+                show: false
+            }
+        },
                 // position: 'top',
                 splitLine: {
                     show: true,
@@ -399,11 +454,94 @@
                 data: theme_data
             }]
         };
-        myChart.setOption(option);
+        themeriver_Chart.setOption(option);
+            themeriver_Chart.on('updateAxisPointer', function (event) {
+        var xAxisInfo = event.axesInfo[0];//.axesInfo[0];
+        if (xAxisInfo) {
+            var this_date = new Date(xAxisInfo.value);
+            var this_year = this_date.toLocaleDateString();//.toLocaleString();
+            var pie_data=[];
+            for(var i=0;i<theme_data.length;i++)
+            {
+                var item=theme_data[i];
+                var item_date = new Date(item[0]);//
+                var item_this_date=item_date.toLocaleDateString()//toLocaleString();// .split('/');
+                if(this_year==item_this_date)//if(item_date[0]==this_year &&(item_date[1]==this_month)&&(item_date[2]==this_day))
+                {
 
+                    pie_data.push({value:item[1],name:item[2]});
+                }
+            }
+            draw_pie(this_year,pie_data);
+        }
+    });
     }
+function draw_pie(title='data Pie',pie_data=origin_pie_data){
+pie_option = {
+    backgroundColor: '#ffffff',
+    title: {
+        text: title,
+        left: 'center',
+        top: 20,
+        textStyle: {
+            color: '#000000'
+        }
+    },
 
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+
+    visualMap: {
+        show: false,
+        min: 80,
+        max: 600,
+        inRange: {
+            colorLightness: [0.5,1]
+        }
+    },
+    series : [
+        {
+            name:title,
+            type:'pie',
+            id:'streaming data',
+            radius : '55%',
+            center: ['50%', '50%'],
+            data:pie_data.sort(function (a, b) { return a.value - b.value; }),
+            roseType: 'radius',
+            labelLine: {
+                normal: {
+                    lineStyle: {
+                        color: '#000000'
+                    },
+                    smooth: 0.2,
+                    length: 10,
+                    length2: 20
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: '#c23531',
+                    shadowBlur: 200,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            },
+
+            animationType: 'scale',
+            animationEasing: 'elasticOut',
+            animationDelay: function (idx) {
+                return Math.random() * 200;
+            }
+        }
+    ]
+};
+pie_Chart = echarts.init(document.getElementById('data_pie'));
+pie_Chart.setOption(pie_option);
+}
     themeriver();
+    draw_pie();
+
 </script>
 
 
@@ -437,19 +575,6 @@
 
                     <button id="generate" onclick="generate()">Generate</button>
                     <div class='demo-bg'></div>
-                    <form class="upload" style='float:right'>
-                        <input type="file" id="time_csvfile" style="display:none" name="time_csvfile"
-                               onchange="data_file_path.value=this.value">
-                        <div id="data_file_path" name="data_file_path" class="fas fa-plus-circle"
-                             onclick="time_csvfile.click()" data-title='select your file'></div>
-                        <div class='fas fa-upload' onclick="read_time_file()" data-title='upload your file'></div>
-                        <div data-title='save your way' style="font-weight: 900">
-                            <a data-toggle="modal" data-target="#login" href=""
-                               style="color:black;display:inline-block">
-                                <span class="glyphicon glyphicon-log-in"></span></a>
-                        </div>
-                    </form>
-                    <!--用户上传自己的方法并给它命名-->
                 </div>
             </div>
         </div>
