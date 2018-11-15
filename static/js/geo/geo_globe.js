@@ -562,30 +562,6 @@ window.onload = function () {
                 }
             scene.add(countryOverlay);
         }
-
-
-        // //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
-        // if (countryOverlay) {
-        //     for (var i = 0; i < countryOverlay.length; i++) {
-        //         currentMesh = scene.getObjectById(countryOverlay[i], true);
-        //         if (currentMesh) {
-        //             currentMesh.material.linewidth = 1;
-        //             currentMesh.material.opacity = 0.6;
-        //         }
-        //     }
-        // }
-        // if (on) {
-        //     meshes = country.polygons3D;
-        //     if (!countryOverlay) countryOverlay = [];
-        //     if (meshes != null)
-        //         for (var i = 0; i < meshes.length; i++) {
-        //             currentMesh = globe.children[2].getObjectById(meshes[i], true);
-        //             currentMesh.material.linewidth = 5;
-        //             currentMesh.material.opacity = 1;
-        //             countryOverlay.push(meshes[i]);
-        //         }
-        //
-        // }
     }
 
     /*鼠标按下的反应
@@ -658,16 +634,10 @@ window.onload = function () {
                     for (var s = 0; s < Math.round(country["products"][product] / dollars); s++) {
                         index = cat["total"];
                         if (!cat.active) {
-                            if (previousMode === "3D") {
-                                tetha = (categories[products[product].color].id) / 15 * Math.PI * 2;
-                                destination[v * 3 + 0] = 3000 * Math.cos(tetha);
-                                destination[v * 3 + 1] = 3000 * Math.sin(tetha);
-                                destination[v * 3 + 2] = 0;//globeSize*1.05+Math.random()*3;
-                            } else if (previousMode === "2D") {
-                                destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
-                                destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight / 4.7;
-                                destination[v * 3 + 2] = 0;
-                            }
+                            tetha = (categories[products[product].color].id) / 15 * Math.PI * 2;
+                            destination[v * 3 + 0] = 3000 * Math.cos(tetha);
+                            destination[v * 3 + 1] = 3000 * Math.sin(tetha);
+                            destination[v * 3 + 2] = 0;
                         }
                         v++;
                     }
@@ -725,16 +695,6 @@ window.onload = function () {
             var inc = 0;
             var particleCount = 0;
 
-            //判断这个点是否在这个国家。
-            // 注意到如果从P作水平向左的射线的话，如果P在多边形内部，那么这条射线与多边形的交点必为奇数，
-            //如果P在多边形外部，则交点个数必为偶数(0也在内)
-            function isPointInPoly(poly, pt) {
-                for (var c = false, i = -1, l = poly.length, j = l - 1; ++i < l; j = i)
-                    ((poly[i].y <= pt.y && pt.y < poly[j].y) || (poly[j].y <= pt.y && pt.y < poly[i].y))
-                    && (pt.x < (poly[j].x - poly[i].x) * (pt.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)
-                    && (c = !c);
-                return c;
-            }
 
             //求这个国家的正中心点和周长
             function shapeCentroid(poly) {
@@ -762,9 +722,7 @@ window.onload = function () {
                 });
                 IDs = country.polygons3D;
                 var dotspacing = Math.pow(country.particles / country.area, 0.5) * 40;
-                /* 确定随机粒子分布的方法
-                 *
-                 * */
+                /* 确定随机粒子分布的方法 */
                 if (IDs) {
                     var p = 0;
                     while (p < country.particles) {//对每个粒子
@@ -838,7 +796,7 @@ window.onload = function () {
                                         newpoint.x *= globeSize / len;
                                         newpoint.y *= globeSize / len;
                                         newpoint.z *= globeSize / len;
-                                        newpoint2 = {"x": test[0], "y": test[2], "z": test[1]}
+                                        newpoint2 = {"x": test[0], "y": test[2], "z": test[1]};
                                         polytest = false;
                                         if (polytest) {
                                             destination[v * 3 + 0] = 0;
@@ -854,7 +812,6 @@ window.onload = function () {
                                     } else {
                                         break;
                                     }
-
                                 }
                             }
                         }
@@ -869,14 +826,11 @@ window.onload = function () {
                 }
             }
             loaded = true;
-
-
         }
         particlesPlaced = 0;
         currentSetup = to;
         $("#countrySection").show();
         $("#productSection").hide();
-
         hideCategories();
     }
 

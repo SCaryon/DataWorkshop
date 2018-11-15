@@ -555,7 +555,7 @@ window.onload = function () {
                     geoMeshline = new GeoMeshLine3D(currentMesh, {
                         resolution: [window.innerWidth, window.innerHeight],
                         color: 0xFFFFFF,
-                        lineWidth: 3,
+                        lineWidth: 2,
                     });
                     // scene.add(geoMeshline);
                     countryOverlay.add(geoMeshline);

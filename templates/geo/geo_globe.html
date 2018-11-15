@@ -18,6 +18,7 @@
     <link href='/static/css/master/Rajdhani.css' rel='stylesheet' type='text/css'>
     <link href="/static/css/master/select2.css" rel="stylesheet" type="text/css">
     <script src="/static/js/master/select2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
     <style>
         #try {
             background-color: #04042a;
@@ -75,20 +76,18 @@
             <div id="backhome" onclick="window.location.href='/'">返回主页</div>
             <div id="showAbout">关于</div>
             <div id="fullscreen">全屏模式</div>
-            {% if mode=="globmap" or mode=="planemap" or mode=="towermap" %}
-                <div id="showlabels">隐藏图标</div>
-            {% endif %}
-            {% if mode=="globemap" or mode=="planemap" %}
-                <div id="contrastbutton">高亮</div>
-            {% endif %}
+            <div id="showlabels">隐藏图标</div>
+            <div id="contrastbutton">高亮</div>
             <div id="backgroundButton">改变背景</div>
-            {% if mode != "listmap" %}
-                <div id="selectcate">选择品类</div>
-                <div id="categories" style="display: none"></div>
-            {% else %}
-                <div id="selectcate_1">目录</div>
-                <div id="categories_1"></div>
-            {% endif %}
+            <div id="selectcate">选择品类</div>
+            <div id="uploadfile">
+                <input class="button_blue" id="file_path" name="file_path" type="button"
+                       onclick="path.click()" value="文件上传">
+                <input type="file" id="path" style="display:none" name="csvfile"
+                       onchange="file_path.value=this.value">
+                <input class="button_blue" type="button" onclick="read_file()" value="提交">
+            </div>
+            <div id="categories" style="display: none"></div>
         </div>
     </div>
 
@@ -161,6 +160,8 @@
 		gl_Position = projectionMatrix * mvPosition;
 	}
 
+
+
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -171,6 +172,8 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
+
+
 
 </script>
 
@@ -219,6 +222,8 @@
 
     }
 
+
+
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -238,6 +243,8 @@
       gl_FragColor = vec4(color.xyz, opacity);
 
     }
+
+
 
 </script>
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
