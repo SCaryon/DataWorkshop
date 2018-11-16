@@ -1371,8 +1371,8 @@ def time_upload():
             year = time_data_object['year'][item]
             for feature in time_data_object.keys():
                 if feature != 'year':
-                    feature_data = float(time_data_object[feature][item])
-                    data = [year, feature_data, feature]
+                    feature_data = time_data_object[feature][item]
+                    data = [str(int(year)), feature_data, feature]
                     themeriver_data.append(data)
         themeriver = {}
         themeriver['data'] = themeriver_data
