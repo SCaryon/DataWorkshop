@@ -162,6 +162,9 @@
 
 
 
+
+
+
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -172,6 +175,9 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
+
+
+
 
 
 
@@ -224,6 +230,9 @@
 
 
 
+
+
+
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -246,6 +255,9 @@
 
 
 
+
+
+
 </script>
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 
@@ -263,7 +275,10 @@
 <script src='/static/js/master/THREE.FullScreen.js'></script><!--关于全屏的方法-->
 <script src='/static/js/master/ParticleLinks.js'></script><!--基本没读懂，关于连线-->
 <script src="/static/js/master/URLparser.js"></script><!--URL解析器-->
-<script src="/static/js/geo/geo_globe.js"></script>
+<script src="/static/js/geo/{% if data %}
+{{ data }}
+{% else %}geo_globe.js
+{% endif %}"></script>
 
 <script>
     (function (i, s, o, g, r, a, m) {
@@ -282,6 +297,89 @@
     ga('send', 'pageview');
 </script>
 <script src='/static/js/master/THREEx.KeyboardState.js'></script><!--定义键盘事件-->
+<script src=" https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
+<script src="/static/js/papaparse.js"></script>
+<script>
+    //文件上传部分
+    $.fn.csv2arr = function (callback) {
+        if (typeof(FileReader) == 'undefined') {    //if not H5
+            alert("Your browser is too old,please use Chrome or Firefox");
+            return false;
+        }
+        if (!$(this)[0].files[0]) {
+            alert("Please select a file");
+            return false;
+        }
+        var fReader = new FileReader();
+        fReader.readAsDataURL($(this)[0].files[0]);
+        $fileDOM = $(this);
+        fReader.onload = function (evt) {
+            var data = evt.target.result;
+            var encoding = checkEncoding(data);
+            Papa.parse($($fileDOM)[0].files[0], {
+                encoding: encoding,
+                complete: function (results) {
+                    var res = results.data;
+                    {#console.log("成功进入geo");#}
+                    $.ajax({
+                        url: '/geo/plane/upload/',
+                        type: 'POST',
+                        data: {json_data: JSON.stringify(res)},
+                        dataType: 'html',
+                        success: function (res) {
+                            if (res == "true") {
+                                alert('success !');
+                                window.location.href = '/geo/globe/';
+                            } else if (res == "login in first!") {
+                                alert('Please login first!');
+                                window.location.href = "/login/";
+                            } else {
+                                alert('Unknown error.');
+                            }
+                        },
+                        error: function () {
+                            alert('Internet error');
+                        }
+                    });
+                    if (res[res.length - 1] == "") {
+                        res.pop();
+                    }
+                    callback && callback(res);
+                }
+            });
+        };
+        fReader.onerror = function (evt) {
+            alert("The file has changed,please select again.(Firefox)");
+        };
 
+        function checkEncoding(base64Str) {
+            var str = atob(base64Str.split(";base64,")[1]);
+            var encoding = jschardet.detect(str);
+            encoding = encoding.encoding;
+            console.log(encoding);
+            if (encoding == "windows-1252") {
+                encoding = "ANSI";
+            }
+            return encoding;
+        }
+    };
+
+    function read_file() {
+        var file_name = $("input[name=csvfile]").val();
+        if (file_name.lastIndexOf(".") != -1) {
+            var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
+            if (fileType == 'csv') {
+                $("input[name=csvfile]").csv2arr(function (res) {
+                });
+            }
+            else
+                alert("Please use csv file")
+        }
+    }
+
+    function uploadComplete(evt) {//py文件上传成功
+        alert(evt.target.responseText);
+    }
+</script>
 </body>
 </html>
