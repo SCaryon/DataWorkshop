@@ -37,6 +37,17 @@ from statistics import Statistics
 # 用于文字识别
 # 用于执行c和java程序
 
+from aip import AipOcr #引入百度api
+import jieba
+import wav2text#wav转text的自定义py文件
+from docx import Document
+#连接百度服务器的密钥
+APP_ID = '14658891'
+API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
+SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
+#连接百度服务器
+#输入三个密钥，返回服务器对象
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -1233,19 +1244,64 @@ def OCR():
     '''
 
 
-@app.route('/word_cloud/OCR', methods=['GET', 'POST'])
+@app.route('/word_cloud_OCR', methods=['GET', 'POST'])
 def picture_OCR():
     if request.method == 'POST':
-        f = request.files['image']
-        base_path = os.path.dirname(
-            __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
-        upload_path = os.path.join(base_path, '', secure_filename('image_by_upload.jpg'))
-        f.save(upload_path)
-        # C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
-        text = pytesseract.image_to_string(Image.open(upload_path), lang='eng')  # 设置为英文或阿拉伯字母的识别
-        result = text.replace('\n', ' ').replace(',', ' ').replace('.', ' ')
-        os.remove(upload_path)
-        return result
+        type=request.form.get('label')
+        if type == 'wav':
+            f = request.files['wav']
+            base_path = os.path.dirname(
+                __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+            upload_path = os.path.join(base_path, '', secure_filename('doc_by_upload.wav'))
+            f.save(upload_path)
+            result = wav2text.wav2word(upload_path)
+            result = json.loads(result)
+            print(result)
+            if result["err_msg"] != "success.":
+                return "err!:" + result["err_msg"]
+            else:
+                return (" ".join(jieba.cut("".join(result["result"]))))
+        if type == 'image':
+            f = request.files['image']
+            base_path = os.path.dirname(
+                __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+            upload_path = os.path.join(base_path, '', secure_filename('image_by_upload.jpg'))
+            f.save(upload_path)
+            # 读取刚储存的本地文件
+            with open(upload_path, 'rb') as fp:
+                image = fp.read()
+            # 输入刚读取的本地文件，调用百度文字识别，返回json格式识别结构
+            result = client.accurate(image)
+
+            # 将百度返回的分行结果连接成一行
+            raw = ""
+            for sresult in result["words_result"]:
+                raw += sresult["words"]
+
+            # 输入连续的文字，返回分词结果
+            x = (" ".join(jieba.cut(raw)))
+
+            # 向浏览器返回分次结果
+            return x
+        if type == 'docx':
+            f = request.files['docx']
+            base_path = os.path.dirname(
+                __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+            upload_path = os.path.join(base_path, '', secure_filename('doc_by_upload.docx'))
+            f.save(upload_path)
+            raw = ""
+            document = Document(upload_path)
+            for paragraph in document.paragraphs:
+                raw += paragraph.text
+                # 输入连续的文字，返回分词结果
+            x = (" ".join(jieba.cut(raw)))
+            # 向浏览器返回分次结果
+            print(x)
+            return x
+        else:
+            return "hello world!"
+
+
 
 
 @app.route('/graphgoo', methods=['POST', 'GET'])
