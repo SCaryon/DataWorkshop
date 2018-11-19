@@ -250,10 +250,13 @@ a {
         <div class="tailoring-content-one">
             <label title="上传图片" for="chooseImg" class="l2-btn choose-btn">
                 <input type="file" accept="image/jpg,image/jpeg,image/png" name="file" id="chooseImg" class="hidden" onchange="selectImg(this)">
-                本地上传
+                local upload
             </label>
-            <label title="重拍" class="l2-btn choose-btn" id='takeAgain' style="margin-left: 2%;">拍照上传</label>
-			<label title="拍照" class="l2-btn choose-btn" id='capture' style="margin-left: 2%;">拍照</label>
+            <label title="重拍" class="l2-btn choose-btn" id='takeAgain' style="margin-left: 2%;">photo upload</label>
+			<label title="拍照" class="l2-btn choose-btn" id='capture' style="margin-left: 2%;">take a picture</label>
+            <input type="file" id="text_file" style="display:none" name="text_file"  onchange="data_file_path.value=this.value">
+            <label id="data_file_path" name="data_file_path" class="l2-btn choose-btn" style="margin-left: 2%;"  onclick="text_file.click()" data-title='select your file'>select file</label>
+            <label class="l2-btn choose-btn" id='text_upload'  style="margin-left: 2%;" onclick="read_text_file()" data-title='upload your file'>upload</label>
             <div class="close-tailoring"  onclick="closeTailor(this)">×</div>
         </div>
         <div class="tailoring-content-two">
@@ -305,10 +308,6 @@ xhr.send(fd);
     }
     }
     }
-    </script>
-
-    <script>
-
     </script>
 <script>
     draw_knowledge()
@@ -429,7 +428,6 @@ var circle = svg.append("g").selectAll("circle")
     .style("fill",function(node){
         var color;//圆圈背景色
         var link=links[node.index];
-        console.log('22',link)
 
             color="#F0F0F0";
 
@@ -447,7 +445,6 @@ var circle = svg.append("g").selectAll("circle")
     .on("click",function(node){
         //单击时让连接线加粗
         edges_line.style("stroke-width",function(line){
-            console.log(line);
             if(line.source.name==node.name || line.target.name==node.name){
                 return 2;
             }else{
@@ -940,6 +937,85 @@ document.getElementById("draw_knowledge").style.display="none";
                 d3.selectAll("#angle-count, #angle-from, #angle-to").on("change", t).on("mouseup", t), t(), parseText(d3.select("#text").property("value"))
             }();}
     </script>
+<script>
+
+    /*
+    * $("#text_upload").on("click",function () {
+        var file_name=$("input[name=text_file]").val();
+    if (file_name.lastIndexOf(".")!=-1) {
+        var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
+        var formDate = new FormData();
+        formDate.append(fileType, document.getElementById('text_file').files[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/word_cloud/OCR',
+            data: formDate,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                document.getElementById('text').innerHTML = data;
+            },
+            error: function (data) {
+                alert('error');
+            }
+        });
+    }
+    });*/
+    function read_text_file(){
+    var file_name=$("input[name=text_file]").val();
+    if (file_name.lastIndexOf(".")!=-1){
+var fileType = (file_name.substring(file_name.lastIndexOf(".")+1,file_name.length)).toLowerCase();
+if(fileType=='docx')
+{
+var formDate = new FormData();
+        formDate.append('docx', document.getElementById('text_file').files[0]);//
+     formDate.append('label', 'docx');
+        $.ajax({
+            type: 'POST',
+            url: '/word_cloud_OCR',
+            data: formDate,
+            contentType: false,
+            processData: false,
+            success: function(data){
+                 closeTailor();
+                document.getElementById('text').innerHTML=data;
+            },
+            error: function(data){
+                console.log(data.responseText);
+            }
+        });
+    };
+
+if(fileType=='wav')
+{
+    var formDate = new FormData();
+        formDate.append('wav', document.getElementById('text_file').files[0]);//
+     formDate.append('label', 'wav');
+        $.ajax({
+            type: 'POST',
+            url: '/word_cloud_OCR',
+            data: formDate,
+            contentType: false,
+            processData: false,
+            success: function(data){
+                closeTailor();
+                document.getElementById('text').innerHTML=data;
+            },
+            error: function(data){
+                console.log(data.responseText);
+            }
+        });
+}
+}
+    }
+
+
+
+function uploadComplete(evt){//py文件上传成功
+        document.getElementById('text').innerHTML=evt.target.responseText;
+}
+
+</script>
 </body>
 </html>
 <!--上传图片并OCR识别-->
@@ -1047,9 +1123,10 @@ document.getElementById("draw_knowledge").style.display="none";
 
 		var formDate = new FormData();
         formDate.append('image', convertBase64UrlToBlob(base64url));
+        formDate.append('label','image');
         $.ajax({
             type: 'POST',
-            url: '/word_cloud/OCR',
+            url: '/word_cloud_OCR',
             data: formDate,
             contentType: false,
             processData: false,
@@ -1059,7 +1136,7 @@ document.getElementById("draw_knowledge").style.display="none";
             error: function(data){
                 alert('error');
             }
-        })
+        });
         //关闭裁剪框
         closeTailor();
     });
@@ -1089,7 +1166,7 @@ document.getElementById("draw_knowledge").style.display="none";
     let video = document.getElementById('video');
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
-    var mediaStreamTrack
+    var mediaStreamTrack;
     function success(stream) {
         //兼容webkit核心浏览器
         let CompatibleURL = window.URL || window.webkitURL;
@@ -1112,7 +1189,7 @@ document.getElementById("draw_knowledge").style.display="none";
         $('#tailoringImg').cropper('replace', canvas.toDataURL("image/png"),false);//默认false，适应高度，不失真
         $("#video").hide();//隐藏拍照框
         $("#showImg").show()//将拍照结果显示
-    })
+    });
 
     //请求拍照
     $("#takeAgain").bind("click", function(){
