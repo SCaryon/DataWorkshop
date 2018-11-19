@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
-# from model import user, db, login, mailconfirm
+from model import user, db, login, mailconfirm
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
@@ -625,9 +625,28 @@ def geo_line():
     return "true"
 
 
-@app.route('/geo/globe', methods=['GET', 'POST'])
+@app.route('/geo/globe/', methods=['GET', 'POST'])
 def geo_globe():
     return render_template("geo/geo_globe.html")
+
+
+# 用户上传plane数据
+@app.route('/geo/plane/upload/', methods=['GET', 'POST'])
+def geo_plane_upload():
+    global final_data_object
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                if not os.path.exists("./static/user/" + email + "/olddata/countries.json"):
+                    shutil.copyfile("./static/data/master/countries.json",
+                                    "./static/user/" + email + "/olddata/countries.json")
+            return render_template("geo/geo_globe.html",data="./static/user/" + email + "/olddata/countries.json")
+    else:
+        return "login in first!"
 
 
 # 地图方法end
