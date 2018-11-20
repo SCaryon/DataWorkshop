@@ -45,6 +45,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li><a onclick="download_report()" class="smoothScroll">Report</a></li>
                 <li><a href="/" class="smoothScroll">Home</a></li>
+                <li><a data-toggle="modal" data-target="#myModal" class="btn btn-lg">Upload File</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
                 <li><a href="#" class="smoothScroll">Contact us</a></li>
             </ul>
@@ -220,6 +221,29 @@
     </div>
 </section>
 
+<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                <h4 id="myModalLabel" class="modal-title">Upload File</h4>
+            </div>
+            <div class="modal-body">
+                <input class="button_blue" id="file_path" name="file_path" type="button"
+                           onclick="path.click()" value="File Upload">
+                <input type="file" id="path" style="display:none" name="csvfile"
+                           onchange="file_path.value=this.value">
+                <input class="button_blue" type="button" onclick="read_file()" value="Submit">
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default">Close</button>
+                <input class="button_blue" type="button" onclick="read_file()" value="Submit">
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="getdata">
     <ul id="table_features">
         {% for feature in features_list %}
@@ -350,7 +374,7 @@
 <script src="../static/js/scatter.js"></script>
 <script src="../static/js/fisheye.js"></script>
 <script src="../static/js/attribution.js"></script>
-
+<script src="../static/js/table_upload.js"></script>
 <script>
     function action_performed(url){
         window.location.href = url;
@@ -1580,8 +1604,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .scaleExtent([0, 20])
         .on("zoom", anomaly_zoomed);*/
     var anomaly_svg = d3.select("#analysis_anomaly_detection_svg").append("svg")
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize*1.1)
+        .attr("height", analysis_svgsize*1.1)
         .attr('id', 'anomaly_svg')
         .append('g')
         //.call(anomaly_zoom)
@@ -1653,8 +1677,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     regression_svg = d3.select("#analysis_regression_svg")       //create svg
         .append('svg')
         .attr('id', 'regression_svg')
-        .attr('width', analysis_svgsize)
-        .attr('height', analysis_svgsize)
+        .attr('width', analysis_svgsize*1.1)
+        .attr('height', analysis_svgsize*1.1)
         .append("g")
         //.call(regression_zoom)
         //.append("g");

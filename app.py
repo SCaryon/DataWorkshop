@@ -1364,12 +1364,14 @@ def graphgoo():
             NODES=graph_nodes,
             MATRIX=graph_matrix
         )
-        return render_template('graphgoo_homepage.html')
+        return render_template('graphgoo_homepage.html', nodes=graph_nodes, matrix=graph_matrix)
 
 
 @app.route('/graphgoo_home')
 def graphgoo_home():
-    return render_template('graphgoo_homepage.html')
+    graph_nodes = current_app.config['NODES']
+    graph_matrix = current_app.config['MATRIX']
+    return render_template('graphgoo_homepage.html', nodes=graph_nodes, matrix=graph_matrix)
 
 
 @app.route('/graph_layout2d/<layout>')
