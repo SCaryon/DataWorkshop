@@ -29,7 +29,7 @@ from werkzeug.utils import secure_filename
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
-from model import user, db, login, mailconfirm
+#from model import user, db, login, mailconfirm
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
@@ -1248,7 +1248,6 @@ def OCR():
         # C:\Users\Administrator\DataA\static\user\1361377791@qq.com\img
         text = pytesseract.image_to_string(Image.open(upload_path), lang='eng')  # 设置为英文或阿拉伯字母的识别
         result = text.replace('\n', ' ')
-        print(result)
         return 'success!'
     # return render_template("draw_text.html",result=result)
     '''
@@ -1275,10 +1274,11 @@ def picture_OCR():
             f.save(upload_path)
             result = wav2text.wav2word(upload_path)
             result = json.loads(result)
-            print(result)
             if result["err_msg"] != "success.":
+                os.remove(upload_path)
                 return "err!:" + result["err_msg"]
             else:
+                os.remove(upload_path)
                 return (" ".join(jieba.cut("".join(result["result"]))))
         if type == 'image':
             f = request.files['image']
@@ -1301,6 +1301,7 @@ def picture_OCR():
             x = (" ".join(jieba.cut(raw)))
 
             # 向浏览器返回分次结果
+            os.remove(upload_path)
             return x
         if type == 'docx':
             f = request.files['docx']
@@ -1315,10 +1316,10 @@ def picture_OCR():
                 # 输入连续的文字，返回分词结果
             x = (" ".join(jieba.cut(raw)))
             # 向浏览器返回分次结果
-            print(x)
+            os.remove(upload_path)
             return x
         else:
-            return "hello world!"
+            return "we don't support this type of file!"
 
 
 
