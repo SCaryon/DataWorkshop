@@ -4,9 +4,11 @@
     <script type="text/javascript" src="../static/js/jquery-1.11.3.js"></script>
     <link rel="stylesheet" href="../static/css/bootstrap.css">
     <script type='text/javascript' src='../static/js/cropper.min.js'></script>
-
+    <script src="../static/js/upload.js"></script>
     <link rel="stylesheet" type="text/css" href="../static/css/cropper.min.css" />
     <link rel="stylesheet" type="text/css" href="../static/css/ImgCropping.css" />
+    <script src="https://cdn.bootcss.com/PapaParse/4.4.0/papaparse.js"></script>
+    <script src=" https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
     <title>Text Graph</title>
 
     <meta name="description" content="">
@@ -149,6 +151,7 @@ a {
     margin-bottom: 10px;
 }
 
+
 </style>
 <body>
 
@@ -165,13 +168,19 @@ a {
                 <li><a href="/text_home" class="smoothScroll">Knowledge Graph</a></li>
                 <li><a onclick="draw_wordcloud()" class="smoothScroll">Word Cloud</a></li>
 
-
             </ul>
         </div>
   </div>
     </nav>
+    <div id="sub">
     <div id='h1_KnowledgeGraph'>
     <h1>Knowledge Graph</h1></div>
+
+    <input class="button_blue" id="file_path" name="file_path" type="button"
+    onclick="path.click()" value="File Upload">
+        <input type="file" id="path" style="display:none" name="csvfile"
+                           onchange="file_path.value=this.value">
+    <input class="button_blue" type="button" onclick="read_file2()" value="Submit"></div>
     <div id='h1_WordCloud'>
     <h1>Word Cloud</h1>
     <hr></div>
@@ -182,7 +191,8 @@ a {
                            onchange="file_path.value=this.value">
     <input class="button_blue" type="button" onclick="read_file()" value="Submit">#}
 
-    <div id="vis" style="float: left"></div>
+    <div id="append_vis" style=" text-align:center"></div>
+
     <form  id="form" >
 
         <p style="position: absolute; top: 0px; display: none;" id="status">1/1</p>
@@ -192,7 +202,7 @@ a {
             <p id="custom-area">
                 <p><label for="text"></label>
                 </p>
-                <p ><textarea style="width:970px;height: 220px;float: left" id="text">
+                <p ><textarea style="width:900px;height: 220px;float: left;" id="text">
 当地 时间 11月 6日 ，中国 在 日内瓦 一场 颇为 关键的 “反击战” 中，赢得 了 一次 “华丽 的 胜利”。
 当天 ， 联合国 人权 理事会 对 中国 进行了 第三轮 国别 人权 审议。这是继 2009  年 和 2013 年 之后 ，联合国 对 中国 人权 状况 的 又一次 例行 综合 考核 。面对 西方 少数 国家 的 偏见 ， 中国 方面 及时 予以 驳斥 、 说明 ， 并 赢得 大多数 与会 国家 的 理解、 认同 和 支持。
 11月 6日 ，在 瑞士 日内瓦 联合国 万国宫 ，与会 代表 参加 联合国 人权理事会 第三轮 国别 人权 审议。
@@ -201,7 +211,7 @@ a {
 阮宗泽 进一步 指出 ，西方 对 中国 的 指责 越来越 丧失 人心 在 意料之中。一 方面，作为 全球 人口 最多 的 国家 ，中国 积极 消除 贫困；另一方面，中国 并 不像 一些 国家 一样 存在 战争 ，中国 让 百姓 享受 到 和平， 这些 都是 对 人权 最好 的 保障 。大多数 国家 支持 中国，说明 这些 国家 都 看到 了 中国 人权 事业 的 进步。这些 国家 大部分 是 发展中 国家，对 中国 取得 这样 的 进步 都 能 感同身受。中国 人权 事业 的 进步 是 对 人类 和平 发展 及 人权 保障 作出 贡献。这 也是 中国 得到 广大 发展中 国家 支持 的 原因。
 
                 </textarea></p>
-             <div id="angles" style="float: right">
+             <div id="angles" style="float: right;padding-right:15px">
              <div style=" text-align: right">
             <div>
             <p><label for="max">Choose the number of impression words:</label> <input type="number" value="250" min="1" id="max">
@@ -238,7 +248,6 @@ a {
             <p><label for="font">Font:</label> <input type="text" id="font" value="Impact">
             </p>
         </div>
-
     </form>
 
 </div>
@@ -250,10 +259,10 @@ a {
         <div class="tailoring-content-one">
             <label title="上传图片" for="chooseImg" class="l2-btn choose-btn">
                 <input type="file" accept="image/jpg,image/jpeg,image/png" name="file" id="chooseImg" class="hidden" onchange="selectImg(this)">
-                local upload
+                上传图片
             </label>
-            <label title="重拍" class="l2-btn choose-btn" id='takeAgain' style="margin-left: 2%;">photo upload</label>
-			<label title="拍照" class="l2-btn choose-btn" id='capture' style="margin-left: 2%;">take a picture</label>
+            <label title="重拍" class="l2-btn choose-btn" id='takeAgain' style="margin-left: 2%;">打开摄像头</label>
+			<label title="拍照" class="l2-btn choose-btn" id='capture' style="margin-left: 2%;">shot</label>
             <input type="file" id="text_file" style="display:none" name="text_file"  onchange="data_file_path.value=this.value">
             <label id="data_file_path" name="data_file_path" class="l2-btn choose-btn" style="margin-left: 2%;"  onclick="text_file.click()" data-title='select your file'>select file</label>
             <label class="l2-btn choose-btn" id='text_upload'  style="margin-left: 2%;" onclick="read_text_file()" data-title='upload your file'>upload</label>
@@ -308,6 +317,57 @@ xhr.send(fd);
     }
     }
     }
+    </script>
+
+    <script>
+function read_text_file(){
+    var file_name=$("input[name=text_file]").val();
+    if (file_name.lastIndexOf(".")!=-1){
+var fileType = (file_name.substring(file_name.lastIndexOf(".")+1,file_name.length)).toLowerCase();
+if(fileType=='docx')
+{
+var formDate = new FormData();
+        formDate.append('docx', document.getElementById('text_file').files[0]);//
+     formDate.append('label', 'docx');
+        $.ajax({
+            type: 'POST',
+            url: '/word_cloud_OCR',
+            data: formDate,
+            contentType: false,
+            processData: false,
+            success: function(data){
+                 closeTailor();
+                document.getElementById('text').innerHTML=data;
+            },
+            error: function(data){
+                console.log(data.responseText);
+            }
+        });
+    };
+
+if(fileType=='wav')
+{
+    var formDate = new FormData();
+        formDate.append('wav', document.getElementById('text_file').files[0]);//
+     formDate.append('label', 'wav');
+        $.ajax({
+            type: 'POST',
+            url: '/word_cloud_OCR',
+            data: formDate,
+            contentType: false,
+            processData: false,
+            success: function(data){
+                closeTailor();
+                document.getElementById('text').innerHTML=data;
+            },
+            error: function(data){
+                console.log(data.responseText);
+            }
+        });
+}
+}
+    }
+    
     </script>
 <script>
     draw_knowledge()
@@ -428,6 +488,7 @@ var circle = svg.append("g").selectAll("circle")
     .style("fill",function(node){
         var color;//圆圈背景色
         var link=links[node.index];
+        console.log('22',link)
 
             color="#F0F0F0";
 
@@ -445,6 +506,7 @@ var circle = svg.append("g").selectAll("circle")
     .on("click",function(node){
         //单击时让连接线加粗
         edges_line.style("stroke-width",function(line){
+            console.log(line);
             if(line.source.name==node.name || line.target.name==node.name){
                 return 2;
             }else{
@@ -546,10 +608,11 @@ function transform2(d) {
     <!-- <script src="./Word Cloud Generator_files/cloud.min.js"></script> -->
     <script type="text/javascript">
         function draw_wordcloud(){
-       //     var body = d3.select("body");
-//var p = body.select("#draw_knowledge");
-//p.remove();
-     document.getElementById("h1_KnowledgeGraph").style.display="none";
+            var body = d3.select("body");
+            var p = body.select("#vis").remove();
+            body.select('#append_vis').append('div').attr('id','vis').style('text-align','center');
+
+     document.getElementById("sub").style.display="none";
      document.getElementById("h1_WordCloud").style.display="inline";
 document.getElementById("draw_knowledge").style.display="none";
             document.getElementById("to_display").style.display="inline";
@@ -840,8 +903,8 @@ document.getElementById("draw_knowledge").style.display="none";
         }("undefined" == typeof exports ? d3.layout || (d3.layout = {}) : exports);
         var unicodePunctuationRe = "!-#%-*,-/:;?@\\[-\\]_{}\xa1\xa7\xab\xb6\xb7\xbb\xbf\u037e\u0387\u055a-\u055f\u0589\u058a\u05be\u05c0\u05c3\u05c6\u05f3\u05f4\u0609\u060a\u060c\u060d\u061b\u061e\u061f\u066a-\u066d\u06d4\u0700-\u070d\u07f7-\u07f9\u0830-\u083e\u085e\u0964\u0965\u0970\u0af0\u0df4\u0e4f\u0e5a\u0e5b\u0f04-\u0f12\u0f14\u0f3a-\u0f3d\u0f85\u0fd0-\u0fd4\u0fd9\u0fda\u104a-\u104f\u10fb\u1360-\u1368\u1400\u166d\u166e\u169b\u169c\u16eb-\u16ed\u1735\u1736\u17d4-\u17d6\u17d8-\u17da\u1800-\u180a\u1944\u1945\u1a1e\u1a1f\u1aa0-\u1aa6\u1aa8-\u1aad\u1b5a-\u1b60\u1bfc-\u1bff\u1c3b-\u1c3f\u1c7e\u1c7f\u1cc0-\u1cc7\u1cd3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205e\u207d\u207e\u208d\u208e\u2329\u232a\u2768-\u2775\u27c5\u27c6\u27e6-\u27ef\u2983-\u2998\u29d8-\u29db\u29fc\u29fd\u2cf9-\u2cfc\u2cfe\u2cff\u2d70\u2e00-\u2e2e\u2e30-\u2e3b\u3001-\u3003\u3008-\u3011\u3014-\u301f\u3030\u303d\u30a0\u30fb\ua4fe\ua4ff\ua60d-\ua60f\ua673\ua67e\ua6f2-\ua6f7\ua874-\ua877\ua8ce\ua8cf\ua8f8-\ua8fa\ua92e\ua92f\ua95f\ua9c1-\ua9cd\ua9de\ua9df\uaa5c-\uaa5f\uaade\uaadf\uaaf0\uaaf1\uabeb\ufd3e\ufd3f\ufe10-\ufe19\ufe30-\ufe52\ufe54-\ufe61\ufe63\ufe68\ufe6a\ufe6b\uff01-\uff03\uff05-\uff0a\uff0c-\uff0f\uff1a\uff1b\uff1f\uff20\uff3b-\uff3d\uff3f\uff5b\uff5d\uff5f-\uff65",
             fill = d3.scale.category20b(),
-            w = 960,
-            h = 600,
+            w = 1000,
+            h = 750,
             words = [],
             max, scale = 1,
             complete = 0,
@@ -937,85 +1000,6 @@ document.getElementById("draw_knowledge").style.display="none";
                 d3.selectAll("#angle-count, #angle-from, #angle-to").on("change", t).on("mouseup", t), t(), parseText(d3.select("#text").property("value"))
             }();}
     </script>
-<script>
-
-    /*
-    * $("#text_upload").on("click",function () {
-        var file_name=$("input[name=text_file]").val();
-    if (file_name.lastIndexOf(".")!=-1) {
-        var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
-        var formDate = new FormData();
-        formDate.append(fileType, document.getElementById('text_file').files[0]);
-        $.ajax({
-            type: 'POST',
-            url: '/word_cloud/OCR',
-            data: formDate,
-            contentType: false,
-            processData: false,
-            success: function (data) {
-                document.getElementById('text').innerHTML = data;
-            },
-            error: function (data) {
-                alert('error');
-            }
-        });
-    }
-    });*/
-    function read_text_file(){
-    var file_name=$("input[name=text_file]").val();
-    if (file_name.lastIndexOf(".")!=-1){
-var fileType = (file_name.substring(file_name.lastIndexOf(".")+1,file_name.length)).toLowerCase();
-if(fileType=='docx')
-{
-var formDate = new FormData();
-        formDate.append('docx', document.getElementById('text_file').files[0]);//
-     formDate.append('label', 'docx');
-        $.ajax({
-            type: 'POST',
-            url: '/word_cloud_OCR',
-            data: formDate,
-            contentType: false,
-            processData: false,
-            success: function(data){
-                 closeTailor();
-                document.getElementById('text').innerHTML=data;
-            },
-            error: function(data){
-                console.log(data.responseText);
-            }
-        });
-    };
-
-if(fileType=='wav')
-{
-    var formDate = new FormData();
-        formDate.append('wav', document.getElementById('text_file').files[0]);//
-     formDate.append('label', 'wav');
-        $.ajax({
-            type: 'POST',
-            url: '/word_cloud_OCR',
-            data: formDate,
-            contentType: false,
-            processData: false,
-            success: function(data){
-                closeTailor();
-                document.getElementById('text').innerHTML=data;
-            },
-            error: function(data){
-                console.log(data.responseText);
-            }
-        });
-}
-}
-    }
-
-
-
-function uploadComplete(evt){//py文件上传成功
-        document.getElementById('text').innerHTML=evt.target.responseText;
-}
-
-</script>
 </body>
 </html>
 <!--上传图片并OCR识别-->
@@ -1123,7 +1107,7 @@ function uploadComplete(evt){//py文件上传成功
 
 		var formDate = new FormData();
         formDate.append('image', convertBase64UrlToBlob(base64url));
-        formDate.append('label','image');
+        formDate.append('label','image')
         $.ajax({
             type: 'POST',
             url: '/word_cloud_OCR',
@@ -1136,7 +1120,7 @@ function uploadComplete(evt){//py文件上传成功
             error: function(data){
                 alert('error');
             }
-        });
+        })
         //关闭裁剪框
         closeTailor();
     });
@@ -1166,7 +1150,7 @@ function uploadComplete(evt){//py文件上传成功
     let video = document.getElementById('video');
     let canvas = document.getElementById('canvas');
     let context = canvas.getContext('2d');
-    var mediaStreamTrack;
+    var mediaStreamTrack
     function success(stream) {
         //兼容webkit核心浏览器
         let CompatibleURL = window.URL || window.webkitURL;
@@ -1189,7 +1173,7 @@ function uploadComplete(evt){//py文件上传成功
         $('#tailoringImg').cropper('replace', canvas.toDataURL("image/png"),false);//默认false，适应高度，不失真
         $("#video").hide();//隐藏拍照框
         $("#showImg").show()//将拍照结果显示
-    });
+    })
 
     //请求拍照
     $("#takeAgain").bind("click", function(){
@@ -1212,5 +1196,78 @@ function uploadComplete(evt){//py文件上传成功
         } else {
             alert('不支持访问用户媒体');
         }
+    }
+
+
+
+    $.fn.csv2arr = function (callback) {
+    if (typeof(FileReader) == 'undefined') {    //if not H5
+        alert("Please use Chrome or Firefox");
+        return false;
+    }
+    if (!$(this)[0].files[0]) {
+        alert("Please select a file");
+        return false;
+    }
+    var fReader = new FileReader();
+    fReader.readAsDataURL($(this)[0].files[0]);
+    $fileDOM = $(this);
+    fReader.onload = function (evt) {
+        var data = evt.target.result;
+        var encoding = checkEncoding(data);
+        Papa.parse($($fileDOM)[0].files[0], {
+            encoding: encoding,
+            complete: function (results) {
+                var res = results.data;
+      $.ajax({
+                        url: '/textgoo',
+                        type: 'POST',
+                        data: {json_data: JSON.stringify(res)},
+                        success: function (res) {
+                            if (res) {
+                                alert('success !');
+                                window.location.href = '/text_home';
+                            }
+                            else {
+                                alert('Unknown error.');
+                            }
+                        },
+                        error: function () {
+                            alert('Internet error');
+                        }
+                    });
+       if (res[res.length - 1] == "") {
+                    res.pop();
+                }
+                callback && callback(res);
+            }
+        });
+    };
+    fReader.onerror = function (evt) {
+        alert("The file has changed,please select again.(Firefox)");
+    };
+
+    function checkEncoding(base64Str) {
+        var str = atob(base64Str.split(";base64,")[1]);
+        var encoding = jschardet.detect(str);
+        encoding = encoding.encoding;
+        console.log(encoding);
+        if (encoding == "windows-1252") {
+            encoding = "ANSI";
+        }
+        return encoding;
+    }
+};
+    function read_file2() {
+        var file_name=$("input[name=csvfile]").val();
+    if (file_name.lastIndexOf(".")!=-1){
+var fileType = (file_name.substring(file_name.lastIndexOf(".")+1,file_name.length)).toLowerCase();
+if(fileType=='csv')
+{
+        $("input[name=csvfile]").csv2arr(function (res) {
+        });
+    }
+
+    }
     }
 </script>
