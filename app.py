@@ -1318,6 +1318,11 @@ def picture_OCR():
             # 向浏览器返回分次结果
             os.remove(upload_path)
             return x
+        if type == 'text':
+            raw = request.form.get('text')
+            x = (" ".join(jieba.cut(raw)))
+            # 向浏览器返回分次结果
+            return x
         else:
             return "we don't support this type of file!"
 
