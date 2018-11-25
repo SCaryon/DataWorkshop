@@ -16,16 +16,19 @@ from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from io import StringIO
+import codecs
 
 import numpy as np
 import pandas as pd
+import pymysql
 # 用于执行病毒查杀
 # import pyclamd
 import pytesseract
 # 用于文字识别
 from PIL import Image
-from flask import Flask, request, json, render_template, session, jsonify, current_app
+from flask import Flask, request, json, render_template, session, jsonify, current_app, g
 from werkzeug.utils import secure_filename
+from xlrd import open_workbook
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
@@ -189,6 +192,7 @@ def create_differ_type_data(fea_list, da_list, type):
 @app.route('/')
 @app.route('/index')
 def index():
+    g.count = 0
     if session.get('email'):
         email = session.get('email')
         user1 = user.query.filter_by(email=email).first()
@@ -616,12 +620,176 @@ def geo_line():
 
 @app.route('/geo/globe/', methods=['GET', 'POST'])
 def geo_globe():
-    return render_template("geo/geo_globe.html")
+    if not session.get('email'):
+        return render_template("geo/geo_globe.html")
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/olddata/countries.json"):
+            return render_template("geo/geo_globe.html", data="/static/user/" + email)
+        else:
+            return render_template("geo/geo_globe.html")
+
+
+def file2db(file, jsonfile):
+    bk = open_workbook(file, encoding_override="utf-8")
+    try:
+        sh_export = bk.sheet_by_name("countries")
+        sh_product = bk.sheet_by_name("products")
+        sh_cate = bk.sheet_by_name('categories')
+    except:
+        return "no such sheet!"
+    else:
+        # 建立一个临时数据库链接，然后新建临时表，使用完成后drop掉。
+        # 就不用db.session这个玩意了，太难用了
+        try:
+            print(g.count)
+        except:
+            g.count = 0
+        else:
+            g.count = g.count + 1
+        email = g.count
+        dbcur = pymysql.connect(host="localhost", user='root', password='qazxswedcvfr', database='data')
+        cursor = dbcur.cursor()
+        sql = "drop table if exists export%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists product%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists category%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists country_pro%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists country%s" % email
+        cursor.execute(sql)
+        sql = "create table export%s (fromISO varchar(128),toISO varchar(128),product varchar(128)," \
+              "year INT ,Quantity FLOAT, primary key(fromISO,toISO,product,year))" % email
+        cursor.execute(sql)
+        sql = "create table category%s (color varchar(128),cateID INT ,name varchar(128),total int default 0" \
+              ",primary key (color))" % email
+        cursor.execute(sql)
+        sql = "create table product%s(products varchar(128),name varchar(128),color varchar(128)," \
+              "proID int,sale float default 0,primary key(products))" % email
+        cursor.execute(sql)
+        sql = "create table country_pro%s(fromISO varchar(128),product varchar(128),sale float," \
+              "primary key(fromISO,product))" % email
+        cursor.execute(sql)
+        sql = "create table country%s(fromISO varchar(128),export double , primary key(fromISO))" % email
+        cursor.execute(sql)
+        # values = []
+        nrows = sh_export.nrows
+        for i in range(0, nrows):
+            row_data = sh_export.row_values(i)
+            row = (row_data[0], row_data[1], row_data[2], row_data[3], row_data[4])
+            # values.append(row)
+            sql = "insert into export%s" % email + " values('%s','%s',%d, %d, %f)" % row
+            cursor.execute(sql)
+        sql = "insert into country_pro%s " \
+              "select fromISO,product,sum(Quantity) from export group by fromISO,product" % email
+        cursor.execute(sql)
+        sql = "insert into country%s " \
+              "select fromISO,sum(Quantity) from export group by fromISO" % email
+        cursor.execute(sql)
+
+        # print(sql)
+        # print(values)
+        dbcur.commit()
+
+        # values = []
+        nrows = sh_product.nrows
+        for i in range(0, nrows):
+            row_data = sh_product.row_values(i)
+            row = (row_data[0], row_data[1], row_data[2], row_data[3])
+            # values.append(row)
+            sql = "insert into product%s(products,name,color,proID)" % email + " values(%d,'%s','%s',%d)" % row
+            cursor.execute(sql)
+        cursor.execute("select product,sum(Quantity) from export%s group by product" % email)
+        result = cursor.fetchall()
+        # print(result)
+        for row in result:
+            pro = row[0]
+            sa = row[1]
+            # print("update product%s set sale=%f where products=%s" % (email, sa, pro))
+            cursor.execute("update product%s set sale=%f where products=%s" % (email, sa, pro))
+        dbcur.commit()
+
+        # values = []
+        nrows = sh_cate.nrows
+        for i in range(0, nrows):
+            row_data = sh_cate.row_values(i)
+            row = (row_data[0], row_data[1], row_data[2], row_data[3])
+            # values.append(row)
+            sql = "insert into category%s" % email + " values('%s','%s','%s',%d)" % row
+            cursor.execute(sql)
+        dbcur.commit()
+
+        with open(jsonfile, "r", encoding="UTF-8") as load_f:
+            load_dict = json.load(load_f)
+            # print(load_dict["countries"])
+            # json.dumps(load_dict, ensure_ascii=False)
+
+            for key in load_dict["countries"]:
+                load_dict["countries"][key]['products'] = {}
+                country = key
+                # print(country)
+                sql = "select * from country_pro%s where fromISO='%s'" % (email, country)
+                # print(sql)
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                dollars = 1000
+                particles = 0
+                for row in result:
+                    particles += row[2] / dollars
+                    load_dict["countries"][key]['products'][row[1]] = row[2]
+                load_dict["countries"][key]['particles'] = int(particles)
+
+                sql = "select export from country%s where fromISO='%s'" % (email, country)
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                # print(result)
+                for row in result:
+                    load_dict["countries"][key]['exports'] = row[0]
+
+            load_dict["categories"] = {}
+            sql = "select * from category%s" % email
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            for row in result:
+                load_dict['categories'][row[0]] = {}
+                load_dict['categories'][row[0]]['id'] = row[1]
+                load_dict['categories'][row[0]]['active'] = True
+                load_dict['categories'][row[0]]['name'] = row[2]
+                load_dict['categories'][row[0]]['total'] = row[3]
+
+            load_dict['products'] = {}
+            sql = "select * from product%s" % email
+            cursor.execute(sql)
+            result = cursor.fetchall()
+
+            for row in result:
+                load_dict['products'][row[0]] = {}
+                load_dict['products'][row[0]]['x'] = 0
+                load_dict['products'][row[0]]['y'] = 0
+                load_dict['products'][row[0]]['name'] = row[1]
+                load_dict['products'][row[0]]['color'] = row[2]
+                load_dict['products'][row[0]]['sales'] = row[4]
+                load_dict['products'][row[0]]['id'] = row[3]
+                load_dict['products'][row[0]]["atlasid"] = row[0]
+
+            with codecs.open(jsonfile, "w",encoding="UTF-8") as f:
+                json.dump(load_dict, f,ensure_ascii=False)
+
+            print("加载入文件完成...")
+            # print(load_dict["countries"])
+            # print(i["products"])
+
+        cursor.close()
+        dbcur.close()
+    return 'success'
 
 
 # 用户上传plane数据
-@app.route('/geo/plane/upload/', methods=['GET', 'POST'])
-def geo_plane_upload():
+@app.route('/geo/plane/upload/export/', methods=['GET', 'POST'])
+def geo_plane_upload_export():
     global final_data_object
     if session.get('email'):
         email = session.get('email')
@@ -631,9 +799,30 @@ def geo_plane_upload():
         else:
             if request.method == 'POST':
                 if not os.path.exists("./static/user/" + email + "/olddata/countries.json"):
-                    shutil.copyfile("./static/data/master/countries.json",
+                    shutil.copy("./static/data/master/countries.json",
                                     "./static/user/" + email + "/olddata/countries.json")
-            return render_template("geo/geo_globe.html",data="./static/user/" + email + "/olddata/countries.json")
+                path = "./static/user/" + email + "/olddata/"
+
+                file = request.files['file']
+                if file:
+                    old_file = path + "countries.xlsx"
+                    if os.path.exists(old_file):
+                        os.remove(old_file)
+                    file.save(old_file)
+
+                    if file2db(old_file, path + 'countries.json') == "no such sheet!":
+                        return "no such sheet!"
+                    else:
+                        return "success"
+                else:
+                    return "filename invalid or network error"
+            print("/static/user/" + email + "/olddata/countries.json")
+            if os.path.exists("./static/user/" + email + "/olddata/geo_globe.js"):
+                return "false"
+            else:
+                shutil.copyfile("./static/js/geo/geo_globe.js", "./static/user/" + email + "/olddata/geo_globe.json")
+
+            return "success"
     else:
         return "login in first!"
 

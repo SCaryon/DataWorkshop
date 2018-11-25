@@ -25,11 +25,11 @@ $.fn.csv2arr = function (callback) {
                         type: 'POST',
                         data: {json_data: JSON.stringify(res)},
                         success: function (data) {
-                            if(data){
+                            if (data) {
                                 alert('Your file was uploaded sucessfully!');
                                 window.location.href = '/home';
                             }
-                            else{
+                            else {
                                 alert('There is somthing wrong with your data!');
                                 window.location.href = '/clean';
                             }
@@ -76,7 +76,7 @@ $.fn.csv2arr = function (callback) {
                         }
                     });
                 }
-                else if($('input[name=select]:checked').val() == 'Graph'){
+                else if ($('input[name=select]:checked').val() == 'Graph') {
                     $.ajax({
                         url: '/graphgoo',
                         type: 'POST',
@@ -108,29 +108,28 @@ $.fn.csv2arr = function (callback) {
         return encoding;
     }
 };
+
 function read_file() {
-        var file_name=$("input[name=csvfile]").val();
-    if (file_name.lastIndexOf(".")!=-1){
-var fileType = (file_name.substring(file_name.lastIndexOf(".")+1,file_name.length)).toLowerCase();
-if(fileType=='csv')
-{
-        $("input[name=csvfile]").csv2arr(function (res) {
-        });
-    }
-    if((fileType=='jpg')||(fileType=='jpeg')||(fileType=='png')||(fileType=='pdf'))
-    {
-        var fd=new FormData();
+    var file_name = $("input[name=csvfile]").val();
+    if (file_name.lastIndexOf(".") != -1) {
+        var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
+        if (fileType == 'csv') {
+            $("input[name=csvfile]").csv2arr(function (res) {
+            });
+        }
+        if ((fileType == 'jpg') || (fileType == 'jpeg') || (fileType == 'png') || (fileType == 'pdf')) {
+            var fd = new FormData();
 
-fd.append("file",document.getElementsByName('csvfile')[0].files[0]);//这是获取上传的文件
+            fd.append("file", document.getElementsByName('csvfile')[0].files[0]);//这是获取上传的文件
 
-    var xhr=new XMLHttpRequest();
-    xhr.open("POST","/OCR");//要传到后台方法的路径
-    xhr.addEventListener("load",uploadComplete,false);
-xhr.send(fd);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/OCR");//要传到后台方法的路径
+            xhr.addEventListener("load", uploadComplete, false);
+            xhr.send(fd);
+        }
     }
-    }
-    }
+}
 
-    function uploadComplete(evt){//py文件上传成功
-alert(evt.target.responseText);
+function uploadComplete(evt) {//py文件上传成功
+    alert(evt.target.responseText);
 }

@@ -1,0 +1,87 @@
+1. 如下所示，在countries中的一个国家的样式是：
+"AO": {
+      "id": 0,
+      "products": {
+        "1211": 37675.65,
+        "0901": 1081094
+      },
+      "continent": 1,
+      "lat": "18.5",
+      "lon": "-12.5",
+      "exports": 47183737717.64896,
+      "particles": 470,
+      "name": "安哥拉",
+      "polygons": [
+        7,
+        8
+      ],
+      "polygons3D": [
+        304,
+        305
+      ],
+      "area": 1246700,
+      "sub": 2,
+      "iso": "AGO"
+}
+那么在更改countries的时候，我们仅需要提供的是下面的一个元组模型：
+countrynames    productid   productexport
+并且根据上述的内容，可以计算出来这个国家总的exports以及它的particles
+因此，对于countries元组，需要修改的只有两个child："products" and "exports"
+
+
+/**
+2. 对于categories.json，为了简单起见，我们现在认为一种product就是一类category。
+而在源数据中，一个category包含数千种products。
+"#FFE999": {
+      "id": 0,
+      "active": true,
+      "name": "动物和动物产品",
+      "probabilities": [
+        0.07,
+        0.05,
+      ],
+      "total": 2972
+    }
+   如上所示，我们只需要对product进行排序以后，给每个category一个id，name，令total=1即可
+
+3.对于products：
+ "1001": {
+      "x": 2.88703925,
+      "y": -90.513794,
+      "name": "小麦和梅斯林",
+      "color": "#FFC41C",
+      "sales": 51106552738,
+      "id": 87,
+      "atlasid": "1001"
+    },
+    它的x和y都是为产品空间准备的，我们可以将其设置为0,0，如果后面有计算以后再进行改变。
+    提示：这里我们默认categories和products是一个东西，但是并没有合并，这是为了以后扩展的时候可以使用
+    所以需要改变的是：name, color, sales, id, atlasid(这个属性可以暂时去掉或者调0)
+
+*/
+
+4. 对于trade.json:
+"AO": [
+      {
+        "c": "CN",
+        "e": 28678
+      },
+      {
+        "c": "IN",
+        "e": 6951
+      }
+    ]
+ 它需要一个元组
+ from   to  total
+
+只需要通过1进行计算即可。
+
+
+因此，我们只需要一个元组，这个元组包含了全球的两国之间的贸易内容，包括出发、目的地、数量、product即可
+然后根据这个可以计算出来任意出发和目的地之间的trade总量（这个或许可以不考虑）
+如果想要增加年份信息，那么我们就暂且增加一列年份好了。
+
+
+因此，我们的第一步目标是，将五列的数据导入库中存入数据库
+第二步：计算一个国家总的export和particles并存入数据库
+第三步：将所有的数据存入json的countries里面
