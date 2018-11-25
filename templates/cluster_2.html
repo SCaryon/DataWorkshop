@@ -585,6 +585,7 @@ window.default = {
             p.setAttribute('id','show_num'+j.toString());
             p.setAttribute('name',key1);//将name属性命名成value
             p.setAttribute('class','parameter');//用于获取参数----
+                p.style.color='#000000';
             p.innerHTML=key1+': '+parameter_data[0]+'('+parameter_data[0]+'---'+window.data[select_cluster][key1][1]+')';
             var bar = document.createElement('div');
             bar.setAttribute('class','bar');
