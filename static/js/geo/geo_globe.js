@@ -5,7 +5,7 @@ window.onload = function () {
     var UserInterface = null;
     var Labels = null;
     var parseURL = new URLparser();
-    var dollars = 100000000;//0.1billion
+    var dollars = 1000;//0.1billion
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
@@ -164,25 +164,35 @@ window.onload = function () {
             globe.add(temp[0]);
             globe.updateMatrix();
             renderer.render(scene, camera);
-        });
-
-
-        /*在countries.json文件里面包含了四个主要信息：
+            // console.log("before",sphereShapeIDs);
+            /*在countries.json文件里面包含了四个主要信息：
         载入country，trade，categories，和products*/
-        $.getJSON("/static/data/master/countries.json", function (corejson) {
+        // console.log($("#input_json").val());
+        $.getJSON("/static/user/1361377791@qq.com/olddata/countries.json", function (corejson) {
+        // $.getJSON("/static/data/master/countries.json", function (corejson) {
+        // $.getJSON($("#input_json").val(), function (corejson) {
             $.each(corejson.countries, function (co, country) {
                 countries[co] = country;
             });
-            $.each(sphereShapeIDs, function (shapeid, shapes) {
-                if (countries[shapeid])
-                    countries[shapeid]["polygons3D"] = sphereShapeIDs[shapeid];
-            });
+
             $.each(corejson.products, function (pid, product) {
                 products[pid] = product;
             });
             $.each(corejson.categories, function (cid, cat) {
                 categories[cid] = cat;
             });
+            // console.log(countries);
+            // console.log(products);
+            // console.log(categories);
+            // console.log(sphereShapeIDs);
+            $.each(sphereShapeIDs, function (shapeid, shapes) {
+                // console.log(sphereShapeIDs);
+                if (countries[shapeid])
+                    countries[shapeid]["polygons3D"] = sphereShapeIDs[shapeid];
+            });
+
+
+
             Labels = new LabelManager(countries);
 
             UserInterface.buildCategories(categories);
@@ -263,6 +273,10 @@ window.onload = function () {
             $("#spinner").fadeOut('slow');
             $('#choice').fadeIn('slow');
         });
+        });
+
+
+
 
         renderer.domElement.addEventListener("mousemove", mouseMove);
         renderer.domElement.addEventListener("mousedown", mouseDown);

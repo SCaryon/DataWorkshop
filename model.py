@@ -1,9 +1,8 @@
-from flask import Flask, url_for, request, redirect, render_template
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash,check_password_hash#转换密码用到的库
-import bcrypt
-import random
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash  # 转换密码用到的库
 
 app = Flask(__name__)
 
@@ -39,13 +38,12 @@ class user(db.Model):
     def __repr__(self):
         return '<user %r>' % self.username
 
-    def password(self,password):
-        self.password_hash=generate_password_hash(password)
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
 
     def check_password_hash(self, password):
         print(self.password_hash)
-        return check_password_hash(self.password_hash,password)
-
+        return check_password_hash(self.password_hash, password)
 
 
 class login(db.Model):
@@ -84,6 +82,51 @@ class methoduse(db.Model):
         self.module = module
         self.use_time = datetime.now()
         self.method = method
+
+
+class export(db.Model):
+    __tablename__ = "export"
+    fromISO = db.Column(db.String(128), primary_key=True)
+    toISO = db.Column(db.String(128), primary_key=True)
+    product = db.Column(db.String(128), primary_key=True)
+    year = db.Column(db.Integer, primary_key=True)
+    Quantity = db.Column(db.Float, default=0)
+
+    def __init__(self, fromISO, toISO, product, year, Quantity):
+        self.fromISO = fromISO
+        self.toISO = toISO
+        self.product = product
+        self.year = year
+        self.Quantity = Quantity
+
+
+class product(db.Model):
+    __tablename__ = "product"
+    products = db.Column(db.String(128), primary_key=True)
+    name = db.Column(db.String(128))
+    color = db.Column(db.String(128))
+    proID = db.Column(db.Integer)
+    sale = db.Column(db.Float, default=0)
+
+    def __init__(self, products, name, color, proID):
+        self.products = products
+        self.name = name
+        self.color = color
+        self.proID = proID
+
+
+class category(db.Model):
+    __tablename__ = "category"
+    color = db.Column(db.String(128), primary_key=True)
+    cateID = db.Column(db.Integer)
+    name = db.Column(db.String(128))
+    total = db.Column(db.Integer, default=0)
+
+    def __init__(self, color, cateId, name, total):
+        self.color = color
+        self.cateID = cateId
+        self.name = name
+        self.total = total
 
 
 # 映射到数据库中

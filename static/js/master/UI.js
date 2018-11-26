@@ -216,9 +216,10 @@ UI.prototype.addSpinner = function () {
 };
 //建立最下方的目录
 UI.prototype.buildCategories = function (categories) {
-    cats = ["动物和动物产品", "蔬菜产品", "食品", "矿物产品", "化学品联合工业", "塑料和橡胶", "皮革和毛皮", "木材和木制品", "纺织品", "鞋类和头饰", "石材和玻璃", "金属", "机电", "运输", "其他", "服务"];
+    cats = [];
     var catHTML = "<table>";
     $.each(categories, function (i, val) {
+        cats[val.id]=val.name;
         color = new THREE.Color(i);
         rgba = "rgba(" + Math.round(color.r * 295) + "," + Math.round(color.g * 295) + "," + Math.round(color.b * 295) + ",0.8)";
         catHTML += "<tr><td class='categoryButton' style='border-left:16px solid " + rgba + " ;'>" +

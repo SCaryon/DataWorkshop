@@ -26,7 +26,7 @@
     </style>
 </head>
 
-<body>
+<body id="allBody">
 
 <!--begin首页-->
 <div id="storyPrompt">
@@ -80,14 +80,18 @@
             <div id="contrastbutton">高亮</div>
             <div id="backgroundButton">改变背景</div>
             <div id="selectcate">选择品类</div>
-            <div id="uploadfile">
+            <div id="uploadexport">
                 <input class="button_blue" id="file_path" name="file_path" type="button"
-                       onclick="path.click()" value="文件上传">
+                       onclick="path.click()" value="贸易信息上传">
                 <input type="file" id="path" style="display:none" name="csvfile"
                        onchange="file_path.value=this.value">
-                <input class="button_blue" type="button" onclick="read_file()" value="提交">
+                <input class="button_blue" id="submit" type="button" onclick="read_file()" value="提交">
             </div>
+
             <div id="categories" style="display: none"></div>
+            <input id="input_json" style="display: none" value="
+                    {% if data %}{{ data }}"+"/olddata/countries.json"
+            {% else %}/static/data/master/countries.json"{% endif %}">
         </div>
     </div>
 
@@ -164,7 +168,6 @@
 
 
 
-
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -175,7 +178,6 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
-
 
 
 
@@ -232,7 +234,6 @@
 
 
 
-
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -257,7 +258,6 @@
 
 
 
-
 </script>
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 
@@ -275,11 +275,10 @@
 <script src='/static/js/master/THREE.FullScreen.js'></script><!--关于全屏的方法-->
 <script src='/static/js/master/ParticleLinks.js'></script><!--基本没读懂，关于连线-->
 <script src="/static/js/master/URLparser.js"></script><!--URL解析器-->
-<script src="/static/js/geo/{% if data %}
-{{ data }}
-{% else %}geo_globe.js
-{% endif %}"></script>
-
+{% if data %}
+<script src="/static/js/geo/geo_globe.js"></script>
+{% else %}<script src="/static/js/geo/geo_globe.js"></script>
+{% endif %}
 <script>
     (function (i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -301,84 +300,32 @@
 <script src="/static/js/papaparse.js"></script>
 <script>
     //文件上传部分
-    $.fn.csv2arr = function (callback) {
-        if (typeof(FileReader) == 'undefined') {    //if not H5
-            alert("Your browser is too old,please use Chrome or Firefox");
-            return false;
-        }
-        if (!$(this)[0].files[0]) {
-            alert("Please select a file");
-            return false;
-        }
-        var fReader = new FileReader();
-        fReader.readAsDataURL($(this)[0].files[0]);
-        $fileDOM = $(this);
-        fReader.onload = function (evt) {
-            var data = evt.target.result;
-            var encoding = checkEncoding(data);
-            Papa.parse($($fileDOM)[0].files[0], {
-                encoding: encoding,
-                complete: function (results) {
-                    var res = results.data;
-                    {#console.log("成功进入geo");#}
-                    $.ajax({
-                        url: '/geo/plane/upload/',
-                        type: 'POST',
-                        data: {json_data: JSON.stringify(res)},
-                        dataType: 'html',
-                        success: function (res) {
-                            if (res == "true") {
-                                alert('success !');
-                                window.location.href = '/geo/globe/';
-                            } else if (res == "login in first!") {
-                                alert('Please login first!');
-                                window.location.href = "/login/";
-                            } else {
-                                alert('Unknown error.');
-                            }
-                        },
-                        error: function () {
-                            alert('Internet error');
-                        }
-                    });
-                    if (res[res.length - 1] == "") {
-                        res.pop();
-                    }
-                    callback && callback(res);
-                }
-            });
-        };
-        fReader.onerror = function (evt) {
-            alert("The file has changed,please select again.(Firefox)");
-        };
-
-        function checkEncoding(base64Str) {
-            var str = atob(base64Str.split(";base64,")[1]);
-            var encoding = jschardet.detect(str);
-            encoding = encoding.encoding;
-            console.log(encoding);
-            if (encoding == "windows-1252") {
-                encoding = "ANSI";
-            }
-            return encoding;
-        }
-    };
-
     function read_file() {
-        var file_name = $("input[name=csvfile]").val();
-        if (file_name.lastIndexOf(".") != -1) {
-            var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
-            if (fileType == 'csv') {
-                $("input[name=csvfile]").csv2arr(function (res) {
-                });
+        var formData = new FormData();
+        formData.append('file', $('#path')[0].files[0]);
+        $.ajax({
+            type: "POST",
+            url: "/geo/plane/upload/export/",
+            data: formData,
+            processData: false,
+            contentType: false,
+            {#dataType:'html',#}
+            success(res) {
+                if (res == "success") {
+                    alert('上传成功！');
+                    window.location.href="/geo/globe/"
+                }
+                else if (res=="login in first!"){
+                    alert(res);
+                    window.location.href="/login/"
+                }
+                else {
+                    alert(res)
+                }
+            }, error() {
+                alert("Internet error");
             }
-            else
-                alert("Please use csv file")
-        }
-    }
-
-    function uploadComplete(evt) {//py文件上传成功
-        alert(evt.target.responseText);
+        });
     }
 </script>
 </body>
