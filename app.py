@@ -20,7 +20,7 @@ import codecs
 
 import numpy as np
 import pandas as pd
-import pymysql
+#import pymysql
 # 用于执行病毒查杀
 # import pyclamd
 import pytesseract
@@ -28,7 +28,7 @@ import pytesseract
 from PIL import Image
 from flask import Flask, request, json, render_template, session, jsonify, current_app, g
 from werkzeug.utils import secure_filename
-from xlrd import open_workbook
+#from xlrd import open_workbook
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
@@ -1580,21 +1580,34 @@ def graph_layout2d(layout):
 def streaming_data():
     global time_data_object
     time_data_object = {}
-    final_data = csv.reader(open('./static/data/streaming_data/data1.csv'))
+    final_data = csv.reader(open('./static/data/streaming_data/initial_streaming_data.csv'))
     year = []
-    num = []
-    values = []
+    DQ = []
+    TY = []
+    SS = []
+    QG = []
+    SY = []
+    DD = []
     for i in final_data:
-        if (len(i) == 0):
+        if (len(i)==0):
             break
         year.append(int(i[0]))
-        num.append(float(i[1]))
-        values.append(float(i[2]))
+        DQ.append(float(i[1]))
+        TY.append(float(i[2]))
+        SS.append(float(i[2]))
+        QG.append(float(i[1]))
+        SY.append(float(i[2]))
+        DD.append(float(i[2]))
     time_data_object = {}
     time_data_object['year'] = year
-    time_data_object['num'] = num
-    time_data_object['values'] = values
-    return render_template('time.html', attr=final_data_object)
+    time_data_object['DQ'] = DQ
+    time_data_object['TY'] = TY
+    time_data_object['SS'] = SS
+    time_data_object['QG'] = QG
+    time_data_object['SY'] = SY
+    time_data_object['DD'] = DD
+
+    return render_template('time.html')
 
 
 @app.route('/time_upload', methods=['GET', 'POST'])
@@ -1618,7 +1631,10 @@ def time_upload():
             if '' in final_data[i]:
                 continue
             for j in range(len(final_data[i])):  # 对每一行都进行数据提取
-                time_data_object[features_list[j]].append(float(final_data[i][j]))
+                if features_list[j]=='year':
+                    time_data_object['year'].append(float(final_data[i][j]))
+                else:
+                    time_data_object[features_list[j]].append(float(final_data[i][j]))
         themeriver_data = []
         for item in range(len(time_data_object['year'])):
             year = time_data_object['year'][item]
@@ -1648,6 +1664,7 @@ def Exponential_smoothing():
         if attribution is not None:
             number = time_data_object[attribution]
         else:
+            #会出错吗？？？？？？？？？？？？？？？？
             number = time_data_object['values']
         data = []
         for i in range(len(time_data_object['year'])):
