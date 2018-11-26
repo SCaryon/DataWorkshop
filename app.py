@@ -32,7 +32,7 @@ from xlrd import open_workbook
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
-#from model import user, db, login, mailconfirm
+from model import user, db, login, mailconfirm
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
@@ -40,17 +40,17 @@ from statistics import Statistics
 # 用于文字识别
 # 用于执行c和java程序
 
-from aip import AipOcr #引入百度api
+# from aip import AipOcr #引入百度api
 import jieba
 import wav2text#wav转text的自定义py文件
-from docx import Document
+# from docx import Document
 #连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 #连接百度服务器
 #输入三个密钥，返回服务器对象
-client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -234,6 +234,7 @@ def login_pass():
     else:
         session.clear()
         session['email'] = email
+        session['user_id']=theuser.id
         session.permanent = True
         login1 = login(email=email)
         db.session.add(login1)

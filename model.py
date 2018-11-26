@@ -20,6 +20,7 @@ db = SQLAlchemy(app)
 class user(db.Model):
     __tablename__ = 'user'
     email = db.Column(db.String(128), primary_key=True)
+    id = db.Column(db.Integer,  primary_key=True, autoincrement=True)
     username = db.Column(db.String(128), unique=True)
     password_hash = db.Column(db.String(128), nullable=False)
     register_on = db.Column(db.DateTime, nullable=False)
@@ -84,49 +85,49 @@ class methoduse(db.Model):
         self.method = method
 
 
-class export(db.Model):
-    __tablename__ = "export"
-    fromISO = db.Column(db.String(128), primary_key=True)
-    toISO = db.Column(db.String(128), primary_key=True)
-    product = db.Column(db.String(128), primary_key=True)
-    year = db.Column(db.Integer, primary_key=True)
-    Quantity = db.Column(db.Float, default=0)
-
-    def __init__(self, fromISO, toISO, product, year, Quantity):
-        self.fromISO = fromISO
-        self.toISO = toISO
-        self.product = product
-        self.year = year
-        self.Quantity = Quantity
-
-
-class product(db.Model):
-    __tablename__ = "product"
-    products = db.Column(db.String(128), primary_key=True)
-    name = db.Column(db.String(128))
-    color = db.Column(db.String(128))
-    proID = db.Column(db.Integer)
-    sale = db.Column(db.Float, default=0)
-
-    def __init__(self, products, name, color, proID):
-        self.products = products
-        self.name = name
-        self.color = color
-        self.proID = proID
-
-
-class category(db.Model):
-    __tablename__ = "category"
-    color = db.Column(db.String(128), primary_key=True)
-    cateID = db.Column(db.Integer)
-    name = db.Column(db.String(128))
-    total = db.Column(db.Integer, default=0)
-
-    def __init__(self, color, cateId, name, total):
-        self.color = color
-        self.cateID = cateId
-        self.name = name
-        self.total = total
+# class export(db.Model):
+#     __tablename__ = "export"
+#     fromISO = db.Column(db.String(128), primary_key=True)
+#     toISO = db.Column(db.String(128), primary_key=True)
+#     product = db.Column(db.String(128), primary_key=True)
+#     year = db.Column(db.Integer, primary_key=True)
+#     Quantity = db.Column(db.Float, default=0)
+#
+#     def __init__(self, fromISO, toISO, product, year, Quantity):
+#         self.fromISO = fromISO
+#         self.toISO = toISO
+#         self.product = product
+#         self.year = year
+#         self.Quantity = Quantity
+#
+#
+# class product(db.Model):
+#     __tablename__ = "product"
+#     products = db.Column(db.String(128), primary_key=True)
+#     name = db.Column(db.String(128))
+#     color = db.Column(db.String(128))
+#     proID = db.Column(db.Integer)
+#     sale = db.Column(db.Float, default=0)
+#
+#     def __init__(self, products, name, color, proID):
+#         self.products = products
+#         self.name = name
+#         self.color = color
+#         self.proID = proID
+#
+#
+# class category(db.Model):
+#     __tablename__ = "category"
+#     color = db.Column(db.String(128), primary_key=True)
+#     cateID = db.Column(db.Integer)
+#     name = db.Column(db.String(128))
+#     total = db.Column(db.Integer, default=0)
+#
+#     def __init__(self, color, cateId, name, total):
+#         self.color = color
+#         self.cateID = cateId
+#         self.name = name
+#         self.total = total
 
 
 # 映射到数据库中
