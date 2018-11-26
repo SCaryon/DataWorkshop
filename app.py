@@ -1125,7 +1125,7 @@ def cluster_way():
                 parameters[key] = request.get_json()[key]
         # n_clusters = int(request.get_json()['cluster'])
         # use_method = int(request.get_json()['method'])
-    parameters['data'] = final_data_object['no_identifiers_data_list']  # 用户输入的数据csv
+    parameters['data'] = current_app.config['TABLE_DATA']#final_data_object['no_identifiers_data_list']  # 用户输入的数据csv
 
     cluster_method = request.get_json()['cluster_method']
     result = getattr(ClusterWay(), cluster_method)(parameters)
