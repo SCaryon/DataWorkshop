@@ -32,7 +32,7 @@ from werkzeug.utils import secure_filename
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
-#from model import user, db, login, mailconfirm
+from model import user, db, login, mailconfirm
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
@@ -40,17 +40,18 @@ from statistics import Statistics
 # 用于文字识别
 # 用于执行c和java程序
 
-from aip import AipOcr #引入百度api
+# from aip import AipOcr #引入百度api
 import jieba
-import wav2text#wav转text的自定义py文件
-from docx import Document
-#连接百度服务器的密钥
+import wav2text  # wav转text的自定义py文件
+
+# from docx import Document
+# 连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
-#连接百度服务器
-#输入三个密钥，返回服务器对象
-client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+# 连接百度服务器
+# 输入三个密钥，返回服务器对象
+# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -234,6 +235,7 @@ def login_pass():
     else:
         session.clear()
         session['email'] = email
+        session['user_id'] = theuser.id
         session.permanent = True
         login1 = login(email=email)
         db.session.add(login1)
@@ -562,7 +564,6 @@ def geo_admin_upload():
         final_data_object['province'] = province
         final_data_object['data'] = final_data
         final_data_object['attr'] = attr
-        # print("province:", province, ",\nattr:", attr, ",\ndata", final_data)
         return "true"
     else:
         return "false"
@@ -786,8 +787,8 @@ def file2db(file, jsonfile):
                 load_dict['products'][row[0]]['id'] = row[3]
                 load_dict['products'][row[0]]["atlasid"] = row[0]
 
-            with codecs.open(jsonfile, "w",encoding="UTF-8") as f:
-                json.dump(load_dict, f,ensure_ascii=False)
+            with codecs.open(jsonfile, "w", encoding="UTF-8") as f:
+                json.dump(load_dict, f, ensure_ascii=False)
 
             print("加载入文件完成...")
             # print(load_dict["countries"])
@@ -811,7 +812,7 @@ def geo_plane_upload_export():
             if request.method == 'POST':
                 if not os.path.exists("./static/user/" + email + "/olddata/countries.json"):
                     shutil.copy("./static/data/master/countries.json",
-                                    "./static/user/" + email + "/olddata/countries.json")
+                                "./static/user/" + email + "/olddata/countries.json")
                 path = "./static/user/" + email + "/olddata/"
 
                 file = request.files['file']
@@ -1124,7 +1125,7 @@ def cluster_way():
                 parameters[key] = request.get_json()[key]
         # n_clusters = int(request.get_json()['cluster'])
         # use_method = int(request.get_json()['method'])
-    parameters['data'] = current_app.config['TABLE_DATA']#final_data_object['no_identifiers_data_list']  # 用户输入的数据csv
+    parameters['data'] = current_app.config['TABLE_DATA']  # final_data_object['no_identifiers_data_list']  # 用户输入的数据csv
 
     cluster_method = request.get_json()['cluster_method']
     result = getattr(ClusterWay(), cluster_method)(parameters)
@@ -1454,7 +1455,7 @@ def OCR():
 @app.route('/word_cloud_OCR', methods=['GET', 'POST'])
 def picture_OCR():
     if request.method == 'POST':
-        type=request.form.get('label')
+        type = request.form.get('label')
         if type == 'wav':
             f = request.files['wav']
             base_path = os.path.dirname(
@@ -1514,8 +1515,6 @@ def picture_OCR():
             return x
         else:
             return "we don't support this type of file!"
-
-
 
 
 @app.route('/graphgoo', methods=['POST', 'GET'])
