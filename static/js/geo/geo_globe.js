@@ -5,7 +5,7 @@ window.onload = function () {
     var UserInterface = null;
     var Labels = null;
     var parseURL = new URLparser();
-    var dollars = 1000;//0.1billion
+    var dollars = 100000000;//0.1billion
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
@@ -168,8 +168,8 @@ window.onload = function () {
             /*在countries.json文件里面包含了四个主要信息：
         载入country，trade，categories，和products*/
         // console.log($("#input_json").val());
-        $.getJSON("/static/user/1361377791@qq.com/olddata/countries.json", function (corejson) {
-        // $.getJSON("/static/data/master/countries.json", function (corejson) {
+        // $.getJSON("/static/user/1361377791@qq.com/olddata/countries.json", function (corejson) {
+        $.getJSON("/static/data/master/countries.json", function (corejson) {
         // $.getJSON($("#input_json").val(), function (corejson) {
             $.each(corejson.countries, function (co, country) {
                 countries[co] = country;
