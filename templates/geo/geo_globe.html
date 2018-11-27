@@ -4,6 +4,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0"/>
     <META NAME="ROBOTS" CONTENT="INDEX, FOLLOW">
     <meta charset="utf-8">
+    <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+    <META HTTP-EQUIV="Expires" CONTENT="-1">
+
 
     <meta property="og:title" content="The Globe of Economic Complexity: Visualize $15 Trillion of World Exports">
     <meta name="description" content="One dot equals $100M of exports">
@@ -89,9 +92,7 @@
             </div>
 
             <div id="categories" style="display: none"></div>
-            <input id="input_json" style="display: none" value="
-                    {% if data %}{{ data }}"+"/olddata/countries.json"
-            {% else %}/static/data/master/countries.json"{% endif %}">
+
         </div>
     </div>
 
@@ -168,6 +169,8 @@
 
 
 
+
+
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -178,6 +181,8 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
+
+
 
 
 
@@ -234,6 +239,8 @@
 
 
 
+
+
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -258,8 +265,14 @@
 
 
 
+
+
 </script>
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+<input id="input_json" style="display: none"
+{% if data %}value="{{ data }}"
+{% else %}value="/static/data/master/countries.json"{% endif %}>
+<input id="input_dollars" style="display: none" value="{% if data %}{{ dollars }}{% else %}100000000{% endif %}">
 
 <script src="/static/js/master/build_three.js"></script>
 <script src="/static/js/master/maps/LineWithWidth.js"></script>
@@ -275,10 +288,8 @@
 <script src='/static/js/master/THREE.FullScreen.js'></script><!--关于全屏的方法-->
 <script src='/static/js/master/ParticleLinks.js'></script><!--基本没读懂，关于连线-->
 <script src="/static/js/master/URLparser.js"></script><!--URL解析器-->
-{% if data %}
 <script src="/static/js/geo/geo_globe.js"></script>
-{% else %}<script src="/static/js/geo/geo_globe.js"></script>
-{% endif %}
+
 <script>
     (function (i, s, o, g, r, a, m) {
         i['GoogleAnalyticsObject'] = r;
@@ -313,11 +324,11 @@
             success(res) {
                 if (res == "success") {
                     alert('上传成功！');
-                    window.location.href="/geo/globe/"
+                    window.location.href = "/geo/globe/"
                 }
-                else if (res=="login in first!"){
+                else if (res == "login in first!") {
                     alert(res);
-                    window.location.href="/login/"
+                    window.location.href = "/login/"
                 }
                 else {
                     alert(res)

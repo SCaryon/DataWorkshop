@@ -18,6 +18,10 @@ from email.mime.text import MIMEText
 from io import StringIO
 import codecs
 
+from xlrd import open_workbook
+import pymysql
+import codecs
+
 import numpy as np
 import pandas as pd
 #import pymysql
@@ -636,13 +640,17 @@ def geo_globe():
         return render_template("geo/geo_globe.html")
     else:
         email = session.get('email')
-        if os.path.exists("./static/user/" + email + "/olddata/countries.json"):
-            return render_template("geo/geo_globe.html", data="/static/user/" + email)
+        if os.path.exists("./static/user/" + email + "/olddata/countries.json") and session.get('dollars'):
+            return render_template("geo/geo_globe.html", dollars=session.get('dollars'),
+                                   data="/static/user/" + email + "/olddata/countries.json")
         else:
             return render_template("geo/geo_globe.html")
 
 
-def file2db(file, jsonfile):
+# In short, this method is to store the data uploaded by
+# the user into the database and process it, and then transfer
+# it to the user's own folder.
+def file2db2json(file, jsonfile):
     bk = open_workbook(file, encoding_override="utf-8")
     try:
         sh_export = bk.sheet_by_name("countries")
@@ -651,15 +659,12 @@ def file2db(file, jsonfile):
     except:
         return "no such sheet!"
     else:
-        # 建立一个临时数据库链接，然后新建临时表，使用完成后drop掉。
-        # 就不用db.session这个玩意了，太难用了
-        try:
-            print(g.count)
-        except:
-            g.count = 0
-        else:
-            g.count = g.count + 1
-        email = g.count
+        # Create a temporary database link, then create a new temporary table, drop it after use.
+        # I don’t need db.session, it’s too hard to use.
+        # Here to explain, each user has their own database table, are used
+        # to temporarily store data and calculate, so you can drop at any time
+        email = session.get('user_id')
+        print(email)
         dbcur = pymysql.connect(host="localhost", user='root', password='qazxswedcvfr', database='data')
         cursor = dbcur.cursor()
         sql = "drop table if exists export%s" % email
@@ -695,10 +700,10 @@ def file2db(file, jsonfile):
             sql = "insert into export%s" % email + " values('%s','%s',%d, %d, %f)" % row
             cursor.execute(sql)
         sql = "insert into country_pro%s " \
-              "select fromISO,product,sum(Quantity) from export group by fromISO,product" % email
+              "select fromISO,product,sum(Quantity) from export%s group by fromISO,product" % (email, email)
         cursor.execute(sql)
         sql = "insert into country%s " \
-              "select fromISO,sum(Quantity) from export group by fromISO" % email
+              "select fromISO,sum(Quantity) from export%s group by fromISO" % (email, email)
         cursor.execute(sql)
 
         # print(sql)
@@ -738,6 +743,19 @@ def file2db(file, jsonfile):
             # print(load_dict["countries"])
             # json.dumps(load_dict, ensure_ascii=False)
 
+            all_particle = 0
+
+            sql = "select * from country_pro%s" % email
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            particles = 0
+            for row in result:
+                particles += row[2]
+            particles = int(particles)
+            dollars = len(str(particles))
+            dollars = pow(10, dollars - 5)
+            session['dollars']=dollars
+
             for key in load_dict["countries"]:
                 load_dict["countries"][key]['products'] = {}
                 country = key
@@ -746,12 +764,12 @@ def file2db(file, jsonfile):
                 # print(sql)
                 cursor.execute(sql)
                 result = cursor.fetchall()
-                dollars = 1000
                 particles = 0
                 for row in result:
                     particles += row[2] / dollars
                     load_dict["countries"][key]['products'][row[1]] = row[2]
                 load_dict["countries"][key]['particles'] = int(particles)
+                all_particle += int(particles)
 
                 sql = "select export from country%s where fromISO='%s'" % (email, country)
                 cursor.execute(sql)
@@ -759,6 +777,7 @@ def file2db(file, jsonfile):
                 # print(result)
                 for row in result:
                     load_dict["countries"][key]['exports'] = row[0]
+            print(all_particle)
 
             load_dict["categories"] = {}
             sql = "select * from category%s" % email
@@ -822,22 +841,16 @@ def geo_plane_upload_export():
                         os.remove(old_file)
                     file.save(old_file)
 
-                    if file2db(old_file, path + 'countries.json') == "no such sheet!":
+                    if file2db2json(old_file, path + 'countries.json') == "no such sheet!":
                         return "no such sheet!"
                     else:
                         return "success"
                 else:
                     return "filename invalid or network error"
             print("/static/user/" + email + "/olddata/countries.json")
-            if os.path.exists("./static/user/" + email + "/olddata/geo_globe.js"):
-                return "false"
-            else:
-                shutil.copyfile("./static/js/geo/geo_globe.js", "./static/user/" + email + "/olddata/geo_globe.json")
-
             return "success"
     else:
         return "login in first!"
-
 
 # 地图方法end
 
