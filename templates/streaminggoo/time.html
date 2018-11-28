@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
+
+    <script src="/static/js/upload/papaparse.js"></script>
+    <script src="/static/js/upload/jschardet.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/static/css/streaminggoo/streaming_data.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/streaminggoo/parallel.css">
+
+    <script src="/static/js/jscolor.js"></script>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/static/js/streaminggoo/echarts.min.js"></script>
+
+
+    <title>Time series analysis</title>
+</head>
+
+<!--ajax get the data of themeriver-->
+<script>
+    function change_attribution(attribution_list) {
+        var time_selector = document.getElementById('attribution_selector');
+        $("#attribution_selector").empty();
+        var option = document.createElement('option');
+        option.setAttribute('value', '');
+        option.innerHTML = '--Time series analysis--';
+        time_selector.appendChild(option);
+        for (var i = 0; i < attribution_list.length; i++) {
+            var option = document.createElement('option');
+            option.setAttribute('value', attribution_list[i]);
+            option.setAttribute('id', attribution_list[i]);
+            option.innerHTML = attribution_list[i];
+            time_selector.appendChild(option);
+        }
+    };
+    $.fn.time_csv2arr = function (callback) {
+        if (typeof(FileReader) == 'undefined') {    //if not H5
+            alert("Your browser is too old,please use Chrome or Firefox");
+            return false;
+        }
+        if (!$(this)[0].files[0]) {
+            alert("Please select a file");
+            return false;
+        }
+        var fReader = new FileReader();
+        fReader.readAsDataURL($(this)[0].files[0]);
+        $fileDOM = $(this);
+        fReader.onload = function (evt) {
+            var data = evt.target.result;
+            var encoding = checkEncoding(data);
+            Papa.parse($($fileDOM)[0].files[0], {
+                encoding: encoding,
+                complete: function (results) {
+                    var res = results.data;
+                    $.ajax({
+                        url: '/time_upload',
+                        type: 'POST',
+                        data: {json_data: JSON.stringify(res)},
+
+                        success: function (res) {
+                            alert('upload the data file successfully !');
+                            $("#draw_bar").empty();
+                            $("#selected_way_attribution").empty();
+                            user_data = {};
+                            draw_counts={};
+                            themeriver(res.features, res.data);
+                            change_attribution(res.features);
+                        },
+                        error: function () {
+                            alert("获取数据失败！");
+                        }
+                    });
+                    if (res[res.length - 1] == "") {
+                        res.pop();
+                    }
+                    callback && callback(res);
+                }
+            });
+        };
+        fReader.onerror = function (evt) {
+            alert("The file has changed,please select again.(Firefox)");
+        };
+
+        function checkEncoding(base64Str) {
+            var str = atob(base64Str.split(";base64,")[1]);
+            var encoding = jschardet.detect(str);
+            encoding = encoding.encoding;
+            if (encoding == "windows-1252") {
+                encoding.detecting = "ANSI";
+            }
+            return encoding;
+        }
+    };
+    $.fn.cluster_csv = function (callback) {
+        alert("hello!")
+    }
+
+    function read_time_file() {
+        var file_name = $("input[name=time_csvfile]").val();
+        if (file_name.lastIndexOf(".") != -1) {
+            var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
+            if (fileType == 'csv') {
+                $("input[name=time_csvfile]").time_csv2arr(function (res) {
+                });
+            }
+        }
+    }
+
+
+    function uploadComplete(evt) {//py文件上传成功
+        alert(evt.target.responseText);
+    }
+
+
+    function save_user_way() {
+        var name = document.getElementsByName('user_cluster_name');
+        var role = document.getElementsByName('role');
+        var fd = new FormData();
+        fd.append("name", name);
+        fd.append('role', role);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/save");//要传到后台方法的路径
+        xhr.addEventListener("load", uploadComplete, false);
+        xhr.send(fd);
+    }
+</script>
+
+<body>
+    <!-- MENU -->
+<div class="navbar custom-navbar navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- NAVBAR HEADER -->
+        <div class="navbar-header">
+            <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+                <span class="icon icon-bar"></span>
+            </button>
+            <!-- lOGO -->
+            <a href="#" class="navbar-brand">DaGoo!</a>
+        </div>
+
+        <!-- MENU LINKS -->
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/products" class="smoothScroll">Products</a></li>
+                <li><a href="#visual_charts" class="smoothScroll">Gallery</a></li>
+                <li><a href="#" class="smoothScroll">Contact us</a></li>
+                <li>
+                    <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
+                </li>
+                {% if user %}
+                    <li class="user_img"><a class="page-scroll" href="/user/">
+                        <div class="to3" style="margin-top: -10px;">
+                            <div class="to2">
+                                <div class="to1">
+                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    </li>
+                    <li><a href="/login/" class="page-scroll">Quit</a></li>
+                {% else %}
+                    <li>
+                        <a href="/login/" class="">Log in/Sign up</a>
+                    </li>
+                {% endif %}
+                {% if user %}
+                    {% if user.permission==100 %}
+                        <li>
+                            <a href="/admin/?manager={{ user.username }}" class="">manage</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            {% if user %}
+                <script>
+
+                    var permi = '' +{{ user.permission }};
+                    switch (permi) {
+                        case "1":
+                            $('.to3').css('background-color', '#aac4bc');
+                            break;
+                        case "2":
+                            $('.to3').css('background-color', '#ae853b');
+                            break;
+                        case "3":
+                            $('.to3').css('background-color', '#dfdc5d');
+                            break;
+                        case "100":
+                            $('.to3').css('background-color', '#ede4b8');
+                            break;
+                        default:
+                            $('.to3').css('background-color', 'white');
+                    }
+                </script>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .section-title {
+    position: relative;
+    padding-bottom: 15px;
+    text-align: left;
+}
+</style>
+<style>
+    body {
+        font: 12px Arial;
+    }
+
+    path {
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+</style>
+
+<div id="echarts_river_pie">
+    <form class="upload" style='float:right;margin-top:100px'>
+                        <input type="file" id="time_csvfile" style="display:none" name="time_csvfile"
+                               onchange="data_file_path.value=this.value">
+                        <div id="data_file_path" name="data_file_path" class="fas fa-plus-circle"
+                             onclick="time_csvfile.click()" data-title='select your file'></div>
+                        <div class='fas fa-upload' onclick="read_time_file()" data-title='upload your file'></div>
+                        <div data-title='save your way' style="font-weight: 900">
+                            <a data-toggle="modal" data-target="#login" href=""
+                               style="color:black;display:inline-block">
+                                <span class="glyphicon glyphicon-log-in"></span></a>
+                        </div>
+                    </form>
+                    <!--用户上传自己的方法并给它命名-->
+    <div id="main" style="margin-top:100px;display:inline-block;width: 600px;height:400px;"></div>
+    <div id="data_pie" style="margin-top:100px;display:inline-block;width: 500px;height:400px;"></div>
+</div>
+<script type="text/javascript">
+    var themeriver_data = [
+        ['2015/11/08', 10, 'DQ'],
+        ['2015/11/09', 15, 'DQ'],
+        ['2015/11/10', 35, 'DQ'],
+        ['2015/11/11',38,'DQ'],
+        ['2015/11/12',22,'DQ'],
+        ['2015/11/13',16,'DQ'],
+        ['2015/11/14', 7, 'DQ'],
+        ['2015/11/15', 2, 'DQ'],
+        ['2015/11/16', 17, 'DQ'],
+        ['2015/11/17', 33, 'DQ'],
+        ['2015/11/18', 22, 'DQ'],
+        ['2015/11/19', 32, 'DQ'],
+        ['2015/11/20', 26, 'DQ'],
+        ['2015/11/21', 35, 'DQ'],
+        ['2015/11/22', 40, 'DQ'],
+        ['2015/11/23', 32, 'DQ'],
+        ['2015/11/24', 26, 'DQ'],
+        ['2015/11/25', 22, 'DQ'],
+        ['2015/11/26',16,'DQ'],
+        ['2015/11/27',22,'DQ'],
+        ['2015/11/28',10,'DQ'],
+        ['2015/11/08', 35, 'TY'],
+        ['2015/11/09', 36, 'TY'],
+        ['2015/11/10', 37, 'TY'],
+        ['2015/11/11', 22, 'TY'],
+        ['2015/11/12', 24, 'TY'],
+        ['2015/11/13', 26, 'TY'],
+        ['2015/11/14', 34, 'TY'],
+        ['2015/11/15', 21, 'TY'],
+        ['2015/11/16', 18, 'TY'],
+        ['2015/11/17', 45, 'TY'],
+        ['2015/11/18', 32, 'TY'],
+        ['2015/11/19', 35, 'TY'],
+        ['2015/11/20', 30, 'TY'],
+        ['2015/11/21', 28, 'TY'],
+        ['2015/11/22', 27, 'TY'],
+        ['2015/11/23', 26, 'TY'],
+        ['2015/11/24', 15, 'TY'],
+        ['2015/11/25', 30, 'TY'],
+        ['2015/11/26', 35, 'TY'],
+        ['2015/11/27', 42, 'TY'],
+        ['2015/11/28', 42, 'TY'],
+        ['2015/11/08', 21, 'SS'],
+        ['2015/11/09', 25, 'SS'],
+        ['2015/11/10', 27, 'SS'],
+        ['2015/11/11', 23, 'SS'],
+        ['2015/11/12', 24, 'SS'],
+        ['2015/11/13', 21, 'SS'],
+        ['2015/11/14', 35, 'SS'],
+        ['2015/11/15', 39, 'SS'],
+        ['2015/11/16', 25, 'SS'],
+        ['2015/11/17', 36, 'SS'],
+        ['2015/11/18', 33, 'SS'],
+        ['2015/11/19', 41, 'SS'],
+        ['2015/11/20', 35, 'SS'],
+        ['2015/11/21', 34, 'SS'],
+        ['2015/11/22', 28, 'SS'],
+        ['2015/11/14', 7, 'QG'],
+        ['2015/11/15', 2, 'QG'],
+        ['2015/11/16', 17, 'QG'],
+        ['2015/11/17', 33, 'QG'],
+        ['2015/11/18', 40, 'QG'],
+        ['2015/11/19', 32, 'QG'],
+        ['2015/11/20', 26, 'QG'],
+        ['2015/11/21', 35, 'QG'],
+        ['2015/11/22', 40, 'QG'],
+        ['2015/11/23', 32, 'QG'],
+        ['2015/11/24', 26, 'QG'],
+        ['2015/11/25', 22, 'QG'],
+        ['2015/11/26', 16, 'QG'],
+        ['2015/11/27', 22, 'QG'],
+        ['2015/11/28', 10, 'QG'],
+        ['2015/11/08', 10, 'SY'],
+        ['2015/11/09', 15, 'SY'],
+        ['2015/11/10', 35, 'SY'],
+        ['2015/11/11', 38, 'SY'],
+        ['2015/11/12', 22, 'SY'],
+        ['2015/11/13', 16, 'SY'],
+        ['2015/11/14', 7, 'SY'],
+        ['2015/11/15', 2, 'SY'],
+        ['2015/11/16', 17, 'SY'],
+        ['2015/11/17', 33, 'SY'],
+        ['2015/11/18', 40, 'SY'],
+        ['2015/11/19', 32, 'SY'],
+        ['2015/11/20', 26, 'SY'],
+        ['2015/11/21', 35, 'SY'],
+        ['2015/11/22', 4, 'SY'],
+        ['2015/11/23', 32, 'SY'],
+        ['2015/11/24', 26, 'SY'],
+        ['2015/11/25', 22, 'SY'],
+        ['2015/11/26', 16, 'SY'],
+        ['2015/11/27', 22, 'SY'],
+        ['2015/11/28', 10, 'SY'],
+        ['2015/11/08', 10, 'DD'],
+        ['2015/11/09', 15, 'DD'],
+        ['2015/11/10', 35, 'DD'],
+        ['2015/11/11', 38, 'DD'],
+        ['2015/11/12', 22, 'DD'],
+        ['2015/11/13', 16, 'DD'],
+        ['2015/11/14', 7, 'DD'],
+        ['2015/11/15', 2, 'DD'],
+        ['2015/11/16', 17, 'DD'],
+        ['2015/11/17', 33, 'DD'],
+        ['2015/11/18', 4, 'DD'],
+        ['2015/11/19', 32, 'DD'],
+        ['2015/11/20', 26, 'DD'],
+        ['2015/11/21', 35, 'DD'],
+        ['2015/11/22', 40, 'DD'],
+        ['2015/11/23', 32, 'DD'],
+        ['2015/11/24', 26, 'DD'],
+        ['2015/11/25', 22, 'DD'],
+        ['2015/11/26', 16, 'DD'],
+        ['2015/11/27', 22, 'DD'],
+        ['2015/11/28', 10, 'DD']
+    ];
+    var themeriver_data1= [
+        ['2015', 10, 'DQ'],
+        ['2016', 15, 'DQ'],
+        ['2017', 35, 'DQ'],
+        // ['2015/11/11',38,'DQ'],['2015/11/12',22,'DQ'],['2015/11/13',16,'DQ'],
+        // ['2015/11/26',16,'DQ'],['2015/11/27',22,'DQ'],['2015/11/28',10,'DQ'],
+        ['2015', 35, 'TY'],
+        ['2016', 42, 'TY'],
+        ['2017', 42, 'TY'],
+        ['2015', 35, 'SS'],
+        ['2016', 34, 'SS'],
+        ['2017', 28, 'SS'],
+        ['2015', 16, 'QG'],
+        ['2016', 22, 'QG'],
+        ['2017', 10, 'QG'],
+        ['2015', 16, 'SY'],
+        ['2016', 22, 'SY'],
+        ['2017', 10, 'SY'],
+        ['2015', 10, 'DD'],
+        ['2016', 15, 'DD'],
+        ['2017', 10, 'DD']
+    ];
+    var theme_features = ['DQ', 'TY', 'SS', 'QG', 'SY', 'DD'];
+    var origin_pie_data=[
+                {value:10, name:'DQ'},
+                {value:35, name:'TY'},
+                {value:21, name:'SS'},
+                {value:10, name:'DD'},
+                {value:10, name:'SY'},
+            ];
+    function themeriver(features = theme_features, theme_data = themeriver_data) {
+        themeriver_Chart = echarts.init(document.getElementById('main'));
+        option = {
+            tooltip: {
+                showContent: false,
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        color: 'rgba(0,0,0,0.2)',
+                        width: 1,
+                        type: 'solid'
+                    }
+                }
+            },
+            legend: {
+                data: features//
+            },
+            singleAxis: {
+                top: 50,
+                bottom:50,
+                axisTick: {},
+                axisLabel: {},
+                type: 'time',
+                axisPointer: {
+            animation: true,
+            label: {
+                show: false
+            }
+        },
+                // position: 'top',
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        type: 'dashed',
+                        opacity: 0.2
+                    }
+                }
+            },
+            series: [{
+                type: 'themeRiver',
+                itemStyle: {
+                    emphasis: {
+                        shadowBlur: 20,
+                        shadowColor: 'rgba(0, 0, 0, 0.8)'
+                    }
+                },
+                data: theme_data
+            }]
+        };
+        themeriver_Chart.setOption(option);
+            themeriver_Chart.on('updateAxisPointer', function (event) {
+        var xAxisInfo = event.axesInfo[0];//.axesInfo[0];
+        if (xAxisInfo) {
+            var this_date = new Date(xAxisInfo.value);
+            var this_year = this_date.toLocaleDateString();//.toLocaleString();
+            var pie_data=[];
+            for(var i=0;i<theme_data.length;i++)
+            {
+                var item=theme_data[i];
+                var item_date = new Date(item[0]);//
+                var item_this_date=item_date.toLocaleDateString()//toLocaleString();// .split('/');
+                if(this_year==item_this_date)//if(item_date[0]==this_year &&(item_date[1]==this_month)&&(item_date[2]==this_day))
+                {
+
+                    pie_data.push({value:item[1],name:item[2]});
+                }
+            }
+            draw_pie(this_year,pie_data);
+        }
+    });
+    }
+function draw_pie(title='data Pie',pie_data=origin_pie_data){
+pie_option = {
+    backgroundColor: '#ffffff',
+    title: {
+        text: title,
+        left: 'center',
+        top: 20,
+        textStyle: {
+            color: '#000000'
+        }
+    },
+
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+
+    visualMap: {
+        show: false,
+        min: 80,
+        max: 600,
+        inRange: {
+            colorLightness: [0.5,1]
+        }
+    },
+    series : [
+        {
+            name:title,
+            type:'pie',
+            id:'streaming data',
+            radius : '55%',
+            center: ['50%', '50%'],
+            data:pie_data.sort(function (a, b) { return a.value - b.value; }),
+            roseType: 'radius',
+            labelLine: {
+                normal: {
+                    lineStyle: {
+                        color: '#000000'
+                    },
+                    smooth: 0.2,
+                    length: 10,
+                    length2: 20
+                }
+            },
+            itemStyle: {
+                normal: {
+                    color: '#c23531',
+                    shadowBlur: 200,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            },
+
+            animationType: 'scale',
+            animationEasing: 'elasticOut',
+            animationDelay: function (idx) {
+                return Math.random() * 200;
+            }
+        }
+    ]
+};
+pie_Chart = echarts.init(document.getElementById('data_pie'));
+pie_Chart.setOption(pie_option);
+}
+    themeriver();
+    draw_pie();
+
+</script>
+
+
+<div class="section" style="padding-top: 100px">
+    <!-- container -->
+    <div class="container">
+        <!-- row -->
+        <div class="row">
+            <!-- section title -->
+            <div class="col-md-12">
+
+                <h3 class="title">Time series analysis</h3>
+                <div class="section-title">
+                    <div style="margin-left: 40px;display:inline"><select id="time_selector">
+                        <option value="" style="color:black">--Time series analysis--</option>
+                        <option id="Exponential_smoothing" value="Exponential_smoothing"
+                                title="Exponential smoothing is a rule of thumb technique for smoothing time series data using the exponential window function. ">
+                            Exponential smoothing
+                        </option>
+                        <option value="Arithmetic_averaging" title="Arithmetic mean is the simplest time sequence prediction method, which can be used to calculate the arithmetic mean of forecasting target in a certain observation period as the next prediction value.">Arithmetic averaging</option>
+                        <option value="Moving_averaging" title="Moving averaging is a simple and smooth forecasting technique, the average of each term is calculated to reflect the long-term trend.">Moving averaging</option>
+                        <!--<option value="User_prediction" title="User method">User method</option>-->
+                    </select></div>
+                    <div style="margin-left: 40px;display:inline"><select id="attribution_selector">
+                        <option value="" style="color:black">--select a attribution--</option>
+                        <option id="values" value="values">values</option>
+                    </select></div>
+
+                    <button id="get_inf" onclick="get_inf()">Wikipedia</button>
+                    <div class='demo-bg'></div>
+
+                    <button id="generate" onclick="generate()">Generate</button>
+                    <div class='demo-bg'></div>
+                </div>
+            </div>
+        </div>
+        <div class="'row">
+            <div class="col-md-12" id="selected_way_attribution">
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- 登录窗口 -->
+<div id="login" class="modal fade">
+    <div class="modal-dialog" style='width:400px;'>
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="close" data-dismiss="modal"><span>&times;</span></div>
+            </div>
+            <div class="modal-title">
+                <h1 class="text-center">submit</h1>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-group" style="padding-bottom: 10px">
+                        <p style="display: inline-block;">Name：</p>
+                        <input name='user_cluster_name' class="form-control" type="text"
+                               style='width:60%;display:inline-block;' placeholder=""></div>
+                    <div class="form-group">
+                        <p style="display: inline-block;">Role：</p>
+                        <label style="padding-left: 30px;padding-right: 20px"><input name="role" value='public'
+                                                                                     type="radio" checked/><span></span>public</label>
+                        <label><input name="role" value='private' type="radio"/><span></span>private</label>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-primary" type="submit" onclick="save_user_way()">OK</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row" style="margin-bottom:20px;margin-top:20px;margin-left:80px;margin-right: 80px">
+    <!-- section title -->
+    <div class="col-md-12">
+        <div class="draw_bar" id="draw_bar">
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<!--get the information about timeseriesanalysis way-->
+<script>
+    window.link = {
+        'Exponential_smoothing': 'https://en.wikipedia.org/wiki/Exponential_smoothing',
+        'Arithmetic_averaging':'https://en.wikipedia.org/wiki/Arithmetic_mean',
+        'Moving_averaging':'https://en.wikipedia.org/wiki/Moving_average',
+    };
+
+    function get_inf() {
+        var url = window.link[$('#time_selector option:selected').val()];
+        window.open(url);
+    };
+    $(document).ready(function () {
+        $('#time_selector').select2();
+        $('#attribution_selector').select2();
+    });
+</script>
+
+<!-->
+<script>
+    function initial_elements(attr){
+        var this_draw_bar = document.getElementById("draw_bar");
+
+        var draw_inf = document.createElement('div');
+         draw_inf.setAttribute('class','draw_inf');
+
+        var draw_attribution = document.createElement('div');//放画图的svg
+        draw_attribution.setAttribute('id', "attribution_" + attr);
+        draw_attribution.setAttribute('class','draw');
+        draw_attribution.style.display='inline-block';
+
+         draw_inf.appendChild(draw_attribution);//把画布放进去
+
+        var draw_inf_body = document.createElement('div');
+         draw_inf_body.setAttribute('class','draw_inf_body');
+
+
+         var way_inf = document.createElement('div');
+         way_inf.setAttribute('class','cluster_way_inf');
+         way_inf.setAttribute('value',attr);
+         way_inf.innerHTML='analysis attribution: '+attr;
+         draw_inf_body.appendChild(way_inf);//把图是信息放入inf_body
+
+         draw_inf.appendChild(draw_inf_body);//把inf_body放进去
+
+        this_draw_bar.appendChild(draw_inf);
+    }
+</script>
+<!--获取方法和参数，画图-->
+<script>
+    function delete_this(id, attribution,order) {//在user_data里面删除该曲线所对应数组，然后重新绘制全体曲线
+        id.remove();
+        var attribution_value=attribution.innerHTML;
+        user_data[attribution_value][order] = [];
+        draw_counts[attribution_value].push(order);
+        $("#attribution_"+attribution_value).empty();
+        if ((draw_counts[attribution_value]).length < 4) {
+            draw_prediction(user_data[attribution_value],user_data_way[attribution_value],attribution_value);
+        }
+        else{
+
+            var draw_div=$("#attribution_"+attribution_value).parent('.draw_inf');
+            draw_div.remove();
+        }
+    }
+
+    function draw_selected_tag(way, attribution, order) {//order表示该曲线的数据在数组中所在的位置
+        var selected_way_attribution = document.getElementById('selected_way_attribution');
+        var selected_button = document.createElement('button');
+        var id = way + '_' + attribution;
+        selected_button.setAttribute('value', id);
+        selected_button.setAttribute('id', id);
+        selected_button.innerHTML = way + '<br>' + attribution;
+        selected_button.style.marginLeft = '8px';
+        selected_button.setAttribute('ondblclick', 'delete_this(' + id + ',' +attribution+','+order + ')');
+        selected_way_attribution.appendChild(selected_button);
+    }
+
+    function draw_prediction(origin_dataset, origin_dataway_set,attr) {//attr是要画图的画布id，也就是进行分析的属性的名称
+        var dataset=[];
+        var dataway_set=[];
+         for (var i = 0; i < origin_dataset.length; i++) {
+             if (origin_dataset[i].length!=0)
+             {
+                dataset.push(origin_dataset[i]);
+                dataway_set.push(origin_dataway_set[i]);
+             }
+                 }
+        var width = 500;
+        var height = 500;
+
+        var padding = {top: 70, right: 70, bottom: 70, left: 70};
+        var gdpmax = 0;
+        for (var i = 0; i < dataset.length; i++) {
+            var currGdp = d3.max(dataset[i], function (d) {
+                return d[1];
+            });
+            if (currGdp > gdpmax)
+                gdpmax = currGdp;
+        }
+
+        var xScale = d3.scale.linear()
+            .domain([1995, 2018])
+            .range([0, width - padding.left - padding.right]);
+
+        var yScale = d3.scale.linear()
+            .domain([0, gdpmax * 1.1])
+            .range([height - padding.bottom - padding.top, 0]);
+
+        var linePath = d3.svg.line()//创建一个直线生成器
+            .x(function (d) {
+                return xScale(d[0]);
+            })
+            .y(function (d) {
+                return yScale(d[1]);
+            })
+            .interpolate("basis")//插值模式
+        ;
+
+//定义两个颜色
+        var colors = [d3.rgb(0, 0, 255), d3.rgb(0, 255, 0),d3.rgb(255,0, 0),d3.rgb(255, 255, 255)];
+
+        var svg = d3.select("#attribution_" + attr)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        svg.selectAll("path")
+            .data(dataset)
+            .enter()
+            .append("path")
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .attr("d", function (d) {
+                return linePath(d);
+                //返回线段生成器得到的路径
+            })
+            .attr("fill", "none")
+            .attr("stroke-width", 3)
+            .attr("stroke", function (d, i) {
+                return colors[i];
+            })
+        .on("mouseover",function(d,i){
+     d3.select(this) //在传给任何D3方法的匿名函数中，如果想操作当前元素，只要引用this就行
+       .attr("stroke","orange")
+         .append("title")
+    .text(dataway_set[i]);
+   })
+       .on("mouseout",function(d,i){
+          d3.select(this)
+            .attr("stroke",colors[i]);
+  });
+            /*.append('title')
+            .text(function(d,i){
+                return dataway_set[i];
+            });*/
+
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .ticks(14)
+            .tickFormat(d3.format("d"))
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+
+//添加一个g用于放x轴
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding.left + "," + (height - padding.top) + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .call(yAxis);
+    }
+</script>
+<script>
+    //从第0个画布开始画图
+    draw_counts = {};//初始化可以画的div编号
+    user_data = {};//保存用于画折线图的数据
+    user_data_way={}//保存用户选择的分析方法，与user_data相对应
+    function generate() {
+        var options = $('#time_selector option:selected'); //获取选中的项,需要给每个方法的每个参数都搞一个默认值
+        if ($('#attribution_selector option:selected').val() == '' || (options.val() == '')) {
+            alert('please select a attribution');
+            return;
+        }
+        var target="#"+options.val()+"_"+$('#attribution_selector option:selected').val();
+        if ($(target).length>0)
+        {
+            alert('it exists!!!');
+            return;
+        }
+        //parameters['draw_id'] = draw_count;
+        if (options.val() == "Exponential_smoothing") {
+            var url = "/time/ex/"
+        }
+        if (options.val() == "Arithmetic_averaging") {
+            var url = "/time/ar/"
+        }
+        if (options.val() == "Moving_averaging") {
+            var url = "/time/mo/"
+        }
+        var parameter = {'attribution': $('#attribution_selector option:selected').val()};
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: JSON.stringify(parameter),
+            contentType: 'application/json; charset=UTF-8',
+            success: function (res) {//返回数据根据结果进行相应的处理
+                var attr = $('#attribution_selector option:selected').val();
+                if ($("#attribution_" + attr).length <= 0) {
+                    initial_elements(attr);
+                    user_data[attr]=[[], [], [], []];
+                    user_data_way[attr]=[[], [], [], []];
+                    draw_counts[attr]=[3, 2, 1, 0]
+                }
+                var res_array = res.split(':');
+                var i = 0;
+                var array = [];
+                while (i < res_array.length) {
+                    array.push([parseFloat((parseFloat(res_array[i])).toFixed(1)), parseFloat((parseFloat(res_array[++i])).toFixed(3))]);
+                    i++;
+                }
+
+
+                var draw_count = (draw_counts[attr]).pop();
+                user_data[attr][draw_count] = array;
+                user_data_way[attr][draw_count]="way: "+options.val()+"   attribution: "+$('#attribution_selector option:selected').val();
+                $("#attribution_" + attr).empty();//清空画布
+                draw_prediction(user_data[attr], user_data_way[attr],attr);
+                var selected_attribution=$('#attribution_selector option:selected').val().toString();
+                var selected_way=$('#time_selector option:selected').val().toString();
+                draw_selected_tag(selected_way,selected_attribution, draw_count);
+            },
+            error: function (res) {
+                alert(res);
+            }
+        });
+    };
+    //根据URL，通过ajax传输来画图
+</script>
+
+
+</html>

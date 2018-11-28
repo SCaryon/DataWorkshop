@@ -13,7 +13,7 @@ from sklearn.cluster import MeanShift
 from sklearn.cluster import SpectralClustering
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.cluster import FeatureAgglomeration
-from hdbscan import HDBSCAN
+# from hdbscan import HDBSCAN
 
 
 class ClusterWay:
@@ -96,7 +96,7 @@ class ClusterWay:
         clustering = model.fit(data)
         result['clustering'] = clustering
         return result
-    def HDBSCAN(self,parameters):# data, min_cluster_size, min_samples, alpha, cluster_selection_method):
+    '''def HDBSCAN(self,parameters):# data, min_cluster_size, min_samples, alpha, cluster_selection_method):
         result = {}
         default_min_cluster_size=3
         default_min_samples=3
@@ -116,7 +116,7 @@ class ClusterWay:
                         cluster_selection_method=default_cluster_selection_method, allow_single_cluster=True)
         clustering = model.fit(data)
         result['clustering'] = clustering
-        return result
+        return result'''
     def GaussianMixture(self,parameters):# data, n_clusters, cov_type):
         result = {}
         default_cluster=3

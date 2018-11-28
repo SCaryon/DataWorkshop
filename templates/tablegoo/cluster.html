@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>HDA</title>
+    <link href="/static/css/bootstrap/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body style="background: black"><!--标识该body，避免跟其他的冲突-->
+<div  style='width: 350px;height: 350px;float: left;' id={{ body_id }}>
+
+    <div id={{ method }}></div>
+    <div id="getdata">
+        <ul id={{ body_draw_id[0] }}>
+            {% for name in data %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+
+        <ul id={{ body_draw_id[1] }}>
+            <li>{{ clusters }}</li>
+        </ul>
+
+        <ul id={{ body_draw_id[2] }}>
+            {% for data_obj in data_obj %}
+                <li  >{{ data_obj }}</li>
+            {% endfor %}
+        </ul>
+
+        <ul id={{ body_draw_id[3] }}>
+            <li>{{ method }}</li>
+        </ul>
+    </div>
+<div><a>{{ score }}</a></div>
+</div>
+
+
+</body>
+
+</html>

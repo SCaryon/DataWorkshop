@@ -1,0 +1,192 @@
+
+    <div id="text" class="text">
+        <ul id ='data_pca'>
+            {% for name in data %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+        <ul id="data_obj">
+            {% for data_obj in data_obj %}
+                <li  >{{ data_obj }}</li>
+            {% endfor %}
+        </ul>
+
+        <ul id="method">
+            <li>{{ method }}</li>
+        </ul>
+    </div>
+
+    <style>
+        .text {
+            font-family: sans-serif;
+            font-size: 11px;
+            width: 400px;
+            height: 300px;
+            background-color:#5bc0de;
+            float: left;
+
+        }
+    </style>
+
+    <div class={{ method }}></div>
+    <script type="text/javascript">
+        arr = document.getElementById("method").getElementsByTagName('li');
+        method = arr[0].innerHTML;
+        class_circles = arr[0].innerHTML + '_circles';
+
+        var arr = document.getElementById("data_obj").getElementsByTagName('li'),rows = [];
+        for(var i = 0;i<arr.length;i++){
+            arr_str=arr[i].innerHTML;
+            var obj = eval('(' + arr_str + ')');
+            rows.push(obj)
+        }
+        var dataset=new Array();
+        var arr = document.getElementById("data_pca").getElementsByTagName('li'),temp = [];
+        for(var i = 0;i<arr.length;i++){
+            temp.push(arr[i].innerHTML)
+        }
+        for(var i = 0; i<temp.length;i++){
+            temp1=temp[i].replace('[','');
+            temp2=temp1.replace(']','');
+            temp3 = temp2.split(",");
+            numArray = temp3.map((value)=>{
+                return  parseFloat(value);
+            });
+            dataset.push(numArray)
+        }
+
+        body = d3.select('body');
+        body.selectAll('.text').remove();
+        var svgWidth = 330;
+        var svgHight = 330;
+        var padding =  10;
+
+        // 创建SVG
+        var svg = d3.select('.' + method)
+            .append('svg')
+            .attr('width', svgWidth)
+            .attr('height', svgHight);
+
+        svg.append('rect')
+        .classed("frame", true)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", svgWidth)
+        .attr("height", svgHight)
+        .attr('fill', 'none')
+        .attr('stroke', '#7b878d');
+
+        // 创建比例尺
+
+        var max_range=d3.max(dataset, function(d) {
+            return d[0];
+        })-d3.min(dataset, function(d) {
+            return d[0];
+        });
+        var max_range1=d3.max(dataset, function(d) {
+            return d[1];
+        })-d3.min(dataset, function(d) {
+            return d[1];
+        });
+if(max_range<max_range1)
+    max_range=max_range1;
+var x_min=d3.min(dataset, function(d) {
+            return d[0];
+        });
+var y_min=d3.min(dataset, function(d) {
+            return d[1];
+        })
+    var xScale = d3.scale.linear()
+        .domain([x_min, x_min+max_range]).range([padding, svgWidth - padding * 2]);
+
+    var yScale = d3.scale.linear()
+        .domain([y_min, y_min+max_range]).range([svgHight - padding, padding]);
+    var rScale = d3.scale.linear()
+        .domain([0, d3.max(dataset, function(d) {
+            return d[1];
+        })]).range([2, 4]);
+
+        var rScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function(d) {
+                return d[1];
+            })]).range([2, 4]);
+
+        var brush = d3.svg.brush()
+            .x(xScale)
+            .y(yScale)
+            .extent([0, 0], [0, 0])
+            .on("brushstart", brushstart)
+            .on("brush", brushed)
+            .on("brushend", brushend);
+
+        svg.append("g")
+            .call(brush)
+            .selectAll("rect")
+            .style("fill-opacity", 0.1);
+
+        // 设置散点的坐标, 半径
+        projection_circles = svg.selectAll('circle')
+            .data(dataset)
+            .enter()
+            .append('circle')
+            .classed(class_circles, true)
+            .attr('cx', function(d) {
+                return xScale(d[0]);
+            })
+            .attr('cy', function(d) {
+                return yScale(d[1]);
+            })
+            .style('stroke','white')
+            .style('fill','red')
+            .attr('r',4);
+
+        svg.selectAll('.' + class_circles)
+            .data(rows)
+            .on("mouseover", function(d,i) {
+                key_name=new Array();
+                for(var key in d){
+                    key_value=key+':'+d[key];
+                    key_name.push(key_value)
+                }
+                table=key_name.toString();
+                table_n=table.replace(/,/g,'\n');
+                svg.append("title").text('ID:'+ i +"\n"+ table_n).attr("id","Ttitle");
+                d3.select(this)
+                    .attr("r", 8);
+            })
+            .on("mouseout", function(d){
+                d3.select(this)
+                    .attr("r", 4);
+                d3.select("#Ttitle").remove();
+            });
+
+        function brushstart() {
+            svg.selectAll('.' + class_circles)
+                .data(dataset)
+                .style("fill", function (d) {
+                return 'red';
+            })
+        }
+
+        function brushed() {
+            var extend = brush.extent();
+            var xmin = extend[0][0];
+            var xmax = extend[1][0];
+            var ymin = extend[0][1];
+            var ymax = extend[1][1];
+
+            svg.selectAll('.' + class_circles).style("fill", function (d) {
+                if(d[0] >= xmin && d[0] <= xmax && d[1] >= ymin && d[1] <= ymax){
+                    return 'red';
+            }
+                else{
+                    return "grey";
+                }
+            })
+        }
+
+        function brushend() {
+            svg.selectAll('.' + class_circles)
+                .data(rows);
+        }
+    </script>

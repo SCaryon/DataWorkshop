@@ -10,14 +10,13 @@
     <meta name="author" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <link rel="stylesheet" href="../static/css/bootstrap.css">
-    <link rel="stylesheet" href="../static/css/font-awesome.min.css">
-    <script src="../static/js/jquery.js"></script>
+    <link rel="stylesheet" href="../static/css/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/bootstrap/font-awesome.min.css">
+    <script src="../static/js/bootstrap/jquery.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap/style.css">
 
     <!-- MAIN CSS -->
-    <link rel="stylesheet" href="../static/css/tooplate-style.css">
-
-    <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+    <link rel="stylesheet" href="../static/css/bootstrap/tooplate-style.css">
 
 </head>
 <body>
@@ -107,21 +106,6 @@
                 <div class="home-text">
                     <h1>Welcome to DaGoo!</h1>
                     <br>
-                    <div id="upload_data_type" class="select_container">
-                        Data Type: &nbsp
-                        <input id="r1" type="radio" name="select" class= "dataType" checked="checked" value="Normal"> &nbsp Normal</input> &nbsp
-                        <input id="r2" type="radio" name="select" class= "dataType" value="Streaming">&nbsp Streaming</input> &nbsp
-                        <input id="r3" type="radio" name="select" class= "dataType" value="Geographical">&nbsp Geographical</input> &nbsp
-                        <input id="r4" type="radio" name="select" class= "dataType" value="Text">&nbsp Text</input> &nbsp
-                        <input id="r5" type="radio" name="select" class= "dataType" value="Graph">&nbsp Graph</input>
-                    </div>
-
-                    <input class="button_blue" id="file_path" name="file_path" type="button"
-                           onclick="path.click()" value="File Upload">
-                    <input type="file" id="path" style="display:none" name="csvfile"
-                           onchange="file_path.value=this.value">
-                    <input class="button_blue" type="button" onclick="read_file()" value="Submit">
-                    <a href='/clean' style="color: white">Clean</a>
                 </div>
             </div>
         </div>
@@ -135,17 +119,15 @@
 
 
 <!-- SCRIPTS -->
-<script src="../static/js/jquery.js"></script>
-<script src="../static/js/bootstrap.min.js"></script>
-<script src="../static/js/jquery.parallax.js"></script>
-<script src="../static/js/modernizr.custom.js"></script>
-<script src="../static/js/smoothscroll.js"></script>
-<script src="../static/js/main.js"></script>
-<script src="../static/js/custom.js"></script>
-<script src="../static/js/upload.js"></script>
-<script src="../static/js/tab.js"></script>
-<script src="../static/js/papaparse.js"></script>
-<script src="../static/js/jschardet.min.js"></script>
-<script src="../static/js/topojson.min.js"></script>
+<script src="../static/js/bootstrap/jquery.js"></script>
+<script src="../static/js/bootstrap/bootstrap.min.js"></script>
+<script src="../static/js/bootstrap/jquery.parallax.js"></script>
+<script src="../static/js/bootstrap/modernizr.custom.js"></script>
+<script src="../static/js/bootstrap/SmoothScroll.js"></script>
+<script src="../static/js/bootstrap/main.js"></script>
+<script src="../static/js/bootstrap/custom.js"></script>
+<script src="../static/js/upload/upload.js"></script>
+<script src="../static/js/upload/papaparse.js"></script>
+<script src="../static/js/upload/jschardet.min.js"></script>
 </body>
 </html>
