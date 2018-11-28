@@ -16,6 +16,9 @@ function UI() {
             case 27://press Esc then fullscreen=false
                 THREEx.FullScreen.cancel();
                 $("#fullscreen").html('<a href="#">全屏模式</a>');
+                $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+                    $("#sideBar").show();
+                });
                 myThis.fullscreen = false;
                 break;
             default:
@@ -27,6 +30,9 @@ function UI() {
         var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
         if (!state) {
             $("#fullscreen").html('<a href="#">全屏模式</a>');
+            $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+                $("#sideBar").show();
+            });
             myThis.fullscreen = false;
             THREEx.FullScreen.cancel();
         }
@@ -37,10 +43,17 @@ function UI() {
         if (!myThis.fullscreen) {
             THREEx.FullScreen.request(document.body);
             $("#fullscreen").html('<a href="#">窗口模式</a>');
+            $("#sideBar").hide();
+            $("#sideBar").animate({'bottom': '-30px'}, 400, 'swing', function () {
+
+            });
             myThis.fullscreen = true;
         } else {
             THREEx.FullScreen.cancel();
             $("#fullscreen").html('<a href="#">全屏模式</a>');
+            $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+                $("#sideBar").show();
+            });
             myThis.fullscreen = false;
         }
     });
@@ -219,7 +232,7 @@ UI.prototype.buildCategories = function (categories) {
     cats = [];
     var catHTML = "<table>";
     $.each(categories, function (i, val) {
-        cats[val.id]=val.name;
+        cats[val.id] = val.name;
         color = new THREE.Color(i);
         rgba = "rgba(" + Math.round(color.r * 295) + "," + Math.round(color.g * 295) + "," + Math.round(color.b * 295) + ",0.8)";
         catHTML += "<tr><td class='categoryButton' style='border-left:16px solid " + rgba + " ;'>" +

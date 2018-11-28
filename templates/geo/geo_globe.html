@@ -7,13 +7,6 @@
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
     <META HTTP-EQUIV="Expires" CONTENT="-1">
 
-
-    <meta property="og:title" content="The Globe of Economic Complexity: Visualize $15 Trillion of World Exports">
-    <meta name="description" content="One dot equals $100M of exports">
-    <meta property="og:description" content="One dot equals $100M of exports">
-    <meta property="og:image" content="http://globe.cid.harvard.edu/images/preview.png">
-    <meta property="og:url" content="http://globe.cid.harvard.edu">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <link href="/static/css/master/style.css" rel="stylesheet" type="text/css">
     <link rel="icon" href="/static/images/master/favicon.ico"/>
 
@@ -21,12 +14,6 @@
     <link href='/static/css/master/Rajdhani.css' rel='stylesheet' type='text/css'>
     <link href="/static/css/master/select2.css" rel="stylesheet" type="text/css">
     <script src="/static/js/master/select2.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
-    <style>
-        #try {
-            background-color: #04042a;
-        }
-    </style>
 </head>
 
 <body id="allBody">
@@ -34,21 +21,11 @@
 <!--begin首页-->
 <div id="storyPrompt">
     <div id="description">
-        {% if mode=="globemap" or mode=="listmap"  or mode=="planemap" or mode=="towermap" %}
-            即将用{{ mode }}为您展示各种产品的出口在全球的分布情况
-        {% else %}
-            即将用{{ mode }}为您展示产品之间的关联关系
-        {% endif %}
-        <br/><br/>
-        在图中，一个点代表 1 亿美元的出口量<br/>
+        即将用globemap为您展示各种产品的出口在全球的分布情况
+        <br/>
+        请不要刷新，耐心等待加载完成
+        <br/>
         <div id="loaded">加载中...</div>
-    </div>
-    <div id="choice" style="display:none">
-        <div id='beginStory'>
-            <img src="/static/images/master/icon/tour.png"/>
-            <div>开始演示</div>
-            <div id="loading">用三维点阵展示产品之间的关系</div>
-        </div>
     </div>
 
 </div>
@@ -61,21 +38,12 @@
     <!--最终页面的左侧-->
     <div id="sideBar">
         <div id="buttons">
-            <div id="countrySection">
-                <div class="optionSeparator">&nbsp;</div>
+            <div id="countrySection" style="width: 150px;float: left">
                 <div class="selectionBox">
                     <select class="countrySelection">
                     </select>
                 </div>
             </div>
-            <div id="productSection" style="display:none">
-                <div class="optionSeparator">&nbsp;</div>
-                <div class="productBox">
-                    <select class="productSelection">
-                    </select>
-                </div>
-            </div>
-            <div class="optionSeparator">&nbsp;</div>
             <div id="backhome" onclick="window.location.href='/'">返回主页</div>
             <div id="showAbout">关于</div>
             <div id="fullscreen">全屏模式</div>
@@ -84,11 +52,17 @@
             <div id="backgroundButton">改变背景</div>
             <div id="selectcate">选择品类</div>
             <div id="uploadexport">
-                <input class="button_blue" id="file_path" name="file_path" type="button"
-                       onclick="path.click()" value="贸易信息上传">
-                <input type="file" id="path" style="display:none" name="csvfile"
-                       onchange="file_path.value=this.value">
-                <input class="button_blue" id="submit" type="button" onclick="read_file()" value="提交">
+                <form method="post" action="/geo/plane/upload/export/" enctype="multipart/form-data">
+                    {#                    <input class="button_blue" id="file_path" name="file_path" type="button"#}
+                    {#                           onclick="path.click()" value="贸易信息上传">#}
+
+                    <input type="file" name="file" id="file">
+                    <input type="submit" value="upload">
+
+{#                    <input type="file" id="path" name="csvfile">#}
+                    {#                    onchange="file_path.value=this.value"style="display:none"#}
+{#                    <input class="button_blue" id="submit" type="submit" value="提交">#}
+                </form>
             </div>
 
             <div id="categories" style="display: none"></div>
@@ -171,6 +145,8 @@
 
 
 
+
+
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -181,6 +157,8 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
+
+
 
 
 
@@ -241,6 +219,8 @@
 
 
 
+
+
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -267,11 +247,13 @@
 
 
 
+
+
 </script>
 <div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 <input id="input_json" style="display: none"
-{% if data %}value="{{ data }}"
-{% else %}value="/static/data/master/countries.json"{% endif %}>
+       {% if data %}value="{{ data }}"
+       {% else %}value="/static/data/master/countries.json"{% endif %}>
 <input id="input_dollars" style="display: none" value="{% if data %}{{ dollars }}{% else %}100000000{% endif %}">
 
 <script src="/static/js/master/build_three.js"></script>

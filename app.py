@@ -24,15 +24,15 @@ import codecs
 
 import numpy as np
 import pandas as pd
-#import pymysql
+# import pymysql
 # 用于执行病毒查杀
 # import pyclamd
 import pytesseract
 # 用于文字识别
 from PIL import Image
-from flask import Flask, request, json, render_template, session, jsonify, current_app, g
+from flask import Flask, request, json, render_template, session, jsonify, url_for, current_app, g, redirect
 from werkzeug.utils import secure_filename
-#from xlrd import open_workbook
+# from xlrd import open_workbook
 
 from anomaly import AnonalyMethod
 from cluster import ClusterWay, EvaluationWay
@@ -754,7 +754,7 @@ def file2db2json(file, jsonfile):
             particles = int(particles)
             dollars = len(str(particles))
             dollars = pow(10, dollars - 5)
-            session['dollars']=dollars
+            session['dollars'] = dollars
 
             for key in load_dict["countries"]:
                 load_dict["countries"][key]['products'] = {}
@@ -833,24 +833,30 @@ def geo_plane_upload_export():
                     shutil.copy("./static/data/master/countries.json",
                                 "./static/user/" + email + "/olddata/countries.json")
                 path = "./static/user/" + email + "/olddata/"
-
-                file = request.files['file']
-                if file:
+                filedata = request.files['file']
+                if filedata:
+                    # filename=os.path.join(path,filedata.filename),
+                    # filedata.filename = "countries.xlsx"
                     old_file = path + "countries.xlsx"
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
                     if os.path.exists(old_file):
                         os.remove(old_file)
-                    file.save(old_file)
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return '上传文件失败'
 
+                    os.rename(path + filedata.filename, old_file)
                     if file2db2json(old_file, path + 'countries.json') == "no such sheet!":
                         return "no such sheet!"
-                    else:
-                        return "success"
                 else:
                     return "filename invalid or network error"
             print("/static/user/" + email + "/olddata/countries.json")
-            return "success"
+            return redirect(url_for('geo_globe'))
     else:
-        return "login in first!"
+        return render_template('login.html')
+
 
 # 地图方法end
 
@@ -1601,7 +1607,7 @@ def streaming_data():
     SY = []
     DD = []
     for i in final_data:
-        if (len(i)==0):
+        if (len(i) == 0):
             break
         year.append(int(i[0]))
         DQ.append(float(i[1]))
@@ -1643,7 +1649,7 @@ def time_upload():
             if '' in final_data[i]:
                 continue
             for j in range(len(final_data[i])):  # 对每一行都进行数据提取
-                if features_list[j]=='year':
+                if features_list[j] == 'year':
                     time_data_object['year'].append(float(final_data[i][j]))
                 else:
                     time_data_object[features_list[j]].append(float(final_data[i][j]))
@@ -1676,7 +1682,7 @@ def Exponential_smoothing():
         if attribution is not None:
             number = time_data_object[attribution]
         else:
-            #会出错吗？？？？？？？？？？？？？？？？
+            # 会出错吗？？？？？？？？？？？？？？？？
             number = time_data_object['values']
         data = []
         for i in range(len(time_data_object['year'])):

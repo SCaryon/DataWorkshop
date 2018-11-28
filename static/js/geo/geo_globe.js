@@ -1049,7 +1049,7 @@ window.onload = function () {
                 animateOverlay(0);
             }
             geometry.attributes.position.needsUpdate = true;
-            animatePointSize(false);
+             animatePointSize(false);
         }
         cameraControls.update();
         renderer.render(scene, camera);
