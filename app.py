@@ -263,7 +263,6 @@ def user_change():
     password = request.form.get('password')
     gender = request.form.get('gender')
     signature = request.form.get('signature')
-    print("jinlaile ")
     user1 = user.query.filter_by(email=email).first()
     if user1 is not None:
         user1.username = name
@@ -292,7 +291,33 @@ def user_change_img():
         return "filename invalid or network error"
 
 
+# 地图方法begin
+# 进入地图的index界面
+@app.route('/geo/', methods=['GET', 'POST'])
+def geo_index():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('geogoo/geogoo_homepage.html', user=user1)
+    else:
+        return render_template('geogoo/geogoo_homepage.html')
+
+
+
 # product master end
+@app.route('/geo/globe/', methods=['GET', 'POST'])
+def geo_globe():
+    if not session.get('email'):
+        return render_template("geogoo/geo_globe.html")
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/countries.json") and session.get('dollars'):
+            return render_template("geogoo/geo_globe.html", dollars=session.get('dollars'),
+                                   data="/static/user/" + email + "/data/countries.json")
+        else:
+            return render_template("geogoo/geo_globe.html")
 
 
 # In short, this method is to store the data uploaded by
@@ -476,10 +501,10 @@ def geo_plane_upload_export():
             return "false"
         else:
             if request.method == 'POST':
-                if not os.path.exists("./static/user/" + email + "/olddata/countries.json"):
-                    shutil.copy("./static/data/master/countries.json",
-                                "./static/user/" + email + "/olddata/countries.json")
-                path = "./static/user/" + email + "/olddata/"
+                if not os.path.exists("./static/user/" + email + "/data/countries.json"):
+                    shutil.copy("./static/data/geogoo/countries.json",
+                                "./static/user/" + email + "/data/countries.json")
+                path = "./static/user/" + email + "/data/"
                 filedata = request.files['file']
                 if filedata:
                     old_file = path + "countries.xlsx"
@@ -497,7 +522,7 @@ def geo_plane_upload_export():
                         return "no such sheet!"
                 else:
                     return "filename invalid or network error"
-            print("/static/user/" + email + "/olddata/countries.json")
+            print("/static/user/" + email + "/data/countries.json")
             return redirect(url_for('geo_globe'))
     else:
         return render_template('user/login.html')

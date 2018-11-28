@@ -38,6 +38,7 @@ window.onload = function () {
     var Particlelinks = null;
     var particlesPlaced = 0;//被安置好的点的数量
     var overlayMaterial = null;
+    var selectCate = false, siderbar = false;
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
     init();
@@ -91,7 +92,7 @@ window.onload = function () {
 
 
         UserInterface = new UI();
-        // UserInterface.addSpinner();
+        UserInterface.addSpinner();
 
         document.body.appendChild(renderer.domElement);
 
@@ -499,55 +500,78 @@ window.onload = function () {
             mouseCoord.y = moveY;
 
             //如果不是拖拽，且不是在story模式
-        } else if (loaded) {
-            var mouseX = e.clientX / window.innerWidth * 2 - 1;
-            var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            vector = new THREE.Vector3(mouseX, mouseY, 0);
-            var values_color = geometry.attributes.customColor.array;
-            var i = 1e3;
-            var s = new THREE.Projector;//可以用来进行碰撞检测
-            //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
-            var o = new THREE.Raycaster;
-            if (currentSetup === "gridSphere")
-                cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
-            else cameraDistance = 3000;
-            vector.unproject(camera);
-            o.ray.set(camera.position, vector.sub(camera.position).normalize());
+        } else {
+            if (mouseX >= window.innerWidth - 10) {
+                selectCate = true;
+                $("#categories").show();
+                $("#categories").animate({'right': '20px'}, 400, "swing", function () {
+                });
+            } else {
+                $("#categories").animate({'right': '-100px'}, 200, "swing", function () {
+                    $("#categories").hide();
+                    selectCate = false;
+                });
+            }
+            if (mouseY >= window.innerHeight - 10) {
+                $("#sideBar").hide();
+                $("#sideBar").animate({'bottom': '-30px'}, 400, 'swing', function () {
+                });
+                siderbar = false;
+            } else {
+                $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+                    $("#sideBar").show();
+                    siderbar = true;
+                });
+            }
+            if (loaded) {
+                var mouseX = e.clientX / window.innerWidth * 2 - 1;
+                var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+                vector = new THREE.Vector3(mouseX, mouseY, 0);
+                var values_color = geometry.attributes.customColor.array;
+                var i = 1e3;
+                var s = new THREE.Projector;//可以用来进行碰撞检测
+                //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
+                var o = new THREE.Raycaster;
+                if (currentSetup === "gridSphere")
+                    cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+                else cameraDistance = 3000;
+                vector.unproject(camera);
+                o.ray.set(camera.position, vector.sub(camera.position).normalize());
 
-            intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
-            if (intersects.length > 0) {//如有相交
-                for (var u = 0; u < intersects.length; u++) {//最近的相交物品
-                    if (intersects[u].distanceToRay < i) {
-                        i = intersects[u].distanceToRay;
-                        //获取该国家的index
-                        if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
-                            this.INTERSECTED = intersects[u].index;
+                intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
+                if (intersects.length > 0) {//如有相交
+                    for (var u = 0; u < intersects.length; u++) {//最近的相交物品
+                        if (intersects[u].distanceToRay < i) {
+                            i = intersects[u].distanceToRay;
+                            //获取该国家的index
+                            if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
+                                this.INTERSECTED = intersects[u].index;
+                            }
                         }
                     }
+                } else if (this.INTERSECTED !== null) {
+                    this.INTERSECTED = null;
+                    highLightCountry(null, false);
                 }
-            } else if (this.INTERSECTED !== null) {
-                this.INTERSECTED = null;
-                highLightCountry(null, false);
-            }
 
-            if (this.INTERSECTED) {
-                if (selectedID !== this.INTERSECTED) {
-                    selectedID = this.INTERSECTED;
+                if (this.INTERSECTED) {
+                    if (selectedID !== this.INTERSECTED) {
+                        selectedID = this.INTERSECTED;
+                    }
+                    UserInterface.changeCursor("pointer");
+                    $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
+                    $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
+                        countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
+                        products[names[this.INTERSECTED].n].sales + "</span>");
+                    highLightCountry(countries[names[this.INTERSECTED].c], true);
+                } else {
+                    $("#pointer").css({top: -100, left: 0});
+                    UserInterface.changeCursor("default");
+                    selectedID = null;
+                    highLightCountry(null, false);
                 }
-                UserInterface.changeCursor("pointer");
-                $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
-                $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
-                    countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
-                    products[names[this.INTERSECTED].n].sales + "</span>");
-                highLightCountry(countries[names[this.INTERSECTED].c], true);
-            } else {
-                $("#pointer").css({top: -100, left: 0});
-                UserInterface.changeCursor("default");
-                selectedID = null;
-                highLightCountry(null, false);
             }
         }
-
     }
 
     //鼠标指到这个国家里面的时候调用的方法，将当前高亮的国家转回普通，然后将当前国家的边界高亮

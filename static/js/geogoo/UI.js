@@ -16,7 +16,7 @@ function UI() {
             case 27://press Esc then fullscreen=false
                 THREEx.FullScreen.cancel();
                 $("#fullscreen").html('<a href="#">全屏模式</a>');
-                $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+                $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
                     $("#sideBar").show();
                 });
                 myThis.fullscreen = false;
@@ -30,7 +30,7 @@ function UI() {
         var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
         if (!state) {
             $("#fullscreen").html('<a href="#">全屏模式</a>');
-            $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+            $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
                 $("#sideBar").show();
             });
             myThis.fullscreen = false;
@@ -85,10 +85,10 @@ function UI() {
         myThis.selectcate = !myThis.selectcate;
         if (myThis.selectcate) {
             $("#categories").show();
-            $("#categories").animate({'left': '20px'}, 400, "swing", function () {
+            $("#categories").animate({'right': '20px'}, 400, "swing", function () {
             });
         } else {
-            $("#categories").animate({'left': '-100px'}, 200, "swing", function () {
+            $("#categories").animate({'right': '-100px'}, 200, "swing", function () {
                 $("#categories").hide();
             });
         }
@@ -205,7 +205,7 @@ UI.prototype.addSpinner = function () {
         lines: 17 // The number of lines to draw
         , length: 0 // The length of each line
         , width: 1 // The line thickness
-        , radius: 84 // The radius of the inner circle
+        , radius: 10 // The radius of the inner circle
         , scale: 3.5 // Scales overall size of the spinner
         , corners: 1 // Corner roundness (0..1)
         , color: '#FFF' // #rgb or #rrggbb or array of colors
@@ -239,7 +239,6 @@ UI.prototype.buildCategories = function (categories) {
             "<div id=cat" + val.id + " class='chooseCategory'>" + cats[val.id] + " </div></td></tr>";
     });
     $("#categories").html(catHTML + "</table>");
-    $("#categories_1").html(catHTML + "</table>")
 };
 //加载中的时候展示加载速度
 UI.prototype.updateLoader = function (add) {
