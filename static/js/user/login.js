@@ -287,8 +287,7 @@ $('#log').click(function () {
             else if(res=="password not right")
                 $('#userCue1').html("Please enter the right password");
             else {
-                window.location.href = "/";
-                console.log("获取数据成功");
+                window.location.href = res;
             }
         },
         error: function () {

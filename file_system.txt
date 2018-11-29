@@ -42,6 +42,7 @@ data：存储用户上传的数据
                     return "filename invalid or network error"
             return redirect(url_for('geo_globe'))# 上传成功以后，跳转到新的方法中去
     else: # 没有登录，跳转到登录页面
+        session["last_page"]="/geo/<%s>" % id
         return render_template('user/login.html')
 
 2）使用ajax，可自行百度，有新的方法请更新本文档以帮助后来开发人员

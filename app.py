@@ -19,7 +19,7 @@ from cluster import ClusterWay, EvaluationWay
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
-# from model import user, methoduse, login, mailconfirm, db
+from model import user, methoduse, login, mailconfirm, db
 from flask import Flask, request, json, render_template, session, jsonify, url_for, current_app, g, redirect
 from xlrd import open_workbook
 
@@ -49,7 +49,6 @@ def index():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def user_login():
-    session.clear()
     return render_template('user/login.html')
 
 
@@ -66,15 +65,19 @@ def login_pass():
     elif not theuser.check_password_hash(pas):
         return "password not right"
     else:
-        session.clear()
         session['email'] = email
         session['user_id'] = theuser.id
         session.permanent = True
         login1 = login(email=email)
         db.session.add(login1)
         db.session.commit()
-        print(theuser)
-        return render_template("datagoo_homepage.html", user=theuser)
+
+        if session.get("last_page"):
+            print(session.get("last_page"))
+            page = session.get("last_page")
+            return page
+        else:
+            return render_template("datagoo_homepage.html", user=theuser)
 
 
 @app.route('/login/pass/name/', methods=['GET', 'POST'])
@@ -309,32 +312,6 @@ def products():
 
 
 # 地图方法begin
-# 进入地图的index界面
-@app.route('/geo/', methods=['GET', 'POST'])
-def geo_index():
-    if session.get('email'):
-        email = session.get('email')
-        user1 = user.query.filter_by(email=email).first()
-        if user1 is None:
-            return "false"
-        return render_template('geogoo/geogoo_homepage.html', user=user1)
-    else:
-        return render_template('geogoo/geogoo_homepage.html')
-
-
-# product master end
-@app.route('/geo/globe/', methods=['GET', 'POST'])
-def geo_globe():
-    if not session.get('email'):
-        return render_template("geogoo/geo_globe.html")
-    else:
-        email = session.get('email')
-        if os.path.exists("./static/user/" + email + "/data/countries.json") and session.get('dollars'):
-            return render_template("geogoo/geo_globe.html", dollars=session.get('dollars'),
-                                   data="/static/user/" + email + "/data/countries.json")
-        else:
-            return render_template("geogoo/geo_globe.html")
-
 
 # In short, this method is to store the data uploaded by
 # the user into the database and process it, and then transfer
@@ -507,9 +484,39 @@ def file2db2json(file, jsonfile):
     return 'success'
 
 
+# 进入地图的index界面
+@app.route('/geo/', methods=['GET', 'POST'])
+def geo_index():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('geogoo/geogoo_homepage.html', user=user1)
+    else:
+        return render_template('geogoo/geogoo_homepage.html')
+
+
+@app.route('/geo/<id>/', methods=['GET', 'POST'])
+def geo_id(id):
+    id = id.replace('<', '')
+    id = id.replace('>', '')
+    if not session.get('email'):
+        return render_template("geogoo/geo_%s.html" % id)
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/countries.json") and session.get('dollars'):
+            return render_template("geogoo/geo_%s.html" % id, dollars=session.get('dollars'),
+                                   data="/static/user/" + email + "/data/countries.json")
+        else:
+            return render_template("geogoo/geo_%s.html" % id)
+
+
 # 用户上传plane数据
-@app.route('/geo/globe/upload/', methods=['GET', 'POST'])
-def geo_globe_upload():
+@app.route('/geo/<id>/upload/', methods=['GET', 'POST'])
+def geo_plane_upload(id):
+    id = id.replace('<', '')
+    id = id.replace('>', '')
     if session.get('email'):
         email = session.get('email')
         user1 = user.query.filter_by(email=email).first()
@@ -537,8 +544,9 @@ def geo_globe_upload():
                 else:
                     return "filename invalid or network error"
             print("/static/user/" + email + "/data/countries.json")
-            return redirect(url_for('geo_globe'))
+            return redirect('/geo/<%s>/' % id)
     else:
+        session["last_page"]="/geo/<%s>" % id
         return render_template('user/login.html')
 
 
@@ -552,7 +560,7 @@ def read_graph_data(filename):
         del graph_nodes[-1]
     for temp_list in range(len(graph_nodes)):
         del graph_matrix[temp_list][0]
-    return graph_nodes,graph_matrix
+    return graph_nodes, graph_matrix
 
 
 @app.route('/graphgoo', methods=['POST', 'GET'])
@@ -627,7 +635,7 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
         table_id_fea_da_dic.append(data_list_to_dictionary(table_fea, temp_list))
     # table statistics data
     table_stt_da = {'mean': [], 'median': [], 'mode': [], 'min': [], 'max': [], 'var': [],
-                                            'corr': []}
+                    'corr': []}
     stt = Statistics(table_da, table_fea[1:])
     table_stt_da['mean'] = stt.mean
     table_stt_da['median'] = stt.median
@@ -658,10 +666,10 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
             table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters)
 
 
-def generate_table_dic_data(table_id,table_da,table_fea):
-    #table_id:current_app.config['TABLE_IDENTIFIERS']
-    #table_da:current_app.config['TABLE_DATA']
-    #table_fea:current_app.config['TABLE_FEATURES']
+def generate_table_dic_data(table_id, table_da, table_fea):
+    # table_id:current_app.config['TABLE_IDENTIFIERS']
+    # table_da:current_app.config['TABLE_DATA']
+    # table_fea:current_app.config['TABLE_FEATURES']
     table_id_da = []
     table_id_fea_da_dic = []
     for i in range(len(table_id)):
@@ -720,7 +728,8 @@ def tablegoo():
     else:
         email = session.get('email')
         if os.path.exists("./static/user/" + email + "/data/table.csv"):
-            table_data, table_features, table_identifiers = read_table_data("./static/user/" + email + "/data/table.csv")
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + email + "/data/table.csv")
             table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
                 table_identifiers, table_features, table_data)
             table_cluster_method = 'KMeans'

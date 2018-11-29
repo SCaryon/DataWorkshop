@@ -5,7 +5,6 @@ window.onload = function () {
     var UserInterface = null;
     var Labels = null;
     var parseURL = new URLparser();
-    var dollars = $("#input_dollars").val();//0.1billion
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
@@ -39,6 +38,7 @@ window.onload = function () {
     var particlesPlaced = 0;//被安置好的点的数量
     var overlayMaterial = null;
     var selectCate = false, siderbar = false;
+    var dollars = $("#input_dollars").val();//0.1billion
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
     init();
@@ -168,10 +168,6 @@ window.onload = function () {
             // console.log("before",sphereShapeIDs);
             /*在countries.json文件里面包含了四个主要信息：
         载入country，trade，categories，和products*/
-            // console.log($("#input_json").val());
-            // $.getJSON("/static/user/1361377791@qq.com/olddata/countries.json", function (corejson) {
-            // $.getJSON("/static/data/geogoo/countries.json", function (corejson) {
-            console.log(dollars, $("#input_json").val());
             $.getJSON($("#input_json").val(), function (corejson) {
                 $.each(corejson.countries, function (co, country) {
                     countries[co] = country;

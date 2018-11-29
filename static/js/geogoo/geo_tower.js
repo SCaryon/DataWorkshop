@@ -5,7 +5,6 @@ window.onload = function () {
     var UserInterface = null;
     var Labels = null;
     var parseURL = new URLparser();
-    var dollars = 100000000;//0.1billion
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
@@ -38,6 +37,8 @@ window.onload = function () {
     var Particlelinks = null;
     var particlesPlaced = 0;//被安置好的点的数量
     var overlayMaterial = null;
+    var selectCate = false, siderbar = false;
+    var dollars = $("#input_dollars").val();//0.1billion
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
     init();
@@ -123,6 +124,7 @@ window.onload = function () {
         countryIndex = 0;
         var countryHTML = "";
         var planeShapeIDs;
+        var sphereShapeIDs;
 
         //载入边界信息
         $.getJSON("/static/data/geogoo/world.json", function (json) {
@@ -136,7 +138,7 @@ window.onload = function () {
 
             temp = drawThreeGeo(json, 400, 'plane', scene, {
                 color: 0x7e7e7e,
-                linewidth: 1,
+                linewidth: 2,
                 transparent: true,
                 opacity: 0.7
             });
@@ -145,113 +147,106 @@ window.onload = function () {
             overlay = new THREE.Mesh(new THREE.PlaneGeometry(560, 280, 1, 1), overlayMaterial);
             shape.add(overlay);
             planeShapeIDs = temp[1];//边界线ID
-
-            // geoMeshline = new GeoMeshLine(json, {
-            //     resolution: [window.innerWidth, window.innerHeight],
-            //     color: 0x00ffff,
-            //     lineWidth: 2
-            // });
-            // scene.add(geoMeshline);
-
             renderer.render(scene, camera);
-        });
 
 
-        /*在countries.json文件里面包含了四个主要信息：
-        载入country，trade，categories，和products*/
-        $.getJSON("/static/data/geogoo/countries.json", function (corejson) {
-            $.each(corejson.countries, function (co, country) {
-                countries[co] = country;
-            });
-            $.each(planeShapeIDs, function (shapeid, shapes) {
-                if (countries[shapeid])
-                    countries[shapeid]["polygons"] = planeShapeIDs[shapeid];
-            });
-            $.each(corejson.products, function (pid, product) {
-                products[pid] = product;
-            });
-            $.each(corejson.categories, function (cid, cat) {
-                categories[cid] = cat;
-            });
-            Labels = new LabelManager(countries);
+            /*在countries.json文件里面包含了四个主要信息：
+            载入country，trade，categories，和products*/
+            $.getJSON($("#input_json").val(), function (corejson) {
+            // $.getJSON("/static/data/geogoo/countries.json", function (corejson) {
+                $.each(corejson.countries, function (co, country) {
+                    countries[co] = country;
+                });
+                $.each(planeShapeIDs, function (shapeid, shapes) {
+                    if (countries[shapeid])
+                        countries[shapeid]["polygons"] = planeShapeIDs[shapeid];
+                });
+                $.each(corejson.products, function (pid, product) {
+                    products[pid] = product;
+                });
+                $.each(corejson.categories, function (cid, cat) {
+                    categories[cid] = cat;
+                });
+                Labels = new LabelManager(countries);
 
-            UserInterface.buildCategories(categories);
+                UserInterface.buildCategories(categories);
 
-            $.each(corejson.trade, function (i, val) {
-                if (countries[i]) {
-                    trades[i] = val;
-                }
-            });
-
-            UserInterface.createSelectionBox(countries);
-
-
-            countryIndex = 124;
-            particles = 153726;
-            var positions = new Float32Array(particles * 3);
-            destination = new Float32Array(particles * 3);
-            var values_color = new Float32Array(particles * 3);
-            var values_size = new Float32Array(particles);
-            var total = 0, v = 0, ray = 4, tetha = 0;
-
-            for (var i = 0; i < countryIndex; i++) {
-                //对每个index寻找相应的country
-                $.each(countries, function (p, v) {
-                    if (i == v.id) {
-                        val = v;//country的属性们
-                        code = p;//country的index
+                $.each(corejson.trade, function (i, val) {
+                    if (countries[i]) {
+                        trades[i] = val;
                     }
                 });
 
-                //找到countries中对应的国家后开始进行处理
-                for (var key in val["products"]) {
-                    productValue = val["products"][key];//键为key的product的量
-                    productInfo = products[key];//键为key的product的具体信息
+                UserInterface.createSelectionBox(countries);
 
-                    color = new THREE.Color(productInfo.color);
 
-                    //在点集中加入点并设置它的位置、目标、大小、颜色的初值
-                    for (var s = 0; s < Math.round(productValue / dollars); s++) {
-                        names.push({"n": key, "c": code});
-                        values_size[v] = 3;
-                        values_color[v * 3 + 0] = color.r * 1.2;
-                        values_color[v * 3 + 1] = color.g * 1.2;
-                        values_color[v * 3 + 2] = color.b * 1.2;
-                        destination[v * 3 + 0] = 1;
-                        destination[v * 3 + 1] = 2;
-                        destination[v * 3 + 2] = 5000;
-                        positions[v * 3 + 0] = 1;
-                        positions[v * 3 + 1] = 2;
-                        positions[v * 3 + 2] = 5000;
-                        v++;
+                countryIndex = 124;
+                particles = 153726;
+                var positions = new Float32Array(particles * 3);
+                destination = new Float32Array(particles * 3);
+                var values_color = new Float32Array(particles * 3);
+                var values_size = new Float32Array(particles);
+                var total = 0, v = 0, ray = 4, tetha = 0;
+
+                for (var i = 0; i < countryIndex; i++) {
+                    //对每个index寻找相应的country
+                    $.each(countries, function (p, v) {
+                        if (i == v.id) {
+                            val = v;//country的属性们
+                            code = p;//country的index
+                        }
+                    });
+
+                    //找到countries中对应的国家后开始进行处理
+                    for (var key in val["products"]) {
+                        productValue = val["products"][key];//键为key的product的量
+                        productInfo = products[key];//键为key的product的具体信息
+
+                        color = new THREE.Color(productInfo.color);
+
+                        //在点集中加入点并设置它的位置、目标、大小、颜色的初值
+                        for (var s = 0; s < Math.round(productValue / dollars); s++) {
+                            names.push({"n": key, "c": code});
+                            values_size[v] = 3;
+                            values_color[v * 3 + 0] = color.r * 1.2;
+                            values_color[v * 3 + 1] = color.g * 1.2;
+                            values_color[v * 3 + 2] = color.b * 1.2;
+                            destination[v * 3 + 0] = 1;
+                            destination[v * 3 + 1] = 2;
+                            destination[v * 3 + 2] = 5000;
+                            positions[v * 3 + 0] = 1;
+                            positions[v * 3 + 1] = 2;
+                            positions[v * 3 + 2] = 5000;
+                            v++;
+                        }
                     }
                 }
-            }
 
-            //geometry初始化后第一次变化
-            geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
-            geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
-            geometry.addAttribute('attributes', new THREE.BufferAttribute(attributes, 1));
+                //geometry初始化后第一次变化
+                geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
+                geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
+                geometry.addAttribute('attributes', new THREE.BufferAttribute(attributes, 1));
 
-            particleSystem = new THREE.Points(geometry, shaderMaterial);
-            particleSystem.frustrumCulled = true;
-            scene.add(particleSystem);
-            loaded = true;
-            switcher("gridmap", false, 3);
-            Particlelinks = new ParticleLinks(13000, clock, darkMode);
-            links = Particlelinks.getMesh();
-            scene.add(links);
+                particleSystem = new THREE.Points(geometry, shaderMaterial);
+                particleSystem.frustrumCulled = true;
+                scene.add(particleSystem);
+                loaded = true;
+                switcher("towers", false, 3);
+                Particlelinks = new ParticleLinks(13000, clock, darkMode);
+                links = Particlelinks.getMesh();
+                scene.add(links);
 
-            $(".countrySelection").on("change", function () {
-                targetCountry($(this).val(), true, true);
-                filterCountry = $(this).val();
+                $(".countrySelection").on("change", function () {
+                    targetCountry($(this).val(), true, true);
+                    filterCountry = $(this).val();
+                });
+
+
+                $("#loaded").fadeOut();
+                $("#spinner").fadeOut('slow');
+                $('#choice').fadeIn('slow');
             });
-
-
-            $("#loaded").fadeOut();
-            $("#spinner").fadeOut('slow');
-            $('#choice').fadeIn('slow');
         });
 
         renderer.domElement.addEventListener("mousemove", mouseMove);
@@ -273,9 +268,7 @@ window.onload = function () {
         //包括IE6在内的浏览器是使用onmousewheel，而FireFox浏览器一个人使用DOMMouseScroll
         renderer.domElement.addEventListener('DOMMouseScroll', mousewheel, false);
         $(renderer.domElement).dblclick(function (e) {
-            if (previousMode === "2D") {
-                cameraControls.zoom(10);
-            }
+            cameraControls.zoom(10);
         });
 
         if (darkMode)
@@ -385,14 +378,12 @@ window.onload = function () {
                         //links.add(line);
                         if (chosenCountry === "ALL") return false;
                     }
-
                 });
             }
         });
 
         links = Particlelinks.getMesh();
         scene.add(links);
-
     }
 
     //在三维的空间里画线
@@ -422,12 +413,6 @@ window.onload = function () {
         return (new THREE.Line(geometry, material, THREE.LineSegments));
     }
 
-    //？？？？对于粒子系统
-    function animateLinks() {
-        Particlelinks.animate();
-
-    }
-
     //在非产品空间移除连线
     function hideLinks() {
         scene.remove(links);
@@ -453,54 +438,86 @@ window.onload = function () {
         //如果是鼠标拖拽
         if (isDragging) {
             UserInterface.changeCursor("grabbing", cameraControls.isLocked());
+            if (previousMode === "3D" || currentSetup === "towers")
+                cameraControls.setTarget(mouseCoord.x - moveX, mouseCoord.y - moveY);
             mouseCoord.x = moveX;
             mouseCoord.y = moveY;
 
             //如果不是拖拽，且不是在story模式
-        } else if (loaded) {
-            var mouseX = e.clientX / window.innerWidth * 2 - 1;
-            var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            vector = new THREE.Vector3(mouseX, mouseY, 0);
-            var values_color = geometry.attributes.customColor.array;
-            var i = 1e3;
-            var s = new THREE.Projector;//可以用来进行碰撞检测
-            //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
-            var o = new THREE.Raycaster;
-            cameraDistance = 3000;
-            vector.unproject(camera);
-            o.ray.set(camera.position, vector.sub(camera.position).normalize());
+        } else {
+            if (moveX >= window.innerWidth - 50) {
+                selectCate = true;
+                $("#categories").show();
+                // $("#catename").hide();
+                $("#categories").animate({'right': '20px'}, 0, "swing", function () {
+                });
+            } else {
+                $("#categories").animate({'right': '-20px'}, 0, "swing", function () {
+                    $("#categories").hide();
+                    // $("#catename").show();
+                    selectCate = false;
+                });
+            }
+            if (moveY >= window.innerHeight - 30) {
+                $("#sideBar").show();
+                // $("#sideBarname").hide();
+                $("#sideBar").animate({'bottom': '0px'}, 0, 'swing', function () {
+                });
+                siderbar = true;
+            } else {
+                $("#sideBar").animate({'bottom': '-30px'}, 0, 'swing', function () {
+                    $("#sideBar").hide();
+                    // $("#sideBarname").show();
+                    siderbar = false;
+                });
+            }
+            if (loaded) {
+                var mouseX = e.clientX / window.innerWidth * 2 - 1;
+                var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+                vector = new THREE.Vector3(mouseX, mouseY, 0);
+                var values_color = geometry.attributes.customColor.array;
+                var i = 1e3;
+                var s = new THREE.Projector;//可以用来进行碰撞检测
+                //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
+                var o = new THREE.Raycaster;
+                if (currentSetup === "gridSphere")
+                    cameraDistance = Math.sqrt(Math.pow(camera.position.x, 2) + Math.pow(camera.position.y, 2) + Math.pow(camera.position.z, 2));
+                else cameraDistance = 3000;
+                vector.unproject(camera);
+                o.ray.set(camera.position, vector.sub(camera.position).normalize());
 
-            intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
-            if (intersects.length > 0) {//如有相交
-                for (var u = 0; u < intersects.length; u++) {//最近的相交物品
-                    if (intersects[u].distanceToRay < i) {
-                        i = intersects[u].distanceToRay;
-                        //获取该国家的index
-                        if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
-                            this.INTERSECTED = intersects[u].index;
+                intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
+                if (intersects.length > 0) {//如有相交
+                    for (var u = 0; u < intersects.length; u++) {//最近的相交物品
+                        if (intersects[u].distanceToRay < i) {
+                            i = intersects[u].distanceToRay;
+                            //获取该国家的index
+                            if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
+                                this.INTERSECTED = intersects[u].index;
+                            }
                         }
                     }
+                } else if (this.INTERSECTED !== null) {
+                    this.INTERSECTED = null;
+                    highLightCountry(null, false);
                 }
-            } else if (this.INTERSECTED !== null) {
-                this.INTERSECTED = null;
-                highLightCountry(null, false);
-            }
 
-            if (this.INTERSECTED) {
-                if (selectedID !== this.INTERSECTED) {
-                    selectedID = this.INTERSECTED;
+                if (this.INTERSECTED) {
+                    if (selectedID !== this.INTERSECTED) {
+                        selectedID = this.INTERSECTED;
+                    }
+                    UserInterface.changeCursor("pointer");
+                    $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
+                    $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
+                        countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
+                        products[names[this.INTERSECTED].n].sales + "</span>");
+                    highLightCountry(countries[names[this.INTERSECTED].c], true);
+                } else {
+                    $("#pointer").css({top: -100, left: 0});
+                    UserInterface.changeCursor("default");
+                    selectedID = null;
+                    highLightCountry(null, false);
                 }
-                UserInterface.changeCursor("pointer");
-                $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
-                $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
-                    countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
-                    products[names[this.INTERSECTED].n].sales + "</span>");
-                highLightCountry(countries[names[this.INTERSECTED].c], true);
-            } else {
-                $("#pointer").css({top: -100, left: 0});
-                UserInterface.changeCursor("default");
-                selectedID = null;
-                highLightCountry(null, false);
             }
         }
 
@@ -523,7 +540,6 @@ window.onload = function () {
                         resolution: [window.innerWidth, window.innerHeight],
                         color: 0xFFFFFF,
                         lineWidth: 2,
-                        opacity:0.5
                     });
                     countryOverlay.add(geoMeshline);
                 }
@@ -599,11 +615,16 @@ window.onload = function () {
                     for (var s = 0; s < Math.round(country["products"][product] / dollars); s++) {
                         index = cat["total"];
                         if (!cat.active) {
-
-                            destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
-                            destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight;
-                            destination[v * 3 + 2] = 0;
-
+                            if (previousMode === "3D") {
+                                tetha = (categories[products[product].color].id) / 15 * Math.PI * 2;
+                                destination[v * 3 + 0] = 3000 * Math.cos(tetha);
+                                destination[v * 3 + 1] = 3000 * Math.sin(tetha);
+                                destination[v * 3 + 2] = 0;//globeSize*1.05+Math.random()*3;
+                            } else if (previousMode === "2D") {
+                                destination[v * 3 + 0] = (indexer[products[product].color] + Math.random() * cat["total"]) / particles * window.innerWidth / 4 - window.innerWidth / 8;
+                                destination[v * 3 + 1] = Math.random() * 5 - window.innerHeight;
+                                destination[v * 3 + 2] = 0;
+                            }
                         }
                         v++;
                     }
@@ -641,133 +662,42 @@ window.onload = function () {
 
             $(".selectionBox").stop().fadeIn();//停止正在运行的动画并渐进出现
 
-            //普通的2D均匀展示
-
-            cameraControls.lockRotation(true);
+            //普通的塔状视图，可旋转
             previousMode = "2D";
+            if (!reset)
+                cameraControls.rotate(-Math.PI / 2, 3 * Math.PI / 4);
             scene.add(shape);
             var v = 0;
             loaded = false;
-            zoomlock = true;
-            cameraControls.center(-40, 0, 10);
+            zoomlock = false;
+            var xaxis = 0, yaxis = 0, zaxis = 0;
             var randomCity, country = null;
-            var colors = {};
-            var count = 0;
-            var xaxis = 0;
-            yaxis = 0;
-
-            function shapeCentroid(poly) {
-                var totalx = 0, totaly = 0, totalz = 0, perimeter = 0;
-                for (var l = 0; l < poly.length; l++) {
-                    totalx += poly[l].x;
-                    totaly += poly[l].y;
-                    totalz += poly[l].z;
-                    if (l < poly.length - 1) {
-                        perimeter += Math.sqrt(Math.pow(poly[l].x - poly[l + 1].x, 2) + Math.pow(poly[l].y - poly[l + 1].y, 2) + Math.pow(poly[l].z - poly[l + 1].z, 2));
-                    }
-                }
-                return [totalx / poly.length * 0.7, totaly / poly.length * 0.7, totalz / poly.length * 0.7, perimeter];
-            }
-
             for (var i = 0; i < countryIndex; i++) {
+                zaxis = 0;
                 $.each(countries, function (p, o) {
                     if (i == o.id) {
                         country = o;
                         code = p;
                     }
                 });
-                IDs = country.polygons;
-                var dotspacing = Math.pow(country.particles / country.area, 0.5) * 40;
-                if (IDs) {
-                    var p = 0;
-                    while (p < country.particles) {
-                        for (var k = 0; k < IDs.length; k++) {
-                            countryline = shape.children[0].getObjectById(IDs[k]);
-
-                            test = shapeCentroid(countryline.geometry.vertices);
-
-                            for (var j = 0; j < countryline.geometry.vertices.length - 1; j++) {
-
-                                r = Math.floor(Math.random() * (countryline.geometry.vertices.length - 1));
-                                vector = countryline.geometry.vertices[r];
-                                vector2 = countryline.geometry.vertices[r + 1];
-                                for (var u = 0; u < Math.sqrt(Math.pow(vector.x - vector2.x, 2) + Math.pow(vector.y - vector2.y, 2) + Math.pow(vector.z - vector2.z, 2)) / test[3] * countryline.geometry.vertices.length; u++) {
-                                    rand = Math.random();
-
-                                    newx = -(vector.x + rand * (vector2.x - vector.x)) * 0.7;
-                                    newy = (vector.z + rand * (vector2.z - vector.z)) * 0.7;
-                                    newz = (vector.y + rand * (vector2.y - vector.y)) * 0.7;
-                                    theta = (90 - country.lon) * Math.PI / 180;
-                                    phi = (country.lat) * Math.PI / 180 + Math.PI / 2;
-                                    //rand=0.5+(Math.random()-0.5)*Math.random();
-                                    //rand=0.25+(Math.random()-0.25)*Math.random();
-                                    rand = Math.random();
-                                    //rand= Math.round(rand*dotspacing*30)/dotspacing/30;
-                                    //rand = 1-Math.random() * Math.random(); //powder
-                                    /*ray = globeSize + (1 - rand) * Math.PI * 2;
-                                    newx2 = (ray * Math.sin(theta) * Math.cos(phi));
-                                    newy2 = (ray * Math.sin(theta) * Math.sin(phi));
-                                    newz2 = (ray * Math.cos(theta));*/
-                                    offsetX = 0, offsetY = 0, offsetZ = 0;
-                                    if (k == 1 && code == "CN") offsetZ = 10;
-                                    if (k === 9 && code == "RU") offsetZ = 50;
-                                    if (k === 0 && code == "IN") offsetY = -15;
-                                    if (k === 0 && code == "AE") offsetZ = 3;
-                                    if (k === 0 && code == "BR") offsetX = 20;
-                                    if (k === 1 && code == "GB") offsetX = 2;
-                                    if (k === 5 && code == "US") offsetY = 14;
-                                    if (k === 1 && code == "JP") offsetX = -3;
-                                    if (k === 10 && code == "CA") offsetZ = 20;
-                                    if (k === 2 && code == "IT") {
-                                        if (r < 10 || r > 38) offsetZ = -5;
-                                        offsetX = offsetZ;
-                                    }
-                                    newx2 = -test[0] + (2 * Math.random() - 1) * rand - offsetX;
-                                    newy2 = test[2] + (2 * Math.random() - 1) * rand - offsetY;
-                                    newz2 = test[1] + (2 * Math.random() - 1) * rand - offsetZ;
-                                    //len=Math.sqrt(Math.pow(vector.x-newx2,2)+Math.pow(vector.y-newy2,2)+Math.pow(vector.z-newz2,2));
-
-                                    //mod=1+country.area/150000000;
-                                    mod = 1;
-                                    newx2 = newx2 * (mod);
-                                    newy2 = newy2 * (mod);
-                                    newz2 = newz2 * (mod);
-
-                                    if (p < country.particles) {
-                                        newpoint = {
-                                            "x": newx + rand * (newx2 - newx),
-                                            "y": newy + rand * (newy2 - newy),
-                                            "z": newz + rand * (newz2 - newz)
-                                        };
-                                        newpoint2 = {"x": test[0], "y": test[2], "z": test[1]};
-                                        //if(code=="IT" ||code=="MX"||code=="JP"||code=="VN"||code=="TH"||code=="GB")polytest=!outofPoly(vector,vector2,newpoint);
-                                        polytest = false;
-                                        if (polytest) {
-                                            destination[v * 3 + 0] = 0;
-                                            destination[v * 3 + 1] = 0;
-                                            destination[v * 3 + 2] = 0;
-                                        } else {
-                                            destination[v * 3 + 0] = -Math.round(newpoint.x * dotspacing) / dotspacing;
-                                            destination[v * 3 + 2] = -Math.round(newpoint.y * dotspacing) / dotspacing;
-                                            destination[v * 3 + 1] = Math.round(newpoint.z * dotspacing) / dotspacing;
-                                        }
-                                        v++;
-                                        p++;
-                                    } else {
-                                        break;
-                                    }
-
-                                }
-                            }
-                        }
+                xaxis = 0;
+                yaxis = 0;
+                // boxSize = Object.keys(country["products"]).length / 10000;
+                //堆积成长宽各为5的Tower
+                for (var j = 0; j < country.particles; j++) {
+                    if (xaxis > 5) {
+                        yaxis++;
+                        xaxis = 0;
                     }
-                } else {
-                    for (var r = 0; r < country.particles; r++) {
-                        destination[v * 3 + 0] = 0;
-                        destination[v * 3 + 1] = 0;
-                        destination[v * 3 + 2] = 0;
-                        v++;
+                    if (yaxis > 5) {
+                        zaxis++;
+                        yaxis = 0;
                     }
+                    destination[v * 3 + 0] = (country.lat) * 1.55 + (xaxis - 2.5) / 3;
+                    destination[v * 3 + 1] = (country.lon) * 1.55 + (yaxis - 2.5) / 3;
+                    destination[v * 3 + 2] = zaxis / 3;
+                    v++;
+                    xaxis++;
                 }
             }
             loaded = true;
@@ -836,6 +766,7 @@ window.onload = function () {
         highLightCountry(countries[selectedCountry], true);
 
         $("#pointer").css({top: -100, left: 0});
+
     });
 
 
@@ -845,29 +776,6 @@ window.onload = function () {
         $("#UI").fadeIn();
     }
 
-    //高亮与正常模式之间的切换
-    $("#contrastbutton").click(function () {
-        if (!contrast) {
-            $(this).html("正常");
-            contrast = true;
-            constantSize = true;
-            changePointSize(3);
-            lines = shape.children[0];
-            for (var i = 0; i < lines.children.length; i++) {
-                lines.children[i].material.linewidth = 6
-            }
-        } else {
-            $(this).html("高亮");
-            contrast = false;
-            constantSize = false;
-
-            lines = shape.children[0];
-            for (var i = 0; i < lines.children.length; i++) {
-                lines.children[i].material.linewidth = 2
-            }
-            animatePointSize(true);
-        }
-    });
 
     //根据当前的比例尺设定point的大小
     function animatePointSize(reset) {
@@ -884,33 +792,6 @@ window.onload = function () {
 
     }
 
-    //改变点的大小，在产品空间的时候不起作用
-    function changePointSize(size) {
-        var sizes = geometry.attributes.size.array;
-        for (var v = 0; v < particles / percentage; v++) {
-            sizes[v] = size;
-        }
-        geometry.attributes.size.needsUpdate = true;
-    }
-
-    function animateOverlay(percentage) {
-        //对于第一二种模式
-        var test = true;
-        //测试目录中每个类型的活跃度
-        $.each(categories, function (col, val) {
-            if (!val.active) test = false;
-        });
-        if (test) {
-            //如果所有点都安放好的话，边界就改变透明度
-            if (percentage === 0) {//如果还有没安放好的点的话
-                overlayMaterial.opacity = Math.min(((cameraControls.getZoom() - 175) / 300), 0.6);
-            } else {
-                overlayMaterial.opacity = Math.min(percentage / 100, 0.6);
-            }
-        } else {
-            overlayMaterial.opacity = 0;
-        }
-    }
 
     //动画
     function animate() {
@@ -921,7 +802,7 @@ window.onload = function () {
         if (loaded) {
             if (links)
                 links.position.set(particleSystem.position.x, particleSystem.position.y, particleSystem.position.z);
-            animateLinks();
+
 
             var positions = geometry.attributes.position.array;
             var currentColor = new THREE.Color();
@@ -966,9 +847,6 @@ window.onload = function () {
                         positions[v * 3 + 2] = destination[v * 3 + 2];
                     }
                 }
-                animateOverlay(particlesPlaced / particles);
-            } else {
-                animateOverlay(0);
             }
             geometry.attributes.position.needsUpdate = true;
             animatePointSize(false);
@@ -977,4 +855,5 @@ window.onload = function () {
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
     }
+
 };
