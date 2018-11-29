@@ -19,7 +19,7 @@ from cluster import ClusterWay, EvaluationWay
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
-# from model import user, methoduse, login, mailconfirm, db
+from model import user, methoduse, login, mailconfirm, db
 from flask import Flask, request, json, render_template, session, jsonify, url_for, current_app, g, redirect
 from xlrd import open_workbook
 
@@ -30,8 +30,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 # 设定session的保存时间，当session.permanent=True的时候
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-app.config['NODES'] = []
-app.config['MATRIX'] = []
 
 
 @app.route('/')
@@ -77,7 +75,7 @@ def login_pass():
             page = session.get("last_page")
             return page
         else:
-            return render_template("datagoo_homepage.html", user=theuser)
+            return '/'
 
 
 @app.route('/login/pass/name/', methods=['GET', 'POST'])
