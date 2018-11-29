@@ -19,7 +19,7 @@ from cluster import ClusterWay, EvaluationWay
 from projection import ProjectionWay
 from regression import fitSLR
 from statistics import Statistics
-from model import user, methoduse, login, mailconfirm, db
+# from model import user, methoduse, login, mailconfirm, db
 from flask import Flask, request, json, render_template, session, jsonify, url_for, current_app, g, redirect
 from xlrd import open_workbook
 
@@ -603,6 +603,7 @@ def graph_upload():
                     return "filename invalid or network error"
             return redirect(url_for('graphgoo'))
     else:
+        session["last_page"] = '/graphgoo'
         return render_template('user/login.html')
 
 
@@ -730,12 +731,12 @@ def tablegoo():
         if os.path.exists("./static/user/" + email + "/data/table.csv"):
             table_data, table_features, table_identifiers = read_table_data(
                 "./static/user/" + email + "/data/table.csv")
-            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
-                table_identifiers, table_features, table_data)
             table_cluster_method = 'KMeans'
             table_embedding_method = 'Principal_Component_Analysis'
-            table_clusters = 3
             table_visualization_method = 'Radviz'
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+                table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
             return render_template('tablegoo/tablegoo_homepage.html',
                                    features_dictionary=table_fea_fea_dic,
                                    no_identifiers_data_list=table_data,
@@ -759,12 +760,12 @@ def tablegoo():
                                    visualization_method=table_visualization_method)
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
-                table_identifiers, table_features, table_data)
             table_cluster_method = 'KMeans'
             table_embedding_method = 'Principal_Component_Analysis'
-            table_clusters = 3
             table_visualization_method = 'Radviz'
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+                table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
             return render_template('tablegoo/tablegoo_homepage.html',
                                    features_dictionary=table_fea_fea_dic,
                                    no_identifiers_data_list=table_data,
@@ -813,7 +814,104 @@ def table_upload():
                     return "filename invalid or network error"
             return redirect(url_for('tablegoo'))
     else:
+        session["last_page"] = '/tablegoo'
         return render_template('user/login.html')
+
+
+@app.route('/textgoo', methods=['GET', 'POST'])
+def textgoo():
+    if not session.get('email'):
+        csv_reader = csv.reader(open('./examples/text/text_data.csv'))
+        text_no_identifiers_data_dictionary = []
+        features_list = ['source', 'target', 'rela']
+        for temp_list in csv_reader:
+            if not temp_list[0]:
+                continue
+            list_num = []
+            for str in temp_list:
+                list_num.append(str)
+            my_dic = data_list_to_dictionary(features_list, list_num)
+            text_no_identifiers_data_dictionary.append(my_dic)
+        return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/text.csv"):
+            csv_reader = csv.reader(open("./static/user/" + email + "/data/text.csv"))
+            text_no_identifiers_data_dictionary = []
+            features_list = ['source', 'target', 'rela']
+            for temp_list in csv_reader:
+                if not temp_list[0]:
+                    continue
+                list_num = []
+                for str in temp_list:
+                    list_num.append(str)
+                my_dic = data_list_to_dictionary(features_list, list_num)
+                text_no_identifiers_data_dictionary.append(my_dic)
+            return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+        else:
+            csv_reader = csv.reader(open('./examples/text/text_data.csv'))
+            text_no_identifiers_data_dictionary = []
+            features_list = ['source', 'target', 'rela']
+            for temp_list in csv_reader:
+                if not temp_list[0]:
+                    continue
+                list_num = []
+                for str in temp_list:
+                    list_num.append(str)
+                my_dic = data_list_to_dictionary(features_list, list_num)
+                text_no_identifiers_data_dictionary.append(my_dic)
+            return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+
+
+@app.route('/text_upload', methods=['GET', 'POST'])
+def text_upload():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                path = "./static/user/" + email + "/data/"
+                filedata = request.files['file']
+                if filedata:
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
+                    if os.path.exists(path + "text.csv"):
+                        os.remove(path + "text.csv")
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return 'ä¸Šä¼ æ–‡ä»¶å¤±è´¥'
+                    os.rename(path + filedata.filename, path + "text.csv")
+                else:
+                    return "filename invalid or network error"
+            return redirect(url_for('textgoo'))
+    else:
+        session["last_page"] = '/textgoo'
+        return render_template('user/login.html')
+
+
+@app.route('/clean', methods=['POST', 'GET'])
+def clean():
+    return render_template("clean.html")
+
+
+@app.route('/clean_table', methods=['POST', 'GET'])
+def clean_table():
+    table_da, table_fea, table_id = read_table_data('./examples/table/car.csv')
+    table_id_da = []
+    for i in range(len(table_id)):
+        temp_list = []
+        temp_list.append(table_id[i])
+        for temp_item in table_da[i]:
+            temp_list.append(temp_item)
+        table_id_da.append(temp_list)
+    source_arr = np.mat(table_id_da)
+    data_transform = source_arr.T
+    data_list_transform = data_transform.tolist()
+    return render_template("clean_table.html", data=table_id_da,
+                           frame=table_fea, data_list=data_list_transform)
 
 
 if __name__ == '__main__':
