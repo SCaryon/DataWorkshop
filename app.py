@@ -1,6 +1,7 @@
 import ast
 import copy
-
+import pandas as pd
+import numpy as np
 import csv
 import os
 import platform
@@ -13,8 +14,12 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import pymysql
 import codecs
-
-from model import user, methoduse, login, mailconfirm, db
+from anomaly import AnonalyMethod
+from cluster import ClusterWay, EvaluationWay
+from projection import ProjectionWay
+from regression import fitSLR
+from statistics import Statistics
+# from model import user, methoduse, login, mailconfirm, db
 from flask import Flask, request, json, render_template, session, jsonify, url_for, current_app, g, redirect
 from xlrd import open_workbook
 
@@ -291,6 +296,18 @@ def user_change_img():
         return "filename invalid or network error"
 
 
+@app.route('/products', methods=['POST', 'GET'])
+def products():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('products.html', user=user1)
+    else:
+        return render_template('products.html')
+
+
 # 地图方法begin
 # 进入地图的index界面
 @app.route('/geo/', methods=['GET', 'POST'])
@@ -303,7 +320,6 @@ def geo_index():
         return render_template('geogoo/geogoo_homepage.html', user=user1)
     else:
         return render_template('geogoo/geogoo_homepage.html')
-
 
 
 # product master end
@@ -524,6 +540,271 @@ def geo_plane_upload_export():
                     return "filename invalid or network error"
             print("/static/user/" + email + "/data/countries.json")
             return redirect(url_for('geo_globe'))
+    else:
+        return render_template('user/login.html')
+
+
+def read_graph_data(filename):
+    temp_data = pd.read_csv('./examples/graph/graph.csv')
+    graph_nodes = temp_data.columns
+    graph_nodes = graph_nodes.tolist()
+    graph_matrix = np.array(temp_data).tolist()
+    del graph_nodes[0]
+    if not graph_nodes[-1]:
+        del graph_nodes[-1]
+    for temp_list in range(len(graph_nodes)):
+        del graph_matrix[temp_list][0]
+    return graph_nodes,graph_matrix
+
+
+@app.route('/graphgoo', methods=['POST', 'GET'])
+def graphgoo():
+    if not session.get('email'):
+        graph_nodes, graph_matrix = read_graph_data('./examples/graph/graph.csv')
+        return render_template('graphgoo/graphgoo_homepage.html', nodes=graph_nodes, matrix=graph_matrix)
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            graph_nodes, graph_matrix = read_graph_data("./static/user/" + email + "/data/graph.csv")
+            return render_template('graphgoo/graphgoo_homepage.html', nodes=graph_nodes, matrix=graph_matrix)
+        else:
+            graph_nodes, graph_matrix = read_graph_data('./examples/graph/graph.csv')
+            return render_template('graphgoo/graphgoo_homepage.html', nodes=graph_nodes, matrix=graph_matrix)
+
+
+@app.route('/graph_upload', methods=['POST', 'GET'])
+def graph_upload():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                path = "./static/user/" + email + "/data/"
+                filedata = request.files['file']
+                if filedata:
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
+                    if os.path.exists(path + "graph.csv"):
+                        os.remove(path + "graph.csv")
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return '上传文件失败'
+                    os.rename(path + filedata.filename, path + "graph.csv")
+                else:
+                    return "filename invalid or network error"
+            return redirect(url_for('graphgoo'))
+    else:
+        return render_template('user/login.html')
+
+
+def data_list_to_dictionary(list_key, list_value):
+    if len(list_key) != len(list_value):
+        print("the keys and the values don't match")
+        exit(0)
+    dict = {}
+    for i in range(len(list_key)):
+        dict[list_key[i]] = list_value[i]
+    return dict
+
+
+def generate_table_data(table_id, table_fea, table_da, table_cluster_method, table_embedding_method):
+    # table original data
+    table_fea_fea_dic = []  # dictionary features for display
+    table_fea_da_dic = []  # dictionary data for visual analysis
+    table_id_fea_da_dic = []  # dictionary data for display
+    table_fea_fea_dic.append(data_list_to_dictionary(table_fea, table_fea))
+    for temp_list in table_da:
+        table_fea_da_dic.append(data_list_to_dictionary(table_fea[1:], temp_list))
+    table_id_da = []
+    for i in range(len(table_id)):
+        temp_list = []
+        temp_list.append(table_id[i])
+        for temp_item in table_da[i]:
+            temp_list.append(temp_item)
+        table_id_da.append(temp_list)
+    for temp_list in table_id_da:
+        table_id_fea_da_dic.append(data_list_to_dictionary(table_fea, temp_list))
+    # table statistics data
+    table_stt_da = {'mean': [], 'median': [], 'mode': [], 'min': [], 'max': [], 'var': [],
+                                            'corr': []}
+    stt = Statistics(table_da, table_fea[1:])
+    table_stt_da['mean'] = stt.mean
+    table_stt_da['median'] = stt.median
+    table_stt_da['mode'] = stt.mode
+    table_stt_da['min'] = stt.min
+    table_stt_da['max'] = stt.max
+    table_stt_da['var'] = stt.var
+    table_stt_da['corr'] = stt.corr
+    # table cluster and embedding data
+    parameters = {}
+    parameters['data'] = table_da
+    result = getattr(ClusterWay(), table_cluster_method)(parameters)
+    clustering = result['clustering']
+    labels = clustering.labels_.tolist()
+    table_clusters = np.unique(labels).size
+    embedding = getattr(ProjectionWay(), table_embedding_method)(table_da)
+    samples, features = embedding['data'].shape
+    data_embedding = embedding['data'].tolist()
+    for i in range(samples):
+        lll = labels[i]
+        data_embedding[i].append(lll)
+    table_clu_emb_da = data_embedding
+    #  table anomaly detection data
+    table_ano_de_da = AnonalyMethod.clfdetection(table_clu_emb_da)
+    # table regression data
+    table_reg_da = fitSLR(data_embedding)
+    return (table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da,
+            table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters)
+
+
+def generate_table_dic_data(table_id,table_da,table_fea):
+    #table_id:current_app.config['TABLE_IDENTIFIERS']
+    #table_da:current_app.config['TABLE_DATA']
+    #table_fea:current_app.config['TABLE_FEATURES']
+    table_id_da = []
+    table_id_fea_da_dic = []
+    for i in range(len(table_id)):
+        temp_list = []
+        temp_list.append(table_id[i])
+        for temp_item in table_da[i]:
+            temp_list.append(temp_item)
+        table_id_da.append(temp_list)
+    for temp_list in table_id_da:
+        table_id_fea_da_dic.append(data_list_to_dictionary(table_fea, temp_list))
+        return table_id_fea_da_dic
+
+
+def read_table_data(filename):
+    table_data = pd.read_csv(filename)
+    table_features = table_data.columns
+    table_features = table_features.tolist()
+    table_data = np.array(table_data).tolist()
+    table_identifiers = []
+    for i in range(len(table_data)):
+        table_identifiers.append(table_data[i][0])
+        del table_data[i][0]
+    return table_data, table_features, table_identifiers
+
+
+@app.route('/tablegoo', methods=['POST', 'GET'])
+def tablegoo():
+    if not session.get('email'):
+        table_cluster_method = 'KMeans'
+        table_embedding_method = 'Principal_Component_Analysis'
+        table_visualization_method = 'Radviz'
+        table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+        table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+            table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
+        return render_template('tablegoo/tablegoo_homepage.html',
+                               features_dictionary=table_fea_fea_dic,
+                               no_identifiers_data_list=table_data,
+                               no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
+                               no_identifiers_data_dictionary=table_fea_da_dic,
+                               data_dictionary=table_id_fea_da_dic,
+                               mean=table_stt_da['mean'],
+                               median=table_stt_da['median'],
+                               mode=table_stt_da['mode'],
+                               min=table_stt_da['min'],
+                               max=table_stt_da['max'],
+                               var=table_stt_da['var'],
+                               corr=table_stt_da['corr'],
+                               features_list=table_features[1:],
+                               cluster_embedding_data=table_clu_emb_da,
+                               n_clusters=table_clusters,
+                               cluster_method=table_cluster_method,
+                               embedding_method=table_embedding_method,
+                               anomaly_detection_data=table_ano_de_da,
+                               regression_data=table_reg_da,
+                               visualization_method=table_visualization_method)
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/table.csv"):
+            table_data, table_features, table_identifiers = read_table_data("./static/user/" + email + "/data/table.csv")
+            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
+                table_identifiers, table_features, table_data)
+            table_cluster_method = 'KMeans'
+            table_embedding_method = 'Principal_Component_Analysis'
+            table_clusters = 3
+            table_visualization_method = 'Radviz'
+            return render_template('tablegoo/tablegoo_homepage.html',
+                                   features_dictionary=table_fea_fea_dic,
+                                   no_identifiers_data_list=table_data,
+                                   no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
+                                   no_identifiers_data_dictionary=table_fea_da_dic,
+                                   data_dictionary=table_id_fea_da_dic,
+                                   mean=table_stt_da['mean'],
+                                   median=table_stt_da['median'],
+                                   mode=table_stt_da['mode'],
+                                   min=table_stt_da['min'],
+                                   max=table_stt_da['max'],
+                                   var=table_stt_da['var'],
+                                   corr=table_stt_da['corr'],
+                                   features_list=table_features[1:],
+                                   cluster_embedding_data=table_clu_emb_da,
+                                   n_clusters=table_clusters,
+                                   cluster_method=table_cluster_method,
+                                   embedding_method=table_embedding_method,
+                                   anomaly_detection_data=table_ano_de_da,
+                                   regression_data=table_reg_da,
+                                   visualization_method=table_visualization_method)
+        else:
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
+                table_identifiers, table_features, table_data)
+            table_cluster_method = 'KMeans'
+            table_embedding_method = 'Principal_Component_Analysis'
+            table_clusters = 3
+            table_visualization_method = 'Radviz'
+            return render_template('tablegoo/tablegoo_homepage.html',
+                                   features_dictionary=table_fea_fea_dic,
+                                   no_identifiers_data_list=table_data,
+                                   no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
+                                   no_identifiers_data_dictionary=table_fea_da_dic,
+                                   data_dictionary=table_id_fea_da_dic,
+                                   mean=table_stt_da['mean'],
+                                   median=table_stt_da['median'],
+                                   mode=table_stt_da['mode'],
+                                   min=table_stt_da['min'],
+                                   max=table_stt_da['max'],
+                                   var=table_stt_da['var'],
+                                   corr=table_stt_da['corr'],
+                                   features_list=table_features[1:],
+                                   cluster_embedding_data=table_clu_emb_da,
+                                   n_clusters=table_clusters,
+                                   cluster_method=table_cluster_method,
+                                   embedding_method=table_embedding_method,
+                                   anomaly_detection_data=table_ano_de_da,
+                                   regression_data=table_reg_da,
+                                   visualization_method=table_visualization_method)
+
+
+@app.route('/table_upload', methods=['GET', 'POST'])
+def table_upload():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                path = "./static/user/" + email + "/data/"
+                filedata = request.files['file']
+                if filedata:
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
+                    if os.path.exists(path + "table.csv"):
+                        os.remove(path + "table.csv")
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return '上传文件失败'
+                    os.rename(path + filedata.filename, path + "table.csv")
+                else:
+                    return "filename invalid or network error"
+            return redirect(url_for('tablegoo'))
     else:
         return render_template('user/login.html')
 
