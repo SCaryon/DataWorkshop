@@ -237,7 +237,7 @@ def forget_change():
     print("email")
     user1 = user.query.filter_by(email=email).first()
     if user1 is not None:
-        user1.password = password
+        user1.password(password)
         db.session.commit()
         return "success"
     else:
@@ -512,7 +512,7 @@ def geo_id(id):
             return render_template("geogoo/geo_%s.html" % id)
 
 
-# 用户上传plane数据
+# 用户上传数据
 @app.route('/geo/<id>/upload/', methods=['GET', 'POST'])
 def geo_plane_upload(id):
     id = id.replace('<', '')
@@ -546,8 +546,64 @@ def geo_plane_upload(id):
             print("/static/user/" + email + "/data/countries.json")
             return redirect('/geo/<%s>/' % id)
     else:
-        session["last_page"]="/geo/<%s>" % id
+        session["last_page"] = "/geo/<%s>" % id
         return render_template('user/login.html')
+
+
+def read_geo_csv(filename):
+    final_data = csv.reader(open(filename))
+    province = []
+    data = []
+    for i in final_data:
+        province.append(i[0])
+        del i[0]
+        data.append(i)
+    attr = data[0]
+    del province[0]
+    del data[0]
+    final_data_object = {}
+    final_data_object['province'] = province
+    final_data_object['data'] = data
+    final_data_object['attr'] = attr
+    return final_data_object
+
+
+# 行政热力图
+@app.route('/geo/admin/', methods=['GET', 'POST'])
+def geo_admin():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if os.path.exists("./static/user/" + email + "/data/geo_admin.csv"):
+                final_data_object=read_geo_csv("./static/user/" + email + "/data/geo_admin.csv")
+                return render_template("geogoo/geo_admin.html", user=user1, attr=final_data_object['attr'])
+            else:
+                final_data_object = read_geo_csv('./examples/dist_code.csv')
+                return render_template('geogoo/geo_admin.html', attr=final_data_object['attr'])
+    else:  # 读取默认的数据
+        final_data_object = read_geo_csv('./examples/dist_code.csv')
+        return render_template('geogoo/geo_admin.html', attr=final_data_object['attr'])
+
+
+# 读取用户上传的行政区数据
+@app.route('/geo/admin/upload/', methods=['GET', 'POST'])
+def geo_admin_upload():
+    global final_data_object
+    if request.method == 'POST':
+        json_data = request.form.get('json_data')
+
+        return "true"
+    else:
+        return "false"
+
+
+# 向前端传递后台的地理信息数据
+@app.route('/geo/get/', methods=['GET', 'POST'])
+def geo_get():
+    return jsonify(final_data_object)
 
 
 def read_graph_data(filename):
