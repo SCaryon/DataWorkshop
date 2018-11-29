@@ -37,7 +37,7 @@ data：存储用户上传的数据
                         filedata.save(path + filedata.filename)
                     except IOError:
                         return '上传文件失败'
-                    os.rename(path + filedata.filename, old_file)
+                    os.rename(path + filedata.filename, path + "countries.xlsx")
                 else:
                     return "filename invalid or network error"
             return redirect(url_for('geo_globe'))# 上传成功以后，跳转到新的方法中去

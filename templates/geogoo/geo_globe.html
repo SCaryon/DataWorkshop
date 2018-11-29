@@ -36,9 +36,11 @@
 <!--加载过程中的动态gif展示来让用户等待异步请求-->
 <div id="spinner"></div>
 
+
 <div id="UI" style="display:none">
     <!--最终页面的左侧-->
-    <div id="sideBar">
+    <div id="sideBarname">选项</div>
+    <div id="sideBar" style="display: none">
         <div id="buttons">
             <div id="countrySection" style="width: 150px;float: left">
                 <div class="selectionBox">
@@ -52,7 +54,6 @@
             <div id="showlabels">隐藏图标</div>
             <div id="contrastbutton">高亮</div>
             <div id="backgroundButton">改变背景</div>
-            <div id="selectcate">选择品类</div>
             <div id="uploadexport">
                 <form method="post" action="/geo/plane/upload/export/" enctype="multipart/form-data">
                     <input type="file" name="file" id="file">
@@ -62,6 +63,7 @@
         </div>
 
     </div>
+    <div id="catename">选择品类</div>
     <div id="categories" style="display: none"></div>
 
     <!--盛放每个country的标签-->
@@ -254,7 +256,7 @@
         formData.append('file', $('#path')[0].files[0]);
         $.ajax({
             type: "POST",
-            url: "/geo/plane/upload/export/",
+            url: "/geo/globe/upload/",
             data: formData,
             processData: false,
             contentType: false,

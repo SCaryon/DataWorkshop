@@ -492,8 +492,8 @@ def file2db2json(file, jsonfile):
 
 
 # 用户上传plane数据
-@app.route('/geo/plane/upload/export/', methods=['GET', 'POST'])
-def geo_plane_upload_export():
+@app.route('/geo/globe/upload/', methods=['GET', 'POST'])
+def geo_globe_upload():
     if session.get('email'):
         email = session.get('email')
         user1 = user.query.filter_by(email=email).first()
@@ -507,18 +507,16 @@ def geo_plane_upload_export():
                 path = "./static/user/" + email + "/data/"
                 filedata = request.files['file']
                 if filedata:
-                    old_file = path + "countries.xlsx"
                     if os.path.exists(path + filedata.filename):
                         os.remove(path + filedata.filename)
-                    if os.path.exists(old_file):
-                        os.remove(old_file)
+                    if os.path.exists(path + "countries.xlsx"):
+                        os.remove(path + "countries.xlsx")
                     try:
                         filedata.save(path + filedata.filename)
                     except IOError:
                         return '上传文件失败'
-
-                    os.rename(path + filedata.filename, old_file)
-                    if file2db2json(old_file, path + 'countries.json') == "no such sheet!":
+                    os.rename(path + filedata.filename, path + "countries.xlsx")
+                    if file2db2json(path + "countries.xlsx", path + 'countries.json') == "no such sheet!":
                         return "no such sheet!"
                 else:
                     return "filename invalid or network error"

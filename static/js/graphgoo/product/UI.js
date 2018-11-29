@@ -16,8 +16,9 @@ function UI() {
             case 27://press Esc then fullscreen=false
                 THREEx.FullScreen.cancel();
                 $("#fullscreen").html('<a href="#">全屏模式</a>');
-                $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
-                    $("#sideBar").show();
+                $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
+                    $("#sideBarname").show();
+                    $("#catename").show();
                 });
                 myThis.fullscreen = false;
                 break;
@@ -30,8 +31,9 @@ function UI() {
         var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
         if (!state) {
             $("#fullscreen").html('<a href="#">全屏模式</a>');
-            $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
-                $("#sideBar").show();
+            $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
+                $("#sideBarname").show();
+                $("#catename").show();
             });
             myThis.fullscreen = false;
             THREEx.FullScreen.cancel();
@@ -44,6 +46,8 @@ function UI() {
             THREEx.FullScreen.request(document.body);
             $("#fullscreen").html('<a href="#">窗口模式</a>');
             $("#sideBar").hide();
+            $("#sideBarname").hide();
+            $("#catename").hide();
             $("#sideBar").animate({'bottom': '-30px'}, 400, 'swing', function () {
 
             });
@@ -52,7 +56,8 @@ function UI() {
             THREEx.FullScreen.cancel();
             $("#fullscreen").html('<a href="#">全屏模式</a>');
             $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
-                $("#sideBar").show();
+                $("#sideBarname").show();
+                $("#catename").show();
             });
             myThis.fullscreen = false;
         }
@@ -80,21 +85,6 @@ function UI() {
     });
 
 
-    //展示/隐藏目录筛选
-    $("#selectcate").click(function () {
-        myThis.selectcate = !myThis.selectcate;
-        if (myThis.selectcate) {
-            $("#categories").show();
-            $("#categories").animate({'left': '20px'}, 400, "swing", function () {
-            });
-        } else {
-            $("#categories").animate({'left': '-100px'}, 200, "swing", function () {
-                $("#categories").hide();
-            });
-        }
-    });
-
-
     //改变整体色调
     $("#backgroundButton").click(function () {
         myThis.darkMode = !myThis.darkMode;
@@ -119,7 +109,7 @@ function UI() {
                 'background-color': 'rgba(0,0,0,0.8)'
             });
             $("#description,#choice,#beginExplore,#beginStory").css('color', 'white');
-            $("#storyline,#fullscreen,#backhome,#showAbout,#showLabels,#contrastbutton,#backgroundButton,#selectcate,#selectcate_1").css({
+            $("#storyline,#fullscreen,#backhome,#showAbout,#showLabels,#contrastbutton,#backgroundButton").css({
                 'color': 'white',
                 'border-top': '1px solid #121314',
                 'border-bottom': '1px solid #121314'
@@ -129,7 +119,7 @@ function UI() {
                 'color': 'white'
             });
 
-            $("#storyline:hover,#fullscreen:hover,#backhome:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover,#selectcate:hover,#selectcate_1:hover").css('border-right', '2px solid #FFF')
+            $("#storyline:hover,#fullscreen:hover,#backhome:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backgroundButton:hover").css('border-right', '2px solid #FFF')
             $('.selectedMode').css('border', '1px solid white');
             $('#storyPrompt').css('background-color', 'rgba(0,0,0,0.4)');
             $('#productlabel').css({
@@ -205,7 +195,7 @@ UI.prototype.addSpinner = function () {
         lines: 17 // The number of lines to draw
         , length: 0 // The length of each line
         , width: 1 // The line thickness
-        , radius: 84 // The radius of the inner circle
+        , radius: 10 // The radius of the inner circle
         , scale: 3.5 // Scales overall size of the spinner
         , corners: 1 // Corner roundness (0..1)
         , color: '#FFF' // #rgb or #rrggbb or array of colors
@@ -239,7 +229,6 @@ UI.prototype.buildCategories = function (categories) {
             "<div id=cat" + val.id + " class='chooseCategory'>" + cats[val.id] + " </div></td></tr>";
     });
     $("#categories").html(catHTML + "</table>");
-    $("#categories_1").html(catHTML + "</table>")
 };
 //加载中的时候展示加载速度
 UI.prototype.updateLoader = function (add) {

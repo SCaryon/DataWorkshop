@@ -498,29 +498,32 @@ window.onload = function () {
             cameraControls.setTarget(mouseCoord.x - moveX, mouseCoord.y - moveY);
             mouseCoord.x = moveX;
             mouseCoord.y = moveY;
-
             //如果不是拖拽，且不是在story模式
         } else {
-            if (mouseX >= window.innerWidth - 10) {
+            if (moveX >= window.innerWidth - 50) {
                 selectCate = true;
                 $("#categories").show();
-                $("#categories").animate({'right': '20px'}, 400, "swing", function () {
+                // $("#catename").hide();
+                $("#categories").animate({'right': '20px'}, 0, "swing", function () {
                 });
             } else {
-                $("#categories").animate({'right': '-100px'}, 200, "swing", function () {
+                $("#categories").animate({'right': '-20px'}, 0, "swing", function () {
                     $("#categories").hide();
+                    // $("#catename").show();
                     selectCate = false;
                 });
             }
-            if (mouseY >= window.innerHeight - 10) {
-                $("#sideBar").hide();
-                $("#sideBar").animate({'bottom': '-30px'}, 400, 'swing', function () {
+            if (moveY >= window.innerHeight - 30) {
+                $("#sideBar").show();
+                // $("#sideBarname").hide();
+                $("#sideBar").animate({'bottom': '0px'}, 0, 'swing', function () {
                 });
-                siderbar = false;
+                siderbar = true;
             } else {
-                $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
-                    $("#sideBar").show();
-                    siderbar = true;
+                $("#sideBar").animate({'bottom': '-30px'}, 0, 'swing', function () {
+                    $("#sideBar").hide();
+                    // $("#sideBarname").show();
+                    siderbar = false;
                 });
             }
             if (loaded) {
