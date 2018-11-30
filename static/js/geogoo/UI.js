@@ -16,10 +16,10 @@ function UI() {
             case 27://press Esc then fullscreen=false
                 THREEx.FullScreen.cancel();
                 $("#fullscreen").html('<a href="#">全屏模式</a>');
-                $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
-                    $("#sideBarname").show();
-                    $("#catename").show();
-                });
+                // $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
+                $("#sideBarname").show();
+                $("#catename").show();
+                // });
                 myThis.fullscreen = false;
                 break;
             default:
@@ -31,10 +31,10 @@ function UI() {
         var state = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen;
         if (!state) {
             $("#fullscreen").html('<a href="#">全屏模式</a>');
-            $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
-                $("#sideBarname").show();
-                $("#catename").show();
-            });
+            // $("#sideBar").animate({'bottom': '0'}, 400, 'swing', function () {
+            $("#sideBarname").show();
+            $("#catename").show();
+            // });
             myThis.fullscreen = false;
             THREEx.FullScreen.cancel();
         }
@@ -45,20 +45,19 @@ function UI() {
         if (!myThis.fullscreen) {
             THREEx.FullScreen.request(document.body);
             $("#fullscreen").html('<a href="#">窗口模式</a>');
-            $("#sideBar").hide();
+            $("#sideBar").show();
             $("#sideBarname").hide();
             $("#catename").hide();
-            $("#sideBar").animate({'bottom': '-30px'}, 400, 'swing', function () {
-
+            $("#sideBar").animate({'top': '0px'}, 0, 'swing', function () {
             });
             myThis.fullscreen = true;
         } else {
             THREEx.FullScreen.cancel();
             $("#fullscreen").html('<a href="#">全屏模式</a>');
-            $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
-                $("#sideBarname").show();
-                $("#catename").show();
-            });
+            // $("#sideBar").animate({'bottom': '30px'}, 400, 'swing', function () {
+            $("#sideBarname").show();
+            $("#catename").show();
+            // });
             myThis.fullscreen = false;
         }
     });

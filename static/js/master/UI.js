@@ -194,13 +194,13 @@ function UI() {
     buttons.push({
         "id": "gridSphereButton",
         "title": "全球视图",
-        "img": "images/master/icon/planemap.png",
+        "img": "images/master/icon/globemap.png",
         "desc": "通过将国家/地区放置在国家/地区内来显"
     });
     buttons.push({
         "id": "gridButton",
         "title": "世界视图",
-        "img": "images/master/icon/globemap.png",
+        "img": "images/master/icon/planemap.png",
         "desc": "通过将国家/地区放置在国家/地区内来显"
     });
     buttons.push({

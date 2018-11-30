@@ -642,6 +642,13 @@ def geo_get():
         return jsonify(final_data_object)
 
 
+@app.route("/graph/<id>")
+def graph_id(id):
+    id = id.replace('<', '')
+    id = id.replace('>', '')
+    return render_template('graphgoo/product/%s.html' % id)
+
+
 def read_graph_data(filename):
     temp_data = pd.read_csv('./examples/graph/graph.csv')
     graph_nodes = temp_data.columns
@@ -777,7 +784,7 @@ def generate_table_dic_data(table_id, table_da, table_fea):
 
 
 def read_table_data(filename):
-    table_data = pd.read_csv(filename)
+    table_data = pd.read_csv(filename, encoding='gbk')
     table_features = table_data.columns
     table_features = table_features.tolist()
     table_data = np.array(table_data).tolist()
@@ -826,7 +833,6 @@ def tablegoo():
             table_cluster_method = 'KMeans'
             table_embedding_method = 'Principal_Component_Analysis'
             table_visualization_method = 'Radviz'
-            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
             table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
                 table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
             return render_template('tablegoo/tablegoo_homepage.html',
