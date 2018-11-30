@@ -816,5 +816,74 @@ def table_upload():
         return render_template('user/login.html')
 
 
+
+@app.route('/streaming_data', methods=['GET', 'POST'])
+def streaming_data():
+    email = session.get('email')
+    user1 = user.query.filter_by(email=email).first()
+    if user1 is not None:
+        return render_template('streaminggoo/time.html',user=user1)
+    else:
+        return render_template('streaminggoo/time.html')
+
+
+@app.route('/time_upload', methods=['GET', 'POST'])
+def time_upload():
+    email = session.get('email')
+    user1 = user.query.filter_by(email=email).first()
+    if user1 is None:
+        return "please sign in first"
+    if session.get('email') and (request.method == 'POST'):
+        path = "./static/user/" + email + "/data/user_data.csv"
+        filedata = request.files['file']
+        if filedata:
+            if os.path.exists(path):
+                os.remove(path)
+            try:
+                filedata.save(path)
+            except IOError:
+                return '上传文件失败'
+
+        time_data_object = {}
+        json_data = request.form.get('json_data')
+        final_data = json.loads(json_data)
+        features_list = final_data[0]
+        for feature in features_list:
+            time_data_object[feature] = []
+        del final_data[0]
+        for i in range(len(final_data) - 1):
+            if (len(final_data[i]) != len(final_data[i])):
+                return 'error!exist none'
+        for i in range(len(final_data)):
+            if (len(final_data[i]) == 0):
+                break
+            if '' in final_data[i]:
+                continue
+            for j in range(len(final_data[i])):  # 对每一行都进行数据提取
+                if features_list[j] == 'year':
+                    time_data_object['year'].append(float(final_data[i][j]))
+                else:
+                    time_data_object[features_list[j]].append(float(final_data[i][j]))
+        themeriver_data = []
+        for item in range(len(time_data_object['year'])):
+            year = time_data_object['year'][item]
+            for feature in time_data_object.keys():
+                if feature != 'year':
+                    feature_data = time_data_object[feature][item]
+                    data = [str(int(year)), feature_data, feature]
+                    themeriver_data.append(data)
+        themeriver = {}
+        themeriver['data'] = themeriver_data
+        themeriver_features = []
+        features = time_data_object.keys()
+        for feature in features:
+            if feature != 'year':
+                themeriver_features.append(feature)
+        themeriver['features'] = themeriver_features
+        return jsonify(themeriver)
+    else:
+        return 'please sign in first'
+
+
 if __name__ == '__main__':
     app.run(processes=10)
