@@ -22,6 +22,19 @@ from statistics import Statistics
 from model import user, methoduse, login, mailconfirm, db
 from flask import Flask, request, json, render_template, session, jsonify, url_for, current_app, g, redirect
 from xlrd import open_workbook
+from werkzeug.utils import secure_filename
+
+from aip import AipOcr #引入百度api
+import jieba
+import wav2text  # wav转text的自定义py文件
+from docx import Document
+# 连接百度服务器的密钥
+APP_ID = '14658891'
+API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
+SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
+# 连接百度服务器
+# 输入三个密钥，返回服务器对象
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -910,49 +923,7 @@ def table_upload():
         return render_template('user/login.html')
 
 
-@app.route('/textgoo', methods=['GET', 'POST'])
-def textgoo():
-    if not session.get('email'):
-        csv_reader = csv.reader(open('./examples/text/text_data.csv'))
-        text_no_identifiers_data_dictionary = []
-        features_list = ['source', 'target', 'rela']
-        for temp_list in csv_reader:
-            if not temp_list[0]:
-                continue
-            list_num = []
-            for str in temp_list:
-                list_num.append(str)
-            my_dic = data_list_to_dictionary(features_list, list_num)
-            text_no_identifiers_data_dictionary.append(my_dic)
-        return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
-    else:
-        email = session.get('email')
-        if os.path.exists("./static/user/" + email + "/data/text.csv"):
-            csv_reader = csv.reader(open("./static/user/" + email + "/data/text.csv"))
-            text_no_identifiers_data_dictionary = []
-            features_list = ['source', 'target', 'rela']
-            for temp_list in csv_reader:
-                if not temp_list[0]:
-                    continue
-                list_num = []
-                for str in temp_list:
-                    list_num.append(str)
-                my_dic = data_list_to_dictionary(features_list, list_num)
-                text_no_identifiers_data_dictionary.append(my_dic)
-            return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
-        else:
-            csv_reader = csv.reader(open('./examples/text/text_data.csv'))
-            text_no_identifiers_data_dictionary = []
-            features_list = ['source', 'target', 'rela']
-            for temp_list in csv_reader:
-                if not temp_list[0]:
-                    continue
-                list_num = []
-                for str in temp_list:
-                    list_num.append(str)
-                my_dic = data_list_to_dictionary(features_list, list_num)
-                text_no_identifiers_data_dictionary.append(my_dic)
-            return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+
 
 
 @app.route('/text_upload', methods=['GET', 'POST'])
@@ -1006,6 +977,8 @@ def clean_table():
     return render_template("clean_table.html", data=table_id_da,
                            frame=table_fea, data_list=data_list_transform)
 
+
+#streaming data start------------------------------------------------------
 @app.route('/streaming_data', methods=['GET', 'POST'])
 def streaming_data():
     email = session.get('email')
@@ -1301,6 +1274,231 @@ def Moving_averaging():
             result.append(str(s_pre_single[a]))
         re_result = ':'.join(result)
         return re_result
+#streaming data end------------------------------------------------------
 
+#cluster start------------------------------------------------------------
+@app.route('/cluster')
+def cluster():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('cluster_2.html', user=user1)
+    else:
+        return render_template('cluster_2.html')
+
+
+@app.route('/cluster/cluster_way', methods=['POST', 'GET'])
+def cluster_way():
+    # run cluster way except user's way
+    original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
+    length = 0
+    no_identifiers_data_list = []
+    features_list = []
+    for i in original_data:
+        if length == 0:
+            features_list = i
+        else:
+            no_identifiers_data_list.append(i)
+        length = length+1
+    parameters = {}
+    draw_id = str(request.get_json()['draw_id'])
+    body = 'page-top' + draw_id
+    node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
+    if request.get_json()['exist'] != 'none':
+        for key in request.get_json():
+            if key != 'cluster_method':  # 要保证参数数组里面只有参数，没有方法名
+                parameters[key] = request.get_json()[key]
+    parameters['data'] = no_identifiers_data_list  # final_data_object['no_identifiers_data_list']  # 用户输入的数据csv
+
+    cluster_method = request.get_json()['cluster_method']
+    result = getattr(ClusterWay(), cluster_method)(parameters)
+    clustering = result['clustering']
+    if result.get('labels') is None:
+        initial_labels = clustering.labels_
+    else:
+        initial_labels = result.get('labels')
+    labels = initial_labels.tolist()
+    clusters = np.unique(labels).size
+
+    if session.get('embedding_method'):
+        embedding_method = session.get('embedding_method')
+    else:
+        embedding_method = 'Principal_Component_Analysis'
+    pca = getattr(ProjectionWay(), embedding_method)(no_identifiers_data_list)
+    data_pca = pca['data']
+    samples, features = data_pca.shape
+    data_pca = data_pca.tolist()
+    for i in range(samples):
+        lll = labels[i]
+        data_pca[i].append(lll)
+
+    this_html = render_template("cluster.html", data=data_pca, data_obj=features_list,
+                                clusters=clusters,
+                                method=cluster_method + draw_id, body_id=body, body_draw_id=node_id)
+    return this_html
+
+
+@app.route('/save_cluster_file', methods=['POST', 'GET'])
+def cluster_code():
+    if request.method == 'POST':
+        f = request.files['file']
+        # 1361377791@qq.com
+        # basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
+        #  文件所要放入的路径
+        basepath = os.path.join("/home/ubuntu/dagoo", 'static', 'user', '1361377791@qq.com',
+                                'user_code')  # + '/static/user/1361377791@qq.com/user_code'  # 文件所要放入的路径
+        path = "./static/user/" + session.get('email')
+        # upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
+        if (request.form.get('label') == 'zip'):
+            filename = os.path.join(basepath, '/code/Mining/User_cluster.zip')  # 要解压的文件
+            filedir = basepath  # 解压后放入的目录
+            # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
+            f.save(basepath + '/User_cluster.zip')
+            fz = zipfile.ZipFile(filename, 'r')
+            for file in fz.namelist():
+                # print(file)  # 打印zip归档中目录
+                fz.extract(file, filedir)
+            return 'upload the cluster code file successfully !'
+        else:
+            if (request.form.get('label') == 'py'):  # python
+                user_cluster_url = os.path.join(basepath, '/code/Mining/User_cluster.py')
+            if (request.form.get('label') == 'jar'):  # java
+                user_cluster_url = os.path.join(basepath, '/code/Mining/User_cluster.jar')
+            if (request.form.get('label') == 'so'):  # c/c++
+                user_cluster_url = os.path.join(basepath, '/code/Mining/User_cluster.so')
+            if (request.form.get('label') == 'csv'):  # csv
+                user_cluster_url = os.path.join(basepath, '/data/User_cluster.csv')
+            '''
+                        if user_cluster_url is not None:
+                f.save(user_cluster_url)
+                cd = pyclamd.ClamdAgnostic()
+                is_virus = cd.scan_file(user_cluster_url)
+                if is_virus is None:
+                    # return redirect(url_for('cluster_code'))
+                    return 'upload the cluster code file successfully !'
+                else:
+                    os.remove(user_cluster_url)
+                    return 'virus!!!'
+                    '''
+
+#cluster end-------------------------------------------------
+
+#text_OCR--------------------------------------------------
+
+@app.route('/textgoo', methods=['GET', 'POST'])
+def textgoo():
+    if not session.get('email'):
+        csv_reader = csv.reader(open('./examples/text/text_data.csv'))
+        text_no_identifiers_data_dictionary = []
+        features_list = ['source', 'target', 'rela']
+        for temp_list in csv_reader:
+            if not temp_list[0]:
+                continue
+            list_num = []
+            for str in temp_list:
+                list_num.append(str)
+            my_dic = data_list_to_dictionary(features_list, list_num)
+            text_no_identifiers_data_dictionary.append(my_dic)
+        return render_template('textgoo/draw_text.html',text_data=text_no_identifiers_data_dictionary)
+    else:
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if os.path.exists("./static/user/" + email + "/data/text.csv"):
+            csv_reader = csv.reader(open("./static/user/" + email + "/data/text.csv"))
+            text_no_identifiers_data_dictionary = []
+            features_list = ['source', 'target', 'rela']
+            for temp_list in csv_reader:
+                if not temp_list[0]:
+                    continue
+                list_num = []
+                for str in temp_list:
+                    list_num.append(str)
+                my_dic = data_list_to_dictionary(features_list, list_num)
+                text_no_identifiers_data_dictionary.append(my_dic)
+            return render_template('textgoo/draw_text.html', user=user1, text_data=text_no_identifiers_data_dictionary)
+        else:
+            csv_reader = csv.reader(open('./examples/text/text_data.csv'))
+            text_no_identifiers_data_dictionary = []
+            features_list = ['source', 'target', 'rela']
+            for temp_list in csv_reader:
+                if not temp_list[0]:
+                    continue
+                list_num = []
+                for str in temp_list:
+                    list_num.append(str)
+                my_dic = data_list_to_dictionary(features_list, list_num)
+                text_no_identifiers_data_dictionary.append(my_dic)
+            return render_template('textgoo/draw_text.html',  user=user1,text_data=text_no_identifiers_data_dictionary)
+
+
+@app.route('/word_cloud_OCR', methods=['GET', 'POST'])
+def picture_OCR():
+    if session.get('email') and request.method == 'POST':
+        type = request.form.get('label')
+        if type == 'wav':
+            f = request.files['wav']
+            base_path = os.path.dirname(
+                __file__ + '/static/user/' + session.get('email') + "/img")# 当前文件所在路径
+            upload_path = os.path.join(base_path, '', secure_filename('doc_by_upload.wav'))
+            f.save(upload_path)
+            result = wav2text.wav2word(upload_path)
+            result = json.loads(result)
+            if result["err_msg"] != "success.":
+                os.remove(upload_path)
+                return "err!:" + result["err_msg"]
+            else:
+                os.remove(upload_path)
+                return (" ".join(jieba.cut("".join(result["result"]))))
+        if type == 'image':
+            f = request.files['image']
+            base_path = os.path.dirname(
+                __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+            upload_path = os.path.join(base_path, '', secure_filename('image_by_upload.jpg'))
+            f.save(upload_path)
+            # 读取刚储存的本地文件
+            with open(upload_path, 'rb') as fp:
+                image = fp.read()
+            # 输入刚读取的本地文件，调用百度文字识别，返回json格式识别结构
+            result = client.accurate(image)
+
+            # 将百度返回的分行结果连接成一行
+            raw = ""
+            for sresult in result["words_result"]:
+                raw += sresult["words"]
+
+            # 输入连续的文字，返回分词结果
+            x = (" ".join(jieba.cut(raw)))
+
+            # 向浏览器返回分次结果
+            os.remove(upload_path)
+            return x
+        if type == 'docx':
+            f = request.files['docx']
+            base_path = os.path.dirname(
+                __file__)  # os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/img"# 当前文件所在路径
+            upload_path = os.path.join(base_path, '', secure_filename('doc_by_upload.docx'))
+            f.save(upload_path)
+            raw = ""
+            document = Document(upload_path)
+            for paragraph in document.paragraphs:
+                raw += paragraph.text
+                # 输入连续的文字，返回分词结果
+            x = (" ".join(jieba.cut(raw)))
+            # 向浏览器返回分次结果
+            os.remove(upload_path)
+            return x
+        if type == 'text':
+            raw = request.form.get('text')
+            x = (" ".join(jieba.cut(raw)))
+            # 向浏览器返回分次结果
+            return x
+        else:
+            return "we don't support this type of file!"
+    else:
+        return jsonify(False)
+
+#text_OCR--------------------------------------------------
 if __name__ == '__main__':
     app.run(processes=10)
