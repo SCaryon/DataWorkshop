@@ -493,7 +493,7 @@ top:0;
     user-select: none;
 }
 #sideBarname{
-    bottom:0;
+    top:0;
     position: absolute;
     right: 100px;
     z-index: 1;
@@ -501,7 +501,7 @@ top:0;
 #catename{
     position: absolute;
     right: 0;
-    bottom: 0;
+    top: 0;
     z-index: 1;
 }
 #nextlevel,#annotation,#title,#subtitle,#subtitle2{

@@ -509,14 +509,14 @@ window.onload = function () {
                     selectCate = false;
                 });
             }
-            if (moveY >= window.innerHeight - 30) {
+            if (moveY <= 50) {
                 $("#sideBar").show();
                 // $("#sideBarname").hide();
-                $("#sideBar").animate({'bottom': '0px'}, 0, 'swing', function () {
+                $("#sideBar").animate({'top': '0px'}, 0, 'swing', function () {
                 });
                 siderbar = true;
             } else {
-                $("#sideBar").animate({'bottom': '-30px'}, 0, 'swing', function () {
+                $("#sideBar").animate({'top': '-30px'}, 0, 'swing', function () {
                     $("#sideBar").hide();
                     // $("#sideBarname").show();
                     siderbar = false;

@@ -95,22 +95,12 @@
         </div>
     </div>
 </div>
-<div id="left">
-    <div>
-        <br>
-        <input class="button_blue" id="file_path" name="file_path" type="button"
-               onclick="path.click()" value="File Upload">
-        <input type="file" id="path" style="display:none" name="csvfile"
-               onchange="file_path.value=this.value">
-        <input class="button_blue" type="button" onclick="read_file()" value="Submit">
-    </div>
-</div>
 
-<div id="container" style="margin-top: 90px;margin-left:15%;"></div>
+<div id="container" style="margin-top: 90px;"></div>
 <script src="https://webapi.amap.com/loca?key=2dd663dd485017c4b832632ff9751da0"></script>
 <!-- UI组件库 1.0 -->
 <script src="https://a.amap.com/Loca/static/mock/earthquake.js"></script>
-<script src="/static/js/jquery.js"></script>
+<script src="/static/js/bootstrap/jquery.js"></script>
 <script src="/static/js/bootstrap/bootstrap.min.js"></script>
 <!--文件上传使用的-->
 <script src="/static/js/upload/papaparse.js"></script>
@@ -119,7 +109,7 @@
     geogra_data = {};
     $.ajax({
         type: "POST",
-        url: "/geo/get/",
+        url: "/geo/get/points/",
         data: {},
         async: false,
         dataType: "json",
