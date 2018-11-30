@@ -68,13 +68,19 @@
                         data: {json_data: JSON.stringify(res)},
 
                         success: function (res) {
-                            alert('upload the data file successfully !');
+                            if (res.hasOwnProperty("features"))
+                            {
+                                alert('upload the data file successfully !');
                             $("#draw_bar").empty();
                             $("#selected_way_attribution").empty();
                             user_data = {};
                             draw_counts={};
                             themeriver(res.features, res.data);
                             change_attribution(res.features);
+                            }
+                            else {
+                                alert(res);
+                            }
                         },
                         error: function () {
                             alert("获取数据失败！");
@@ -373,28 +379,6 @@
         ['2015/11/26', 16, 'DD'],
         ['2015/11/27', 22, 'DD'],
         ['2015/11/28', 10, 'DD']
-    ];
-    var themeriver_data1= [
-        ['2015', 10, 'DQ'],
-        ['2016', 15, 'DQ'],
-        ['2017', 35, 'DQ'],
-        // ['2015/11/11',38,'DQ'],['2015/11/12',22,'DQ'],['2015/11/13',16,'DQ'],
-        // ['2015/11/26',16,'DQ'],['2015/11/27',22,'DQ'],['2015/11/28',10,'DQ'],
-        ['2015', 35, 'TY'],
-        ['2016', 42, 'TY'],
-        ['2017', 42, 'TY'],
-        ['2015', 35, 'SS'],
-        ['2016', 34, 'SS'],
-        ['2017', 28, 'SS'],
-        ['2015', 16, 'QG'],
-        ['2016', 22, 'QG'],
-        ['2017', 10, 'QG'],
-        ['2015', 16, 'SY'],
-        ['2016', 22, 'SY'],
-        ['2017', 10, 'SY'],
-        ['2015', 10, 'DD'],
-        ['2016', 15, 'DD'],
-        ['2017', 10, 'DD']
     ];
     var theme_features = ['DQ', 'TY', 'SS', 'QG', 'SY', 'DD'];
     var origin_pie_data=[
