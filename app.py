@@ -650,7 +650,7 @@ def graph_id(id):
 
 
 def read_graph_data(filename):
-    temp_data = pd.read_csv('./examples/graph/graph.csv')
+    temp_data = pd.read_csv(filename, encoding='gbk')
     graph_nodes = temp_data.columns
     graph_nodes = graph_nodes.tolist()
     graph_matrix = np.array(temp_data).tolist()
@@ -861,7 +861,6 @@ def tablegoo():
             table_cluster_method = 'KMeans'
             table_embedding_method = 'Principal_Component_Analysis'
             table_visualization_method = 'Radviz'
-            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
             table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
                 table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
             return render_template('tablegoo/tablegoo_homepage.html',
@@ -990,7 +989,6 @@ def text_upload():
         return render_template('user/login.html')
 
 
-
 @app.route('/clean', methods=['POST', 'GET'])
 def clean():
     return render_template("clean.html")
@@ -1011,6 +1009,7 @@ def clean_table():
     data_list_transform = data_transform.tolist()
     return render_template("clean_table.html", data=table_id_da,
                            frame=table_fea, data_list=data_list_transform)
+
 
 @app.route('/streaming_data', methods=['GET', 'POST'])
 def streaming_data():
@@ -1088,6 +1087,7 @@ def time_upload():
         print("please sign in first")
         return 'please sign in first'
 
+
 @app.route('/streaming_data_fourier', methods=['GET', 'POST'])
 def streamingdata_fourier():
     if session.get('email') and request.method == 'POST':
@@ -1118,6 +1118,7 @@ def streamingdata_fourier():
         return jsonify(result)
     else:
         return 'please sign in first'
+
 
 @app.route('/time/ex/', methods=['POST', 'GET'])
 def Exponential_smoothing():
@@ -1258,6 +1259,7 @@ def simplle_smoothing(s):
         s2[i] = sum(s[i - 5:i]) / 5
     return s2
 
+
 @app.route('/time/mo/', methods=['POST', 'GET'])
 def Moving_averaging():
     if session.get('email') and request.method == 'POST':
@@ -1307,6 +1309,7 @@ def Moving_averaging():
             result.append(str(s_pre_single[a]))
         re_result = ':'.join(result)
         return re_result
+
 
 if __name__ == '__main__':
     app.run(processes=10)
