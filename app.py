@@ -30,8 +30,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 # 设定session的保存时间，当session.permanent=True的时候
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-app.config['NODES'] = []
-app.config['MATRIX'] = []
 
 
 @app.route('/')
@@ -77,7 +75,7 @@ def login_pass():
             page = session.get("last_page")
             return page
         else:
-            return render_template("datagoo_homepage.html", user=theuser)
+            return '/'
 
 
 @app.route('/login/pass/name/', methods=['GET', 'POST'])
@@ -237,7 +235,7 @@ def forget_change():
     print("email")
     user1 = user.query.filter_by(email=email).first()
     if user1 is not None:
-        user1.password = password
+        user1.password(password)
         db.session.commit()
         return "success"
     else:
@@ -512,7 +510,7 @@ def geo_id(id):
             return render_template("geogoo/geo_%s.html" % id)
 
 
-# 用户上传plane数据
+# 用户上传数据
 @app.route('/geo/<id>/upload/', methods=['GET', 'POST'])
 def geo_plane_upload(id):
     id = id.replace('<', '')
@@ -546,8 +544,64 @@ def geo_plane_upload(id):
             print("/static/user/" + email + "/data/countries.json")
             return redirect('/geo/<%s>/' % id)
     else:
-        session["last_page"]="/geo/<%s>" % id
+        session["last_page"] = "/geo/<%s>" % id
         return render_template('user/login.html')
+
+
+def read_geo_csv(filename):
+    final_data = csv.reader(open(filename))
+    province = []
+    data = []
+    for i in final_data:
+        province.append(i[0])
+        del i[0]
+        data.append(i)
+    attr = data[0]
+    del province[0]
+    del data[0]
+    final_data_object = {}
+    final_data_object['province'] = province
+    final_data_object['data'] = data
+    final_data_object['attr'] = attr
+    return final_data_object
+
+
+# 行政热力图
+@app.route('/geo/admin/', methods=['GET', 'POST'])
+def geo_admin():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if os.path.exists("./static/user/" + email + "/data/geo_admin.csv"):
+                final_data_object=read_geo_csv("./static/user/" + email + "/data/geo_admin.csv")
+                return render_template("geogoo/geo_admin.html", user=user1, attr=final_data_object['attr'])
+            else:
+                final_data_object = read_geo_csv('./examples/dist_code.csv')
+                return render_template('geogoo/geo_admin.html', attr=final_data_object['attr'])
+    else:  # 读取默认的数据
+        final_data_object = read_geo_csv('./examples/dist_code.csv')
+        return render_template('geogoo/geo_admin.html', attr=final_data_object['attr'])
+
+
+# 读取用户上传的行政区数据
+@app.route('/geo/admin/upload/', methods=['GET', 'POST'])
+def geo_admin_upload():
+    global final_data_object
+    if request.method == 'POST':
+        json_data = request.form.get('json_data')
+
+        return "true"
+    else:
+        return "false"
+
+
+# 向前端传递后台的地理信息数据
+@app.route('/geo/get/', methods=['GET', 'POST'])
+def geo_get():
+    return jsonify(final_data_object)
 
 
 def read_graph_data(filename):
@@ -603,6 +657,7 @@ def graph_upload():
                     return "filename invalid or network error"
             return redirect(url_for('graphgoo'))
     else:
+        session["last_page"] = '/graphgoo'
         return render_template('user/login.html')
 
 
@@ -730,12 +785,12 @@ def tablegoo():
         if os.path.exists("./static/user/" + email + "/data/table.csv"):
             table_data, table_features, table_identifiers = read_table_data(
                 "./static/user/" + email + "/data/table.csv")
-            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
-                table_identifiers, table_features, table_data)
             table_cluster_method = 'KMeans'
             table_embedding_method = 'Principal_Component_Analysis'
-            table_clusters = 3
             table_visualization_method = 'Radviz'
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+                table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
             return render_template('tablegoo/tablegoo_homepage.html',
                                    features_dictionary=table_fea_fea_dic,
                                    no_identifiers_data_list=table_data,
@@ -759,12 +814,12 @@ def tablegoo():
                                    visualization_method=table_visualization_method)
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da = generate_table_data(
-                table_identifiers, table_features, table_data)
             table_cluster_method = 'KMeans'
             table_embedding_method = 'Principal_Component_Analysis'
-            table_clusters = 3
             table_visualization_method = 'Radviz'
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+                table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method)
             return render_template('tablegoo/tablegoo_homepage.html',
                                    features_dictionary=table_fea_fea_dic,
                                    no_identifiers_data_list=table_data,
@@ -813,9 +868,105 @@ def table_upload():
                     return "filename invalid or network error"
             return redirect(url_for('tablegoo'))
     else:
+        session["last_page"] = '/tablegoo'
         return render_template('user/login.html')
 
 
+@app.route('/textgoo', methods=['GET', 'POST'])
+def textgoo():
+    if not session.get('email'):
+        csv_reader = csv.reader(open('./examples/text/text_data.csv'))
+        text_no_identifiers_data_dictionary = []
+        features_list = ['source', 'target', 'rela']
+        for temp_list in csv_reader:
+            if not temp_list[0]:
+                continue
+            list_num = []
+            for str in temp_list:
+                list_num.append(str)
+            my_dic = data_list_to_dictionary(features_list, list_num)
+            text_no_identifiers_data_dictionary.append(my_dic)
+        return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/text.csv"):
+            csv_reader = csv.reader(open("./static/user/" + email + "/data/text.csv"))
+            text_no_identifiers_data_dictionary = []
+            features_list = ['source', 'target', 'rela']
+            for temp_list in csv_reader:
+                if not temp_list[0]:
+                    continue
+                list_num = []
+                for str in temp_list:
+                    list_num.append(str)
+                my_dic = data_list_to_dictionary(features_list, list_num)
+                text_no_identifiers_data_dictionary.append(my_dic)
+            return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+        else:
+            csv_reader = csv.reader(open('./examples/text/text_data.csv'))
+            text_no_identifiers_data_dictionary = []
+            features_list = ['source', 'target', 'rela']
+            for temp_list in csv_reader:
+                if not temp_list[0]:
+                    continue
+                list_num = []
+                for str in temp_list:
+                    list_num.append(str)
+                my_dic = data_list_to_dictionary(features_list, list_num)
+                text_no_identifiers_data_dictionary.append(my_dic)
+            return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
+
+
+@app.route('/text_upload', methods=['GET', 'POST'])
+def text_upload():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                path = "./static/user/" + email + "/data/"
+                filedata = request.files['file']
+                if filedata:
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
+                    if os.path.exists(path + "text.csv"):
+                        os.remove(path + "text.csv")
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return 'ä¸Šä¼ æ–‡ä»¶å¤±è´¥'
+                    os.rename(path + filedata.filename, path + "text.csv")
+                else:
+                    return "filename invalid or network error"
+            return redirect(url_for('textgoo'))
+    else:
+        session["last_page"] = '/textgoo'
+        return render_template('user/login.html')
+
+
+
+@app.route('/clean', methods=['POST', 'GET'])
+def clean():
+    return render_template("clean.html")
+
+
+@app.route('/clean_table', methods=['POST', 'GET'])
+def clean_table():
+    table_da, table_fea, table_id = read_table_data('./examples/table/car.csv')
+    table_id_da = []
+    for i in range(len(table_id)):
+        temp_list = []
+        temp_list.append(table_id[i])
+        for temp_item in table_da[i]:
+            temp_list.append(temp_item)
+        table_id_da.append(temp_list)
+    source_arr = np.mat(table_id_da)
+    data_transform = source_arr.T
+    data_list_transform = data_transform.tolist()
+    return render_template("clean_table.html", data=table_id_da,
+                           frame=table_fea, data_list=data_list_transform)
 
 @app.route('/streaming_data', methods=['GET', 'POST'])
 def streaming_data():
@@ -883,6 +1034,7 @@ def time_upload():
         return jsonify(themeriver)
     else:
         return 'please sign in first'
+
 
 
 if __name__ == '__main__':

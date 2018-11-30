@@ -165,6 +165,7 @@ a {
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav navbar-left">
                  <li><a href="/"  class="smoothScroll">Home</a></li>
+                <li><a href="/products" class="smoothScroll">Products</a></li>
                 <li><a href="/text_home" class="smoothScroll">Knowledge Graph</a></li>
                 <li><a onclick="draw_wordcloud()" class="smoothScroll">Word Cloud</a></li>
 
@@ -176,11 +177,10 @@ a {
     <div id='h1_KnowledgeGraph'>
     <h1>Knowledge Graph</h1></div>
 
-    <input class="button_blue" id="file_path" name="file_path" type="button"
-    onclick="path.click()" value="File Upload">
-        <input type="file" id="path" style="display:none" name="csvfile"
-                           onchange="file_path.value=this.value">
-    <input class="button_blue" type="button" onclick="read_file2()" value="Submit"></div>
+    <form method="post" action="/table_upload" enctype="multipart/form-data">
+        <input type="file" name="file" id="file">
+        <input type="submit" value="upload">
+    </form>
     <div id='h1_WordCloud'>
     <h1>Word Cloud</h1>
     <hr></div>
