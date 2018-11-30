@@ -953,9 +953,6 @@ def table_upload():
         return render_template('user/login.html')
 
 
-
-
-
 @app.route('/text_upload', methods=['GET', 'POST'])
 def text_upload():
     if session.get('email'):
@@ -1007,7 +1004,7 @@ def clean_table():
                            frame=table_fea, data_list=data_list_transform)
 
 
-#streaming data start------------------------------------------------------
+# streaming data start------------------------------------------------------
 @app.route('/streaming_data', methods=['GET', 'POST'])
 def streaming_data():
     email = session.get('email')
@@ -1415,9 +1412,10 @@ def cluster_code():
                     return 'virus!!!'
                     '''
 
-#cluster end-------------------------------------------------
+# cluster end-------------------------------------------------
 
-#text_OCR--------------------------------------------------
+# text_OCR--------------------------------------------------
+
 
 @app.route('/textgoo', methods=['GET', 'POST'])
 def textgoo():
