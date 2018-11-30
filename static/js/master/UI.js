@@ -243,7 +243,10 @@ function UI() {
         if (i % 2 == 0 && i > 0) {
             newDiv += "</tr><tr>"
         }
-        newDiv += "<td><div class='modeSelector' style='-webkit-transform: rotateY(" + angle + "deg);transform: rotateY(" + angle + "deg);'id='" + option.id + "'><img src='/static/" + option.img + "'/><div class='optionTitle'>" + option.title + "</div></div></td>";
+        newDiv += "<td>" +
+            "<div class='modeSelector' style='-webkit-transform: rotateY(" + angle + "deg);transform: rotateY(" + angle + "deg);'id='" + option.id + "'>" +
+            "<img style='height: 50px' src='/static/" + option.img + "'/>" +
+            "<div class='optionTitle'>" + option.title + "</div></div></td>";
     }
     newDiv += "</tr></table>";
 
@@ -255,7 +258,7 @@ function UI() {
                 $("#modeDescription").show();
                 $("#modeDescription").html(buttons[i].desc);
                 offset = $(this).offset();
-                $("#modeDescription").css({'top': offset.top, 'left': '180px'});
+                $("#modeDescription").css({'top': offset.top, 'left': '130px'});
             }
         }
     });
