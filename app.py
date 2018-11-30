@@ -990,6 +990,7 @@ def text_upload():
         return render_template('user/login.html')
 
 
+
 @app.route('/clean', methods=['POST', 'GET'])
 def clean():
     return render_template("clean.html")
@@ -1011,6 +1012,301 @@ def clean_table():
     return render_template("clean_table.html", data=table_id_da,
                            frame=table_fea, data_list=data_list_transform)
 
+@app.route('/streaming_data', methods=['GET', 'POST'])
+def streaming_data():
+    email = session.get('email')
+    user1 = user.query.filter_by(email=email).first()
+    if user1 is not None:
+        return render_template('streaminggoo/time.html',user=user1)
+    else:
+        return render_template('streaminggoo/time.html')
+
+
+@app.route('/time_upload', methods=['GET', 'POST'])
+def time_upload():
+    email = session.get('email')
+    user1 = user.query.filter_by(email=email).first()
+    #if user1 is None:
+        #print("please sign in")
+        #return "please sign in"
+    if session.get('email') and (request.method == 'POST'):
+        path = "./static/user/" + email + "/data/user_data.csv"
+        filedata = request.files['file']
+        if filedata:
+            if os.path.exists(path):
+                os.remove(path)
+            try:
+                filedata.save(path)
+            except IOError:
+                return '上传文件失败'
+        time_data_object = {}
+        original_data = csv.reader(open("./static/user/" + email + "/data/user_data.csv"))
+        features_list = []
+        final_data = []
+        length=0
+        for i in original_data:
+            if length==0:
+                features_list = i
+                del i
+            else:
+                final_data.append(i)
+            length=length+1
+
+        for feature in features_list:
+            time_data_object[feature] = []
+        for i in range(len(final_data) - 1):
+            if (len(final_data[i]) != len(final_data[i])):
+                return 'error!exist none'
+        for i in range(len(final_data)):
+            if (len(final_data[i]) == 0):
+                break
+            if '' in final_data[i]:
+                continue
+            for j in range(len(final_data[i])):  # 对每一行都进行数据提取
+                if features_list[j] == 'year':
+                    time_data_object['year'].append(float(final_data[i][j]))
+                else:
+                    time_data_object[features_list[j]].append(float(final_data[i][j]))
+        themeriver_data = []
+        for item in range(len(time_data_object['year'])):
+            year = time_data_object['year'][item]
+            for feature in time_data_object.keys():
+                if feature != 'year':
+                    feature_data = time_data_object[feature][item]
+                    data = [str(int(year)), feature_data, feature]
+                    themeriver_data.append(data)
+        themeriver = {}
+        themeriver['data'] = themeriver_data
+        themeriver_features = []
+        features = time_data_object.keys()
+        for feature in features:
+            if feature != 'year':
+                themeriver_features.append(feature)
+        themeriver['features'] = themeriver_features
+        return jsonify(themeriver)
+    else:
+        print("please sign in first")
+        return 'please sign in first'
+
+@app.route('/streaming_data_fourier', methods=['GET', 'POST'])
+def streamingdata_fourier():
+    if session.get('email') and request.method == 'POST':
+        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
+        year = []
+        attribution = [] # 创建一个包含30个点的余弦波信号
+        length = 0
+        year_location = 0
+        attribution_location = 0
+        for i in original_data:
+            if length == 0:
+                for f in range(len(i)):
+                    if i[f] == 'year':
+                        year_location = f
+                    if i[f] == request.get_json()['attribution']:
+                        attribution_location = f
+            else:
+                year.append(i[year_location])
+                attribution.append(float(i[attribution_location]))
+            length=length+1
+        wave = np.cos(attribution)
+        transformed = np.fft.fft(wave)  # 使用fft函数对余弦波信号进行傅里叶变换。
+        result = {}
+        result['xdata'] = year
+        result['ydata'] = []#transformed.tolist()
+        for i in transformed:
+            result['ydata'].append(round(abs(i),4))
+        return jsonify(result)
+    else:
+        return 'please sign in first'
+
+@app.route('/time/ex/', methods=['POST', 'GET'])
+def Exponential_smoothing():
+    # global time_data_object
+    if session.get('email') and request.method == 'POST':
+        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
+        year = []
+        number = []  # 创建一个包含30个点的余弦波信号
+        length = 0
+        year_location = 0
+        attribution_location = 0
+        for i in original_data:
+            if length == 0:
+                for f in range(len(i)):
+                    if i[f] == 'year':
+                        year_location = f
+                    if i[f] == request.get_json()['attribution']:
+                        attribution_location = f
+            else:
+                year.append(int(i[year_location]))
+                number.append(float(i[attribution_location]))
+            length = length + 1
+        alpha = .70  # 设置alphe，即平滑系数
+        data = []
+        for i in range(len(year)):
+            data_i = [year[i], number[i]]
+            data.append(data_i)
+        for i in range(len(year)):
+            abcyear = int(year[i])
+        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+        initial_line = np.array(
+            [0, number[0]])  # 初始化，由于平滑指数是根据上一期的数值进行预测的，原始数据中的最早数据为1995，没有1994年的数据，这里定义1994年的数据和1995年数据相同
+        initial_data = np.insert(data, 0, values=initial_line, axis=0)  # 插入初始化数据
+        initial_year, initial_number = initial_data.T  # 插入初始化年
+        s_single = np.zeros(initial_number.shape)
+        s_single[0] = initial_number[0]
+        for i in range(1, len(s_single)):
+            s_single[i] = alpha * initial_number[i] + (1 - alpha) * s_single[i - 1]
+        s_double = np.zeros(s_single.shape)
+        s_double[0] = s_single[0]
+        for i in range(1, len(s_double)):
+            s_double[i] = alpha * s_single[i] + (1 - alpha) * s_double[
+                i - 1]  # 计算二次平滑字数，二次平滑指数是在一次指数平滑的基础上进行的，三次指数平滑以此类推
+
+        a_double = 2 * s_single - s_double  # 计算二次指数平滑的a
+        b_double = (alpha / (1 - alpha)) * (s_single - s_double)  # 计算二次指数平滑的b
+        s_pre_double = np.zeros(s_double.shape)  # 建立预测轴
+        for i in range(1, len(initial_year)):
+            s_pre_double[i] = a_double[i - 1] + b_double[i - 1]  # 循环计算每一年的二次指数平滑法的预测值，下面三次指数平滑法原理相同
+        pre_next_year = a_double[-1] + b_double[-1] * 1  # 预测下一年
+        pre_next_two_year = a_double[-1] + b_double[-1] * 2  # 预测下两年
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_double = np.insert(s_pre_double, len(s_pre_double), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)  # 组合预测值
+        s_triple = np.zeros(s_double.shape)
+        s_triple[0] = s_double[0]
+        for i in range(1, len(s_triple)):
+            s_triple[i] = alpha * s_double[i] + (1 - alpha) * s_triple[i - 1]
+
+        a_triple = 3 * s_single - 3 * s_double + s_triple
+        b_triple = (alpha / (2 * ((1 - alpha) ** 2))) * (
+                (6 - 5 * alpha) * s_single - 2 * ((5 - 4 * alpha) * s_double) + (4 - 3 * alpha) * s_triple)
+        c_triple = ((alpha ** 2) / (2 * ((1 - alpha) ** 2))) * (s_single - 2 * s_double + s_triple)
+
+        s_pre_triple = np.zeros(s_triple.shape)
+
+        for i in range(1, len(initial_year)):
+            s_pre_triple[i] = a_triple[i - 1] + b_triple[i - 1] * 1 + c_triple[i - 1] * (1 ** 2)
+
+        pre_next_year = a_triple[-1] + b_triple[-1] * 1 + c_triple[-1] * (1 ** 2)
+        pre_next_two_year = a_triple[-1] + b_triple[-1] * 2 + c_triple[-1] * (2 ** 2)
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_triple = np.insert(s_pre_triple, len(s_pre_triple), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)
+
+        new_year = np.insert(year, len(year), values=pre_year, axis=0)
+        output = np.array([new_year, s_pre_double, s_pre_triple])
+        result = []
+        for a in range(1, len(new_year)):
+            result.append(str(new_year[a]))
+            result.append(str(s_pre_triple[a]))
+        re_result = ':'.join(result)
+        return re_result
+
+
+@app.route('/time/ar/', methods=['POST', 'GET'])
+def Arithmetic_averaging():
+    if session.get('email') and request.method == 'POST':
+        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
+        year = []
+        number = []  # 创建一个包含30个点的余弦波信号
+        length = 0
+        year_location = 0
+        attribution_location = 0
+        for i in original_data:
+            if length == 0:
+                for f in range(len(i)):
+                    if i[f] == 'year':
+                        year_location = f
+                    if i[f] == request.get_json()['attribution']:
+                        attribution_location = f
+            else:
+                year.append(int(i[year_location]))
+                number.append(float(i[attribution_location]))
+            length = length + 1
+        data = []
+        for i in range(len(year)):
+            data_i = [year[i], number[i]]
+            data.append(data_i)
+        for i in range(len(year)):
+            abcyear = year[i]
+        number = np.array(number)
+        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+        s_single = np.zeros(number.shape)
+        s_single[0] = number[0]
+        for i in range(1, len(s_single)):
+            s_single[i] = sum(number[:i]) / i
+        # 计算一次平滑
+        s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
+        pre_next_year = sum(number[:]) / len(number)  # 预测下一年
+        pre_next_two_year = (sum(number[:]) + pre_next_year) / (len(number) + 1)  # 预测下两年
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)  # 组合预测值
+        new_year = np.insert(year, len(year), values=pre_year, axis=0)
+        result = []
+        for a in range(1, len(new_year)):
+            result.append(str(new_year[a]))
+            result.append(str(s_pre_single[a]))
+        re_result = ':'.join(result)
+        return re_result
+
+
+def simplle_smoothing(s):
+    s2 = np.zeros(s.shape)
+    s2[0:5] = s[0:5]
+    for i in range(5, len(s2)):
+        s2[i] = sum(s[i - 5:i]) / 5
+    return s2
+
+@app.route('/time/mo/', methods=['POST', 'GET'])
+def Moving_averaging():
+    if session.get('email') and request.method == 'POST':
+        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
+        year = []
+        number = []  # 创建一个包含30个点的余弦波信号
+        length = 0
+        year_location = 0
+        attribution_location = 0
+        for i in original_data:
+            if length == 0:
+                for f in range(len(i)):
+                    if i[f] == 'year':
+                        year_location = f
+                    if i[f] == request.get_json()['attribution']:
+                        attribution_location = f
+            else:
+                year.append(int(i[year_location]))
+                number.append(float(i[attribution_location]))
+            length = length + 1
+        number = np.array(number)
+        data = []
+        for i in range(len(year)):
+            data_i = [year[i], number[i]]
+            data.append(data_i)
+        for i in range(len(year)):
+            abcyear = year[i]
+        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+        s_single = np.zeros(number.shape)
+        s_single[0:5] = number[0:5]
+        for i in range(5, len(s_single)):
+            s_single[i] = sum(number[i - 5:i]) / 5
+        # 计算一次平滑
+        s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
+        yearnumbertotal = len(year)
+        select = yearnumbertotal - 5
+        select1 = yearnumbertotal - 4
+        pre_next_year = sum(number[select:]) / 5  # 预测下一年
+        pre_next_two_year = (sum(number[select1:]) + pre_next_year) / 5  # 预测下两年
+        insert_year = np.array([pre_next_year, pre_next_two_year])
+        s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
+                                 axis=0)  # 组合预测值
+        new_year = np.insert(year, len(year), values=pre_year, axis=0)
+        result = []
+        for a in range(1, len(new_year)):
+            result.append(str(new_year[a]))
+            result.append(str(s_pre_single[a]))
+        re_result = ':'.join(result)
+        return re_result
 
 if __name__ == '__main__':
     app.run(processes=10)

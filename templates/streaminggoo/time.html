@@ -11,7 +11,7 @@
     <script src="/static/js/upload/jschardet.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
-    <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/static/css/streaminggoo/streaming_data.css">
@@ -28,97 +28,60 @@
 
 <!--ajax get the data of themeriver-->
 <script>
-    function change_attribution(attribution_list) {
-        var time_selector = document.getElementById('attribution_selector');
-        $("#attribution_selector").empty();
+    function change_attribution(element_id,attribution_list,first_element) {
+        var time_selector = document.getElementById(element_id);//attribution_selector
+        $("#"+element_id).empty();
         var option = document.createElement('option');
         option.setAttribute('value', '');
-        option.innerHTML = '--Time series analysis--';
+        option.innerHTML = first_element  //'--Time series analysis--';
         time_selector.appendChild(option);
         for (var i = 0; i < attribution_list.length; i++) {
             var option = document.createElement('option');
             option.setAttribute('value', attribution_list[i]);
-            option.setAttribute('id', attribution_list[i]);
+            if (element_id=='attribution_selector')
+                option.setAttribute('id', attribution_list[i]);
+            else{
+                option.setAttribute('id', 'fourier_'+attribution_list[i]);
+            }
             option.innerHTML = attribution_list[i];
             time_selector.appendChild(option);
-        }
-    };
-    $.fn.time_csv2arr = function (callback) {
-        if (typeof(FileReader) == 'undefined') {    //if not H5
-            alert("Your browser is too old,please use Chrome or Firefox");
-            return false;
-        }
-        if (!$(this)[0].files[0]) {
-            alert("Please select a file");
-            return false;
-        }
-        var fReader = new FileReader();
-        fReader.readAsDataURL($(this)[0].files[0]);
-        $fileDOM = $(this);
-        fReader.onload = function (evt) {
-            var data = evt.target.result;
-            var encoding = checkEncoding(data);
-            Papa.parse($($fileDOM)[0].files[0], {
-                encoding: encoding,
-                complete: function (results) {
-                    var res = results.data;
-                    $.ajax({
-                        url: '/time_upload',
-                        type: 'POST',
-                        data: {json_data: JSON.stringify(res)},
-
-                        success: function (res) {
-                            alert('upload the data file successfully !');
-                            $("#draw_bar").empty();
-                            $("#selected_way_attribution").empty();
-                            user_data = {};
-                            draw_counts={};
-                            themeriver(res.features, res.data);
-                            change_attribution(res.features);
-                        },
-                        error: function () {
-                            alert("获取数据失败！");
-                        }
-                    });
-                    if (res[res.length - 1] == "") {
-                        res.pop();
-                    }
-                    callback && callback(res);
-                }
-            });
-        };
-        fReader.onerror = function (evt) {
-            alert("The file has changed,please select again.(Firefox)");
-        };
-
-        function checkEncoding(base64Str) {
-            var str = atob(base64Str.split(";base64,")[1]);
-            var encoding = jschardet.detect(str);
-            encoding = encoding.encoding;
-            if (encoding == "windows-1252") {
-                encoding.detecting = "ANSI";
-            }
-            return encoding;
-        }
-    };
-    $.fn.cluster_csv = function (callback) {
-        alert("hello!")
-    }
-
-    function read_time_file() {
-        var file_name = $("input[name=time_csvfile]").val();
+        }};
+        function read_time_file() {
+           var file_name = $("input[name=time_csvfile]").val();
         if (file_name.lastIndexOf(".") != -1) {
             var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
-            if (fileType == 'csv') {
-                $("input[name=time_csvfile]").time_csv2arr(function (res) {
-                });
-            }
+            if(fileType=='csv')
+                {
+                var fd=new FormData();
+
+                fd.append("file",document.getElementById('time_csvfile').files[0]);//这是获取上传的文件
+                    fd.append('label','csv');
+
+                    var xhr=new XMLHttpRequest();
+                    xhr.open("POST","/time_upload");//要传到后台方法的路径
+                    xhr.addEventListener("load",uploadComplete,false);
+                xhr.send(fd)
+                    }
         }
-    }
+    };
 
 
     function uploadComplete(evt) {//py文件上传成功
-        alert(evt.target.responseText);
+        var res=JSON.parse(evt.target.responseText);
+        if (res.hasOwnProperty("features"))
+        {   alert('upload the data file successfully !');
+            $("#draw_bar").empty();
+            $("#selected_way_attribution").empty();
+            $("#fourier_bar").empty();
+            user_data = {};
+            draw_counts = {};
+            themeriver(res.features, res.data);
+            change_attribution('attribution_selector',res.features,'--Time series analysis--');
+            change_attribution('fourier_attribution_selector',res.features,'--period detection--');
+        }
+        else {
+            alert(res);
+        }
     }
 
 
@@ -133,7 +96,7 @@
         xhr.open("POST", "/save");//要传到后台方法的路径
         xhr.addEventListener("load", uploadComplete, false);
         xhr.send(fd);
-    }
+    };
 </script>
 
 <body>
@@ -257,6 +220,7 @@
     <div id="main" style="margin-top:100px;display:inline-block;width: 600px;height:400px;"></div>
     <div id="data_pie" style="margin-top:100px;display:inline-block;width: 500px;height:400px;"></div>
 </div>
+    <!--change the data of themeriver-->
 <script type="text/javascript">
     var themeriver_data = [
         ['2015/11/08', 10, 'DQ'],
@@ -373,28 +337,6 @@
         ['2015/11/26', 16, 'DD'],
         ['2015/11/27', 22, 'DD'],
         ['2015/11/28', 10, 'DD']
-    ];
-    var themeriver_data1= [
-        ['2015', 10, 'DQ'],
-        ['2016', 15, 'DQ'],
-        ['2017', 35, 'DQ'],
-        // ['2015/11/11',38,'DQ'],['2015/11/12',22,'DQ'],['2015/11/13',16,'DQ'],
-        // ['2015/11/26',16,'DQ'],['2015/11/27',22,'DQ'],['2015/11/28',10,'DQ'],
-        ['2015', 35, 'TY'],
-        ['2016', 42, 'TY'],
-        ['2017', 42, 'TY'],
-        ['2015', 35, 'SS'],
-        ['2016', 34, 'SS'],
-        ['2017', 28, 'SS'],
-        ['2015', 16, 'QG'],
-        ['2016', 22, 'QG'],
-        ['2017', 10, 'QG'],
-        ['2015', 16, 'SY'],
-        ['2016', 22, 'SY'],
-        ['2017', 10, 'SY'],
-        ['2015', 10, 'DD'],
-        ['2016', 15, 'DD'],
-        ['2017', 10, 'DD']
     ];
     var theme_features = ['DQ', 'TY', 'SS', 'QG', 'SY', 'DD'];
     var origin_pie_data=[
@@ -567,7 +509,12 @@ pie_Chart.setOption(pie_option);
                     </select></div>
                     <div style="margin-left: 40px;display:inline"><select id="attribution_selector">
                         <option value="" style="color:black">--select a attribution--</option>
-                        <option id="values" value="values">values</option>
+                        <option id="DQ" value="DQ">DQ</option>
+                        <option id="TY" value="TY">TY</option>
+                        <option id="SS" value="SS">SS</option>
+                        <option id="QG" value="QG">QG</option>
+                        <option id="SY" value="SY">SY</option>
+                        <option id="DD" value="DD">DD</option>
                     </select></div>
 
                     <button id="get_inf" onclick="get_inf()">Wikipedia</button>
@@ -626,6 +573,44 @@ pie_Chart.setOption(pie_option);
     </div>
 </div>
 
+    <div class="section" style="padding-top: 100px">
+    <!-- container -->
+    <div class="container">
+        <!-- row -->
+        <div class="row">
+            <!-- section title -->
+            <div class="col-md-12">
+                <h3 class="title"> period detection</h3>
+                <div class="section-title">
+                    <div style="margin-left: 40px;display:inline"><select id="fourier_attribution_selector">
+                        <option value="" style="color:black">--select a attribution--</option>
+                        <option id="fourier_DQ" value="DQ">DQ</option>
+                        <option id="fourier_TY" value="TY">TY</option>
+                        <option id="fourier_SS" value="SS">SS</option>
+                        <option id="fourier_QG" value="QG">QG</option>
+                        <option id="fourier_SY" value="SY">SY</option>
+                        <option id="fourier_DD" value="DD">DD</option>
+                    </select></div>
+                    <button id="fourier_generate" onclick="fourier_generate()">Generate</button>
+                    <div class='demo-bg'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row" style="margin-bottom:20px;margin-top:20px;margin-left:80px;margin-right: 80px">
+    <!-- section title -->
+    <div class="col-md-12">
+        <div  class='draw_bar'  style="width:100%;height:500px;">
+<div class="draw_inf" style="width:100%;height:500px;">
+    <div class="draw" id="fourier_bar" style="width:100%;height:500px;">
+
+    </div>
+</div>
+        </div>
+    </div>
+</div>
 
 </body>
 
@@ -644,6 +629,7 @@ pie_Chart.setOption(pie_option);
     $(document).ready(function () {
         $('#time_selector').select2();
         $('#attribution_selector').select2();
+        $('#fourier_attribution_selector').select2();
     });
 </script>
 
@@ -717,9 +703,9 @@ pie_Chart.setOption(pie_option);
                 dataway_set.push(origin_dataway_set[i]);
              }
                  }
-        var width = 500;
-        var height = 500;
-
+        console.log(dataset);
+        var width = 480;
+        var height = 480;
         var padding = {top: 70, right: 70, bottom: 70, left: 70};
         var gdpmax = 0;
         for (var i = 0; i < dataset.length; i++) {
@@ -731,7 +717,7 @@ pie_Chart.setOption(pie_option);
         }
 
         var xScale = d3.scale.linear()
-            .domain([1995, 2018])
+            .domain([1995,2018])
             .range([0, width - padding.left - padding.right]);
 
         var yScale = d3.scale.linear()
@@ -750,7 +736,6 @@ pie_Chart.setOption(pie_option);
 
 //定义两个颜色
         var colors = [d3.rgb(0, 0, 255), d3.rgb(0, 255, 0),d3.rgb(255,0, 0),d3.rgb(255, 255, 255)];
-
         var svg = d3.select("#attribution_" + attr)
             .append("svg")
             .attr("width", width)
@@ -872,6 +857,152 @@ pie_Chart.setOption(pie_option);
         });
     };
     //根据URL，通过ajax传输来画图
+</script>
+
+
+<!--fourier-->
+<script>
+    function draw_fourier(xdata,ydata){
+        var width = 1100;
+        var height = 450;
+        var padding = {top: 70, right: 70, bottom: 70, left: 70};
+        var this_set=[];
+        for (var i =0;i<xdata.length;i++)
+        {
+            var temp=[];
+            temp.push(xdata[i]);
+            temp.push(ydata[i]);
+           this_set.push(temp)
+        }
+        var dataset=[];
+        dataset.push(this_set);
+        console.log(dataset);
+        var xdatamax = 0;
+        for (var i = 0; i < xdata.length; i++) {
+            var currydata = xdata[i];
+            if (currydata > xdatamax)
+                xdatamax = currydata;
+        }
+        var xdatamin = 0;
+        for (var i = 0; i < xdata.length; i++) {
+            var currydata = xdata[i];
+            if (currydata < xdatamin ||(xdatamin)==0)
+                xdatamin = currydata;
+        }
+
+        var ydatamax = 0;
+        for (var i = 0; i < ydata.length; i++) {
+            var currydata = ydata[i];
+            if (currydata > ydatamax)
+                ydatamax = currydata;
+        }
+        var ydatamin = 0;
+        for (var i = 0; i < ydata.length; i++) {
+            var currydata = ydata[i];
+            if (currydata < ydatamin ||(ydatamin==0))
+                ydatamin = currydata;
+        }
+        var xScale = d3.scale.linear()
+            .domain([xdatamin,xdatamax])
+            .range([0, width - padding.left - padding.right]);
+
+        var yScale = d3.scale.linear()
+            .domain([ydatamin*0.9, ydatamax * 1.1])
+            .range([height - padding.bottom - padding.top, 0]);
+
+        var linePath = d3.svg.line()//创建一个直线生成器
+            .x(function (d) {
+                console.log(d[0])
+                return xScale(d[0]);
+            })
+            .y(function (d) {
+                console.log(d[1])
+                return yScale(d[1]);
+            })
+            .interpolate("basis")//插值模式
+        ;
+
+//定义两个颜色
+        var colors = [d3.rgb(0, 0, 255), d3.rgb(0, 255, 0),d3.rgb(255,0, 0),d3.rgb(255, 255, 255)];
+
+        var svg = d3.select("#fourier_bar")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        svg.selectAll("path")
+            .data(dataset)
+            .enter()
+            .append("path")
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .attr("d", function (d) {
+                return linePath(d);
+                //返回线段生成器得到的路径
+            })
+            .attr("fill", "none")
+            .attr("stroke-width", 3)
+            .attr("stroke", function (d, i) {
+                return colors[i];
+            })
+        .on("mouseover",function(d,i){
+     d3.select(this) //在传给任何D3方法的匿名函数中，如果想操作当前元素，只要引用this就行
+       .attr("stroke","orange");
+   })
+       .on("mouseout",function(d,i){
+          d3.select(this)
+            .attr("stroke",colors[i]);
+  });
+            /*.append('title')
+            .text(function(d,i){
+                return dataway_set[i];
+            });*/
+
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .ticks(14)
+            .tickFormat(d3.format("d"))
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+
+//添加一个g用于放x轴
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding.left + "," + (height - padding.top) + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .call(yAxis);
+    }
+
+    function  fourier_generate(){
+var selected_attibution=$('#fourier_attribution_selector option:selected').val();
+        if (selected_attibution == '') {
+            alert('please select a attribution');
+            return;
+        }
+        var parameter={};
+        parameter['attribution'] = selected_attibution;
+        var url = '/streaming_data_fourier';
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: JSON.stringify(parameter),
+            contentType: 'application/json; charset=UTF-8',
+            success: function (res) {//返回数据根据结果进行相应的处理
+                $("#fourier_bar").empty();
+                draw_fourier(res.xdata,res.ydata);
+            },
+            error: function (res) {
+                alert("error!");
+            }
+        });
+
+    }
 </script>
 
 
