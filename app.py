@@ -642,6 +642,31 @@ def geo_get():
         return jsonify(final_data_object)
 
 
+# 海量点分布
+@app.route('/geo/points/', methods=['GET', 'POST'])
+def geo_points():
+    final_data = csv.reader(open('./examples/geo/geo_points.csv'))
+    point = []
+    for i in final_data:
+        dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
+        point.append(dic)
+    final_data_object = {}
+    final_data_object['points'] = point
+    return render_template('geogoo/geo_points.html')
+
+
+@app.route('/geo/get/points/', methods=['GET','POST'])
+def geo_get_points():
+    final_data = csv.reader(open('./examples/geo/geo_points.csv'))
+    point = []
+    for i in final_data:
+        dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
+        point.append(dic)
+    final_data_object = {}
+    final_data_object['points'] = point
+    return jsonify(final_data_object)
+
+
 @app.route("/graph/<id>")
 def graph_id(id):
     id = id.replace('<', '')
@@ -990,7 +1015,6 @@ def text_upload():
         return render_template('user/login.html')
 
 
-
 @app.route('/clean', methods=['POST', 'GET'])
 def clean():
     return render_template("clean.html")
@@ -1012,12 +1036,13 @@ def clean_table():
     return render_template("clean_table.html", data=table_id_da,
                            frame=table_fea, data_list=data_list_transform)
 
+
 @app.route('/streaming_data', methods=['GET', 'POST'])
 def streaming_data():
     email = session.get('email')
     user1 = user.query.filter_by(email=email).first()
     if user1 is not None:
-        return render_template('streaminggoo/time.html',user=user1)
+        return render_template('streaminggoo/time.html', user=user1)
     else:
         return render_template('streaminggoo/time.html')
 
@@ -1026,9 +1051,9 @@ def streaming_data():
 def time_upload():
     email = session.get('email')
     user1 = user.query.filter_by(email=email).first()
-    #if user1 is None:
-        #print("please sign in")
-        #return "please sign in"
+    # if user1 is None:
+    # print("please sign in")
+    # return "please sign in"
     if session.get('email') and (request.method == 'POST'):
         path = "./static/user/" + email + "/data/user_data.csv"
         filedata = request.files['file']
@@ -1043,14 +1068,14 @@ def time_upload():
         original_data = csv.reader(open("./static/user/" + email + "/data/user_data.csv"))
         features_list = []
         final_data = []
-        length=0
+        length = 0
         for i in original_data:
-            if length==0:
+            if length == 0:
                 features_list = i
                 del i
             else:
                 final_data.append(i)
-            length=length+1
+            length = length + 1
 
         for feature in features_list:
             time_data_object[feature] = []
@@ -1088,12 +1113,13 @@ def time_upload():
         print("please sign in first")
         return 'please sign in first'
 
+
 @app.route('/streaming_data_fourier', methods=['GET', 'POST'])
 def streamingdata_fourier():
     if session.get('email') and request.method == 'POST':
         original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
         year = []
-        attribution = [] # 创建一个包含30个点的余弦波信号
+        attribution = []  # 创建一个包含30个点的余弦波信号
         length = 0
         year_location = 0
         attribution_location = 0
@@ -1107,17 +1133,18 @@ def streamingdata_fourier():
             else:
                 year.append(i[year_location])
                 attribution.append(float(i[attribution_location]))
-            length=length+1
+            length = length + 1
         wave = np.cos(attribution)
         transformed = np.fft.fft(wave)  # 使用fft函数对余弦波信号进行傅里叶变换。
         result = {}
         result['xdata'] = year
-        result['ydata'] = []#transformed.tolist()
+        result['ydata'] = []  # transformed.tolist()
         for i in transformed:
-            result['ydata'].append(round(abs(i),4))
+            result['ydata'].append(round(abs(i), 4))
         return jsonify(result)
     else:
         return 'please sign in first'
+
 
 @app.route('/time/ex/', methods=['POST', 'GET'])
 def Exponential_smoothing():
@@ -1258,6 +1285,7 @@ def simplle_smoothing(s):
         s2[i] = sum(s[i - 5:i]) / 5
     return s2
 
+
 @app.route('/time/mo/', methods=['POST', 'GET'])
 def Moving_averaging():
     if session.get('email') and request.method == 'POST':
@@ -1307,6 +1335,7 @@ def Moving_averaging():
             result.append(str(s_pre_single[a]))
         re_result = ':'.join(result)
         return re_result
+
 
 if __name__ == '__main__':
     app.run(processes=10)
