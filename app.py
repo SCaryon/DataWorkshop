@@ -272,7 +272,7 @@ def user_change():
     user1 = user.query.filter_by(email=email).first()
     if user1 is not None:
         user1.username = name
-        user1.password = password
+        user1.password(password)
         if gender == 'male':
             user1.gender = True
         else:
@@ -307,6 +307,11 @@ def products():
         return render_template('products.html', user=user1)
     else:
         return render_template('products.html')
+
+
+@app.route('/master/', methods=['POST', 'GET'])
+def master():
+    return render_template('geogoo/master.html')
 
 
 # 地图方法begin
@@ -495,6 +500,7 @@ def geo_index():
         return render_template('geogoo/geogoo_homepage.html')
 
 
+# the first four geo models
 @app.route('/geo/<id>/', methods=['GET', 'POST'])
 def geo_id(id):
     id = id.replace('<', '')
@@ -510,7 +516,7 @@ def geo_id(id):
             return render_template("geogoo/geo_%s.html" % id)
 
 
-# 用户上传数据
+# the upload method for the first four geo method
 @app.route('/geo/<id>/upload/', methods=['GET', 'POST'])
 def geo_plane_upload(id):
     id = id.replace('<', '')
@@ -548,7 +554,7 @@ def geo_plane_upload(id):
         return render_template('user/login.html')
 
 
-def read_geo_csv(filename):
+def read_geo_admin_csv(filename):
     final_data = csv.reader(open(filename))
     province = []
     data = []
@@ -576,32 +582,64 @@ def geo_admin():
             return "false"
         else:
             if os.path.exists("./static/user/" + email + "/data/geo_admin.csv"):
-                final_data_object=read_geo_csv("./static/user/" + email + "/data/geo_admin.csv")
+                final_data_object = read_geo_admin_csv("./static/user/" + email + "/data/geo_admin.csv")
                 return render_template("geogoo/geo_admin.html", user=user1, attr=final_data_object['attr'])
             else:
-                final_data_object = read_geo_csv('./examples/dist_code.csv')
+                final_data_object = read_geo_admin_csv('./examples/geo/dist_code.csv')
                 return render_template('geogoo/geo_admin.html', attr=final_data_object['attr'])
     else:  # 读取默认的数据
-        final_data_object = read_geo_csv('./examples/dist_code.csv')
+        final_data_object = read_geo_admin_csv('./examples/geo/dist_code.csv')
         return render_template('geogoo/geo_admin.html', attr=final_data_object['attr'])
 
 
 # 读取用户上传的行政区数据
 @app.route('/geo/admin/upload/', methods=['GET', 'POST'])
 def geo_admin_upload():
-    global final_data_object
-    if request.method == 'POST':
-        json_data = request.form.get('json_data')
-
-        return "true"
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                path = "./static/user/" + email + "/data/"
+                filedata = request.files['file']
+                if filedata:
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
+                    if os.path.exists(path + "geo_admin.csv"):
+                        os.remove(path + "geo_admin.csv")
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return '上传文件失败'
+                    os.rename(path + filedata.filename, path + "geo_admin.csv")
+                else:
+                    return "filename invalid or network error"
+            return redirect(url_for('geo_admin'))
     else:
-        return "false"
+        session["last_page"] = "/geo/admin/"
+        return render_template('user/login.html')
 
 
 # 向前端传递后台的地理信息数据
 @app.route('/geo/get/', methods=['GET', 'POST'])
 def geo_get():
-    return jsonify(final_data_object)
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if os.path.exists("./static/user/" + email + "/data/geo_admin.csv"):
+                final_data_object = read_geo_admin_csv("./static/user/" + email + "/data/geo_admin.csv")
+                return jsonify(final_data_object)
+            else:
+                final_data_object = read_geo_admin_csv('./examples/geo/dist_code.csv')
+                return jsonify(final_data_object)
+    else:  # 读取默认的数据
+        final_data_object = read_geo_admin_csv('./examples/geo/dist_code.csv')
+        return jsonify(final_data_object)
 
 
 def read_graph_data(filename):

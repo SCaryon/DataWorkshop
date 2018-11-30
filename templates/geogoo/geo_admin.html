@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.min.css">
 
     <!-- MAIN CSS -->
-        <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
+    <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <link rel="stylesheet" href="/static/css/geogoo/geography.css">
 </head>
@@ -120,11 +120,16 @@
     <button id="color_reverse" class="button_blue">reverse</button>
     <br>
 
-    <input class="button_blue" id="file_path" name="file_path" type="button"
-           onclick="path.click()" value="File Upload">
-    <input type="file" id="path" style="display:none" name="csvfile"
-           onchange="file_path.value=this.value">
-    <input class="button_blue" type="button" onclick="read_file()" value="Submit">
+    <form method="post" action="/geo/admin/upload/" enctype="multipart/form-data">
+{#        <input type="file" name="file" id="file">#}
+{#        <input type="submit" value="upload">#}
+        <input class="button_blue" id="file_path" name="file_path" type="button"
+               onclick="file.click()" value="File Upload">
+        <input type="file" id="file" style="display:none" name="file"
+               onchange="file_path.value=this.value">
+        <input class="button_blue" type="submit" value="Submit">
+    </form>
+
 
 </div>
 <div id="container" style="margin-top: 90px;float: left;"></div>
