@@ -40,6 +40,8 @@ window.onload = function () {
     var particlesPlaced = 0;//被安置好的点的数量
     var Pgeometry = null;
     var Sgeometry = null;
+    var selectCate = false, siderbar = false;
+
 
     //此方法在noWebGL.js里面，检测浏览器的可行性
     init();
@@ -102,7 +104,7 @@ window.onload = function () {
             customColor: {type: 'c', value: null},
         };
 
-        var textureblock = new THREE.TextureLoader().load("/static/images/geogoo/block.png");
+        var textureblock = new THREE.TextureLoader().load("/static/images/graph_data/block.png");
         var uniforms = {
             color: {type: "c", value: new THREE.Color(0xffffff)},
             texture: {type: "t", value: textureblock}
@@ -121,7 +123,7 @@ window.onload = function () {
 
         /*在countries.json文件里面包含了四个主要信息：
         载入country，trade，categories，和products*/
-        $.getJSON("/static/data/geogoo/countries.json", function (corejson) {
+        $.getJSON("/static/data/graphgoo/countries.json", function (corejson) {
             $.each(corejson.countries, function (co, country) {
                 countries[co] = country;
             });
@@ -145,7 +147,7 @@ window.onload = function () {
 
 
             //载入产品空间信息
-            $.getJSON("/static/data/geogoo/productspace.json", function (pspace) {
+            $.getJSON("/static/data/graphgoo/productspace.json", function (pspace) {
                 $.each(pspace, function (p, values) {
                     ID = p;
                     //将ID补全为四位再查询产品信息
@@ -358,7 +360,7 @@ window.onload = function () {
                 });
                 cloudGeometry.colors = colors;
 
-                var texturedot7 = new THREE.TextureLoader().load("/static/images/geogoo/dot7.png");
+                var texturedot7 = new THREE.TextureLoader().load("/static/images/graph_data/dot7.png");
                 cloudMaterial = new THREE.PointsMaterial({
                     transparent: true,
                     size: nodeSize,
@@ -425,7 +427,7 @@ window.onload = function () {
             }
 
             added = {};
-            $.getJSON("/static/data/geogoo/network_hs.json", function (json) {
+            $.getJSON("/static/data/graphgoo/network_hs.json", function (json) {
                 nodes = json.nodes;
                 line_geom = new THREE.Geometry();
                 var line_material = new THREE.LineBasicMaterial({color: 0x808080, opacity: 0.2, linewidth: 1});
@@ -485,47 +487,75 @@ window.onload = function () {
             mouseCoord.y = moveY;
 
             //如果不是拖拽，且不是在story模式
-        } else if (loaded) {
-            var mouseX = e.clientX / window.innerWidth * 2 - 1;
-            var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-            vector = new THREE.Vector3(mouseX, mouseY, 0);
-            var values_color = geometry.attributes.customColor.array;
-            var i = 1e3;
-            var s = new THREE.Projector;//可以用来进行碰撞检测
-            //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
-            var o = new THREE.Raycaster;
-            cameraDistance = 3000;
-            vector.unproject(camera);
-            o.ray.set(camera.position, vector.sub(camera.position).normalize());
+        } else {
+            if (moveX >= window.innerWidth - 50) {
+                selectCate = true;
+                $("#categories").show();
+                // $("#catename").hide();
+                $("#categories").animate({'right': '0'}, 0, "swing", function () {
+                });
+            } else {
+                $("#categories").animate({'right': '-20px'}, 0, "swing", function () {
+                    $("#categories").hide();
+                    // $("#catename").show();
+                    selectCate = false;
+                });
+            }
+            if (moveY <= 50) {
+                $("#sideBar").show();
+                // $("#sideBarname").hide();
+                $("#sideBar").animate({'top': '0px'}, 0, 'swing', function () {
+                });
+                siderbar = true;
+            } else {
+                $("#sideBar").animate({'top': '-30px'}, 0, 'swing', function () {
+                    $("#sideBar").hide();
+                    // $("#sideBarname").show();
+                    siderbar = false;
+                });
+            }
+            if (loaded) {
+                var mouseX = e.clientX / window.innerWidth * 2 - 1;
+                var mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+                vector = new THREE.Vector3(mouseX, mouseY, 0);
+                var values_color = geometry.attributes.customColor.array;
+                var i = 1e3;
+                var s = new THREE.Projector;//可以用来进行碰撞检测
+                //Raycasting is used for mouse picking (working out what objects in the 3d space the mouse is over) amongst other things.
+                var o = new THREE.Raycaster;
+                cameraDistance = 3000;
+                vector.unproject(camera);
+                o.ray.set(camera.position, vector.sub(camera.position).normalize());
 
-            intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
-            if (intersects.length > 0) {//如有相交
-                for (var u = 0; u < intersects.length; u++) {//最近的相交物品
-                    if (intersects[u].distanceToRay < i) {
-                        i = intersects[u].distanceToRay;
-                        //获取该国家的index
-                        if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
-                            this.INTERSECTED = intersects[u].index;
+                intersects = o.intersectObject(particleSystem);//从中心点发射线与别的物品相交点从近到远的一个数组
+                if (intersects.length > 0) {//如有相交
+                    for (var u = 0; u < intersects.length; u++) {//最近的相交物品
+                        if (intersects[u].distanceToRay < i) {
+                            i = intersects[u].distanceToRay;
+                            //获取该国家的index
+                            if (this.INTERSECTED != intersects[u].index && intersects[u].distance < cameraDistance - globeSize / 5) {
+                                this.INTERSECTED = intersects[u].index;
+                            }
                         }
                     }
+                } else if (this.INTERSECTED !== null) {
+                    this.INTERSECTED = null;
                 }
-            } else if (this.INTERSECTED !== null) {
-                this.INTERSECTED = null;
-            }
 
-            if (this.INTERSECTED) {
-                if (selectedID !== this.INTERSECTED) {
-                    selectedID = this.INTERSECTED;
+                if (this.INTERSECTED) {
+                    if (selectedID !== this.INTERSECTED) {
+                        selectedID = this.INTERSECTED;
+                    }
+                    UserInterface.changeCursor("pointer");
+                    $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
+                    $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
+                        countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
+                        products[names[this.INTERSECTED].n].sales + "</span>");
+                } else {
+                    $("#pointer").css({top: -100, left: 0});
+                    UserInterface.changeCursor("default");
+                    selectedID = null;
                 }
-                UserInterface.changeCursor("pointer");
-                $("#pointer").css({left: e.pageX + 15, top: e.pageY - 7});
-                $("#pointer").html("<span style='color:" + products[names[this.INTERSECTED].n].color + "'>" +
-                    countries[names[this.INTERSECTED].c].name + "出口" + products[names[this.INTERSECTED].n].name + ' $' +
-                    products[names[this.INTERSECTED].n].sales + "</span>");
-            } else {
-                $("#pointer").css({top: -100, left: 0});
-                UserInterface.changeCursor("default");
-                selectedID = null;
             }
         }
     }
