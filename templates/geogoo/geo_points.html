@@ -99,7 +99,7 @@
 <div id="container" style="margin-top: 90px;"></div>
 <script src="https://webapi.amap.com/loca?key=2dd663dd485017c4b832632ff9751da0"></script>
 <!-- UI组件库 1.0 -->
-<script src="https://a.amap.com/Loca/static/mock/earthquake.js"></script>
+<script src="/static/data/geogoo/geo_points.js"></script>
 <script src="/static/js/bootstrap/jquery.js"></script>
 <script src="/static/js/bootstrap/bootstrap.min.js"></script>
 <!--文件上传使用的-->
@@ -157,7 +157,6 @@
         var rawData = ev.rawData;
         // 原始鼠标事件
         var originalEvent = ev.originalEvent;
-
     });
 
 
@@ -165,7 +164,6 @@
         lnglat: function (data) {
             var item = data.value;
             return [item.longitude, item.latitude];
-
         }
     });
 
@@ -255,7 +253,6 @@
             var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
             if (fileType == 'csv') {
                 $("input[name=csvfile]").csv2arr(function (res) {
-                    console.log('尼玛');
                 });
             }
             else

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>城市链接（曲线）</title>
+    <style>
+        html, body, #container {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<script src="//webapi.amap.com/loca?v=1.2.0&key=2dd663dd485017c4b832632ff9751da0"></script>
+<script src="/static/data/geogoo/geo_line.js"></script>
+<script>
+
+    var map = Loca.create('container', {
+        mapStyle: 'amap://styles/26fc904bd43d8b834219809619ba4aea',
+        features: ['bg', 'road'],
+        center: [108.149185, 33.663153],
+        zoom: 5,
+        pitch: 40,
+        // Loca 自 1.2.0 起 viewMode 模式默认为 3D，如需 2D 模式，请显示配置。
+        // viewMode: '3D'
+    });
+
+    var layer = Loca.visualLayer({
+        container: map,
+        fitView: true,
+        type: 'line',
+        shape: 'line'
+    });
+
+    layer.setData(geo_line, {
+        lnglat: 'line'
+    });
+
+    layer.setOptions({
+        style: {
+            // 3D Line 不支持设置线宽，线宽为 1px
+            // borderWidth: 1,
+            // 曲率 [-1, 1] 区间
+            curveness: 1,
+            opacity: 0.8,
+            color: '#5695F6'
+        }
+    });
+
+    layer.render();
+
+</script>
+</body>
+</html>

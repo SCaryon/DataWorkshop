@@ -666,6 +666,10 @@ def geo_get_points():
     final_data_object['points'] = point
     return jsonify(final_data_object)
 
+@app.route('/geo/line/',methods=['GET','POST'])
+def geo_line():
+    return render_template('geogoo/geo_line.html')
+
 
 @app.route("/graph/<id>")
 def graph_id(id):
