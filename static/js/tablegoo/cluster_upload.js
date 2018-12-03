@@ -61,10 +61,17 @@ function read_cluster_file(){
     if (file_name.lastIndexOf(".")!=-1){
 var fileType = (file_name.substring(file_name.lastIndexOf(".")+1,file_name.length)).toLowerCase();
 if(fileType=='csv')
-{
-    $("input[name=cluster_csvfile]").cluster_csv2arr(function(res){
-    });
-}
+                {
+                var fd=new FormData();
+
+                fd.append("file",document.getElementById('time_csvfile').files[0]);//这是获取上传的文件
+                    fd.append('label','csv');
+
+                    var xhr=new XMLHttpRequest();
+                    xhr.open("POST","/save_cluster_file");//要传到后台方法的路径
+                    xhr.addEventListener("load",uploadComplete,false);
+                xhr.send(fd)
+                    }
 if(fileType=='py')
 {
 var fd=new FormData();
@@ -73,7 +80,7 @@ fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是�
     fd.append('label','py');
 
     var xhr=new XMLHttpRequest();
-    xhr.open("POST","/cluster_code");//要传到后台方法的路径
+    xhr.open("POST","/save_cluster_file");//要传到后台方法的路径
     xhr.addEventListener("load",uploadComplete,false);
 xhr.send(fd)
     };
@@ -86,7 +93,7 @@ fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是�
     fd.append('label','zip');
 
     var xhr=new XMLHttpRequest();
-    xhr.open("POST","/cluster_code");//要传到后台方法的路径
+    xhr.open("POST","/save_cluster_file");//要传到后台方法的路径
     xhr.addEventListener("load",uploadComplete,false);
 xhr.send(fd);
 }
@@ -98,7 +105,7 @@ fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是�
     fd.append('label','jar');
 
     var xhr=new XMLHttpRequest();
-    xhr.open("POST","/cluster_code");//要传到后台方法的路径
+    xhr.open("POST","/save_cluster_file");//要传到后台方法的路径
     xhr.addEventListener("load",uploadComplete,false);
 xhr.send(fd);
 }
@@ -110,7 +117,7 @@ fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是�
     fd.append('label','so');
 
     var xhr=new XMLHttpRequest();
-    xhr.open("POST","/cluster_code");//要传到后台方法的路径
+    xhr.open("POST","/save_cluster_file");//要传到后台方法的路径
     xhr.addEventListener("load",uploadComplete,false);
 xhr.send(fd);
 }
