@@ -1,7 +1,7 @@
 import ast
 import copy
-# import pandas as pd
-# import numpy as np
+import pandas as pd
+import numpy as np
 import csv
 import os
 import platform
@@ -24,10 +24,10 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 
-# from aip import AipOcr  # 引入百度api
-# import jieba
-# import wav2text  # wav转text的自定义py文件
-# from docx import Document
+from aip import AipOcr  # 引入百度api
+import jieba
+import wav2text  # wav转text的自定义py文件
+from docx import Document
 
 # 连接百度服务器的密钥
 APP_ID = '14658891'
@@ -35,7 +35,7 @@ API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -1738,6 +1738,46 @@ def picture_OCR():
     else:
         return jsonify(False)
 
+
+def get_file_content(filePath):
+    with open(filePath, 'rb') as fp:
+        return fp.read()
+
+@app.route('/upload_pic', methods=['POST', 'GET'])
+def upload_pic():
+    # text=pytesseract.image_to_string(Image.open('show.jpg'),lang='chi_sim') #设置为中文文字的识别
+    if session.get('email') and request.method == 'POST':
+        f = request.files['uploadImage']
+        filename = f.filename
+        base_path = "./static/user/" + session.get('email') + "/data"  # 当前文件所在路径
+        upload_path = os.path.join(base_path, '', secure_filename(filename))
+
+        if os.path.exists(upload_path):
+            os.remove(upload_path)
+        f.save(upload_path)  # appends upload.filename automatically
+
+        # 读取刚储存的本地文件
+        image = get_file_content(upload_path)
+
+        # 输入刚读取的本地文件，调用百度文字识别，返回json格式识别结构
+        result = client.basicAccurate(image)
+
+        # 将百度返回的分行结果连接成一行
+        raw = ""
+        for sresult in result["words_result"]:
+            raw += sresult["words"]
+
+        # 输入连续的文字，返回分词结果
+        x = (" ".join(jieba.cut(raw)))
+
+        # 打印分词结果
+        print(x)
+
+        # 向浏览器返回分次结果
+        return x
+    else:
+        session['last_page'] = '/textgoo'
+        return jsonify(False)
 
 # text_OCR--------------------------------------------------
 
