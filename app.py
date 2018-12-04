@@ -1022,6 +1022,19 @@ def read_table_data(filename):
     return table_data, table_features, table_identifiers
 
 
+def check_table_data(data_list):
+    data_list = np.array(data_list)
+    rows, columns = data_list.shape
+    for i in range(rows):
+        for j in range(columns):
+            try:
+                if np.isnan(data_list[i][j]):
+                    return False
+            except:
+                return False
+    return True
+
+
 @app.route('/tablegoo', methods=['POST', 'GET'])
 def tablegoo():
     if not session.get('email'):
@@ -1134,6 +1147,11 @@ def table_upload():
                     except IOError:
                         return '上传文件失败'
                     os.rename(path + filedata.filename, path + "table.csv")
+                    table_data, table_features, table_identifiers = read_table_data(
+                        "./static/user/" + email + "/data/table.csv")
+                    if not check_table_data(table_data):
+                        os.remove(path + "table.csv")
+                        return 'data error, please clean your data and then upload again'
                 else:
                     return "filename invalid or network error"
             return redirect(url_for('tablegoo'))

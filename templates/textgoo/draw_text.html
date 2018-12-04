@@ -185,7 +185,7 @@ a {
          <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/"  class="smoothScroll">Home</a></li>
-                <li><a href="/text_home" class="smoothScroll">Knowledge Graph</a></li>
+                <li><a href="/textgoo" class="smoothScroll">Knowledge Graph</a></li>
                 <li><a onclick="draw_wordcloud()" class="smoothScroll">Word Cloud</a></li>
                 <li>
                     <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
@@ -242,12 +242,16 @@ a {
     <div id="sub">
     <div id='h1_KnowledgeGraph'>
     <h1>Knowledge Graph</h1></div>
-
-    <input class="button_blue" id="file_path" name="file_path" type="button"
+        <form method="post" action="/text_upload" enctype="multipart/form-data">
+                    <input type="file" name="file" id="file">
+                    <input type="submit" value="upload">
+                </form>
+    {#    <input class="button_blue" id="file_path" name="file_path" type="button"
     onclick="path.click()" value="File Upload">
         <input type="file" id="path" style="display:none" name="csvfile"
                            onchange="file_path.value=this.value">
-    <input class="button_blue" type="button" onclick="read_file2()" value="Submit"></div>
+    <input class="button_blue" type="button" onclick="read_file2()" value="Submit">#}
+    </div>
     <div id='h1_WordCloud'>
     <h1>Word Cloud</h1>
     <hr></div>
@@ -260,7 +264,7 @@ a {
 
     <div id="append_vis" style=" text-align:center"></div>
 <button style="position: relative; top: 24px;" id="participle" onclick="input_in_text()" class="l-btn">participle</button>
-    <form  id="form" >
+    <form  id="word_cloud_form" >
 
         <p style="position: absolute; top: 0px; display: none;" id="status">1/1</p>
 
@@ -657,7 +661,7 @@ function transform2(d) {
     <script type="text/javascript">
         function draw_wordcloud(){
             var body = d3.select("body");
-            var p = body.select("#vis").remove();
+            //var p = body.select("#vis").remove();
             body.select('#append_vis').append('div').attr('id','vis').style('text-align','center');
 
      document.getElementById("sub").style.display="none";
@@ -972,7 +976,7 @@ document.getElementById("draw_knowledge").style.display="none";
             background = svg.append("g"),
             vis = svg.append("g").attr("transform", "translate(" + [w >> 1, h >> 1] + ")");
         d3.select("#download-svg").on("click", downloadSVG), d3.select("#download-png").on("click", downloadPNG);
-        var form = d3.select("#form").on("submit", function() {
+        var form = d3.select("#word_cloud_form").on("submit", function() {
             //需要判断text是用户自己输入的，还是upload进来的
             parseText(d3.select("#wordcloud_text").property("value")), d3.event.preventDefault();
         });
@@ -1271,13 +1275,13 @@ document.getElementById("draw_knowledge").style.display="none";
             complete: function (results) {
                 var res = results.data;
       $.ajax({
-                        url: '/textgoo',
+                        url: '/text_upload',
                         type: 'POST',
                         data: {json_data: JSON.stringify(res)},
                         success: function (res) {
                             if (res) {
                                 alert('success !');
-                                window.location.href = '/text_home';
+                                window.location.href = '/textgoo';
                             }
                             else {
                                 alert('Unknown error.');
