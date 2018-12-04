@@ -360,7 +360,7 @@ top:0;
 #beginExplore:hover,#beginStory:hover{
     opacity: 1;
 }
-#storyline,#fullscreen,#showAbout,#showLabels,#contrastbutton,#backgroundButton,#selectcate,#selectcate_1,#backhome{
+#storyline,#fullscreen,#showAbout,#showLabels,#backtohome,#contrastbutton,#masterpoint,#master,#backgroundButton,#selectcate,#selectcate_1,#backhome{
     min-width:80px;
     color:white;
     border-top: 1px solid #121314;
@@ -396,7 +396,7 @@ top:0;
 }
 
 
-#storyline:hover,#fullscreen:hover,#showAbout:hover,#showLabels:hover,#contrastbutton:hover,#backhome:hover,#backgroundButton:hover,#selectcate:hover,#selectcate_1:hover{
+#storyline:hover,#fullscreen:hover,#backtohome:hover,#showAbout:hover,#masterpoint:hover,#master:hover,#showLabels:hover,#contrastbutton:hover,#backhome:hover,#backgroundButton:hover,#selectcate:hover,#selectcate_1:hover{
     border-right: 2px solid #FFF;
     opacity: 1;
 }

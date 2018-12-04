@@ -5,7 +5,8 @@ window.onload = function () {
     var UserInterface = null;
     var Labels = null;
     var parseURL = new URLparser();
-    var dollars = 100000000;//0.1billion
+    // var dollars = 100000000;//0.1billion
+    var dollars = 120;
     var particles = 1000;
     var destination = [];
     var increment = 5;//点的位置变化增量
@@ -187,140 +188,141 @@ window.onload = function () {
             globe.add(temp[0]);
             globe.updateMatrix();
             renderer.render(scene, camera);
+            /*在countries.json文件里面包含了四个主要信息：
+            载入country，trade，categories，和products*/
+            $.getJSON("/static/data/master/year/countries%s.json".replace('%s', $("#timeSelection").val()), function (corejson) {
+                // $.getJSON("/static/data/master/year/countries.json", function (corejson) {
+                $.each(corejson.countries, function (co, country) {
+                    countries[co] = country;
+                });
+                $.each(planeShapeIDs, function (shapeid, shapes) {
+                    if (countries[shapeid])
+                        countries[shapeid]["polygons"] = planeShapeIDs[shapeid];
+                });
+                $.each(sphereShapeIDs, function (shapeid, shapes) {
+                    if (countries[shapeid])
+                        countries[shapeid]["polygons3D"] = sphereShapeIDs[shapeid];
+                });
+                $.each(corejson.products, function (pid, product) {
+                    products[pid] = product;
+                });
+                $.each(corejson.categories, function (cid, cat) {
+                    categories[cid] = cat;
+                });
+                Labels = new LabelManager(countries);
+
+                UserInterface.buildCategories(categories);
+
+                $.each(corejson.trade, function (i, val) {
+                    if (countries[i]) {
+                        trades[i] = val;
+                    }
+                });
+
+                UserInterface.createSelectionBox(countries);
+
+
+                //载入产品空间信息
+                $.getJSON("/static/data/master/productspace.json", function (pspace) {
+                    $.each(pspace, function (p, values) {
+                        ID = p;
+                        //将ID补全为四位再查询产品信息
+                        for (var add = 0; add < 4 - p.length; add++) {
+                            ID = "0" + ID;
+                        }
+                        if (products[ID]) {
+                            products[ID].x3 = parseFloat(values[0].x) / 33 + 30;
+                            products[ID].y3 = parseFloat(values[0].y) / 33 + 40;
+                            products[ID].z3 = parseFloat(values[0].z) / 40;
+                        } else {
+                        }
+                    });
+                    UserInterface.createProductBox(products);//加入产品选择框
+
+                    $(".productSelection").on("change", function () {
+                        //在产品空间的时候就会触发
+                        if (currentSetup === "productspace" || currentSetup === "productspace3D" || currentSetup === "productsphere")
+                            targetNode(products[$(this).val()]);
+                        filterProduct = $(this).val();
+                        console.log($(this).val())
+                    });
+                });
+
+
+                countryIndex = 124;
+                particles = 153726;
+                var positions = new Float32Array(particles * 3);
+                destination = new Float32Array(particles * 3);
+                var values_color = new Float32Array(particles * 3);
+                var values_size = new Float32Array(particles);
+                var total = 0, v = 0, ray = 4, tetha = 0;
+
+                for (var i = 0; i < countryIndex; i++) {
+                    //对每个index寻找相应的country
+                    $.each(countries, function (p, v) {
+                        if (i == v.id) {
+                            val = v;//country的属性们
+                            code = p;//country的index
+                        }
+                    });
+
+                    //找到countries中对应的国家后开始进行处理
+                    for (var key in val["products"]) {
+                        productValue = val["products"][key];//键为key的product的量
+                        productInfo = products[key];//键为key的product的具体信息
+
+                        color = new THREE.Color(productInfo.color);
+
+                        //在点集中加入点并设置它的位置、目标、大小、颜色的初值
+                        for (var s = 0; s < Math.round(productValue / dollars); s++) {
+                            names.push({"n": key, "c": code});
+                            values_size[v] = 3;
+                            values_color[v * 3 + 0] = color.r * 1.2;
+                            values_color[v * 3 + 1] = color.g * 1.2;
+                            values_color[v * 3 + 2] = color.b * 1.2;
+                            destination[v * 3 + 0] = 1;
+                            destination[v * 3 + 1] = 2;
+                            destination[v * 3 + 2] = 5000;
+                            positions[v * 3 + 0] = 1;
+                            positions[v * 3 + 1] = 2;
+                            positions[v * 3 + 2] = 5000;
+                            v++;
+                        }
+                    }
+                }
+
+                //geometry初始化后第一次变化
+                geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
+                geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
+                geometry.addAttribute('attributes', new THREE.BufferAttribute(attributes, 1));
+
+                particleSystem = new THREE.Points(geometry, shaderMaterial);
+                particleSystem.frustrumCulled = true;
+                scene.add(particleSystem);
+                loaded = true;
+                switcher("gridSphere", false, 25);
+                Particlelinks = new ParticleLinks(13000, clock, darkMode);
+                links = Particlelinks.getMesh();
+                scene.add(links);
+
+                $(".countrySelection").on("change", function () {
+                    targetCountry($(this).val(), true, true);
+                    filterCountry = $(this).val();
+                    if (currentSetup === "productspace" || currentSetup === "productsphere" || currentSetup === "productspace3D") {
+                        switcher(currentSetup, true, 5);
+                    }
+
+                });
+
+
+                $("#loaded").fadeOut();
+                $("#spinner").fadeOut('slow');
+                $('#choice').fadeIn('slow');
+            });
         });
 
 
-        /*在countries.json文件里面包含了四个主要信息：
-        载入country，trade，categories，和products*/
-        $.getJSON("/static/data/master/countries.json", function (corejson) {
-            $.each(corejson.countries, function (co, country) {
-                countries[co] = country;
-            });
-            $.each(planeShapeIDs, function (shapeid, shapes) {
-                if (countries[shapeid])
-                    countries[shapeid]["polygons"] = planeShapeIDs[shapeid];
-            });
-            $.each(sphereShapeIDs, function (shapeid, shapes) {
-                if (countries[shapeid])
-                    countries[shapeid]["polygons3D"] = sphereShapeIDs[shapeid];
-            });
-            $.each(corejson.products, function (pid, product) {
-                products[pid] = product;
-            });
-            $.each(corejson.categories, function (cid, cat) {
-                categories[cid] = cat;
-            });
-            Labels = new LabelManager(countries);
-
-            UserInterface.buildCategories(categories);
-
-            $.each(corejson.trade, function (i, val) {
-                if (countries[i]) {
-                    trades[i] = val;
-                }
-            });
-
-            UserInterface.createSelectionBox(countries);
-
-
-            //载入产品空间信息
-            $.getJSON("/static/data/master/productspace.json", function (pspace) {
-                $.each(pspace, function (p, values) {
-                    ID = p;
-                    //将ID补全为四位再查询产品信息
-                    for (var add = 0; add < 4 - p.length; add++) {
-                        ID = "0" + ID;
-                    }
-                    if (products[ID]) {
-                        products[ID].x3 = parseFloat(values[0].x) / 33 + 30;
-                        products[ID].y3 = parseFloat(values[0].y) / 33 + 40;
-                        products[ID].z3 = parseFloat(values[0].z) / 40;
-                    } else {
-                    }
-                });
-                UserInterface.createProductBox(products);//加入产品选择框
-
-                $(".productSelection").on("change", function () {
-                    //在产品空间的时候就会触发
-                    if (currentSetup === "productspace" || currentSetup === "productspace3D" || currentSetup === "productsphere")
-                        targetNode(products[$(this).val()]);
-                    filterProduct = $(this).val();
-                    console.log($(this).val())
-                });
-            });
-
-
-            countryIndex = 124;
-            particles = 153726;
-            var positions = new Float32Array(particles * 3);
-            destination = new Float32Array(particles * 3);
-            var values_color = new Float32Array(particles * 3);
-            var values_size = new Float32Array(particles);
-            var total = 0, v = 0, ray = 4, tetha = 0;
-
-            for (var i = 0; i < countryIndex; i++) {
-                //对每个index寻找相应的country
-                $.each(countries, function (p, v) {
-                    if (i == v.id) {
-                        val = v;//country的属性们
-                        code = p;//country的index
-                    }
-                });
-
-                //找到countries中对应的国家后开始进行处理
-                for (var key in val["products"]) {
-                    productValue = val["products"][key];//键为key的product的量
-                    productInfo = products[key];//键为key的product的具体信息
-
-                    color = new THREE.Color(productInfo.color);
-
-                    //在点集中加入点并设置它的位置、目标、大小、颜色的初值
-                    for (var s = 0; s < Math.round(productValue / dollars); s++) {
-                        names.push({"n": key, "c": code});
-                        values_size[v] = 3;
-                        values_color[v * 3 + 0] = color.r * 1.2;
-                        values_color[v * 3 + 1] = color.g * 1.2;
-                        values_color[v * 3 + 2] = color.b * 1.2;
-                        destination[v * 3 + 0] = 1;
-                        destination[v * 3 + 1] = 2;
-                        destination[v * 3 + 2] = 5000;
-                        positions[v * 3 + 0] = 1;
-                        positions[v * 3 + 1] = 2;
-                        positions[v * 3 + 2] = 5000;
-                        v++;
-                    }
-                }
-            }
-
-            //geometry初始化后第一次变化
-            geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.addAttribute('customColor', new THREE.BufferAttribute(values_color, 3));
-            geometry.addAttribute('size', new THREE.BufferAttribute(values_size, 1));
-            geometry.addAttribute('attributes', new THREE.BufferAttribute(attributes, 1));
-
-            particleSystem = new THREE.Points(geometry, shaderMaterial);
-            particleSystem.frustrumCulled = true;
-            scene.add(particleSystem);
-            loaded = true;
-            switcher("gridSphere", false, 25);
-            Particlelinks = new ParticleLinks(13000, clock, darkMode);
-            links = Particlelinks.getMesh();
-            scene.add(links);
-
-            $(".countrySelection").on("change", function () {
-                targetCountry($(this).val(), true, true);
-                filterCountry = $(this).val();
-                if (currentSetup === "productspace" || currentSetup === "productsphere" || currentSetup === "productspace3D") {
-                    switcher(currentSetup, true, 5);
-                }
-
-            });
-
-
-            $("#loaded").fadeOut();
-            $("#spinner").fadeOut('slow');
-            $('#choice').fadeIn('slow');
-        });
         selectedNode.position.set(0, 0, 10000);
         scene.add(selectedNode);
 
@@ -847,7 +849,7 @@ window.onload = function () {
 
     //鼠标指到这个国家里面的时候调用的方法，将当前高亮的国家转回普通，然后将当前国家的边界高亮
     function highLightCountry(country, on) {
-        if (currentSetup != "productspace" && currentSetup != "productspace3D" && currentSetup != "productsphere") {
+        if (currentSetup != "productspace" && currentSetup != "productspace3D" && currentSetup != "productsphere" && currentSetup != "groupby") {
             //如果当前已经有别的国家被高亮了，那么将这个国家先给变为普通状态
             if (currentSetup == "gridSphere") {
                 if (countryOverlay) {
@@ -1654,6 +1656,9 @@ window.onload = function () {
             case "gridButton":
                 switcher("gridmap", false, 5);
                 break;
+            case "groupButton":
+                switcher("groupby", false, 5);
+                break;
             case "productButton":
                 switcher("productspace", false, 5);
                 $(".countrySelection").select2("val", null);
@@ -1666,9 +1671,7 @@ window.onload = function () {
                 switcher("productsphere", false, 5);
                 $(".countrySelection").select2("val", null);
                 break;
-            case "groupButton":
-                switcher("groupby", false, 5);
-                break;
+
         }
     });
 
@@ -1805,27 +1808,7 @@ window.onload = function () {
     }
 
     function animateOverlay(percentage) {
-        //对于第一二种模式
-        if (currentSetup === "gridmap" || currentSetup === "gridSphere") {
-            var test = true;
-            //测试目录中每个类型的活跃度
-            $.each(categories, function (col, val) {
-                if (!val.active) test = false;
-            });
-            if (test) {
-                overlay = globe.children[1];
-                //如果所有点都安放好的话，边界就改变透明度
-                if (percentage === 0) {//如果还有没安放好的点的话
-                    overlayMaterial.opacity = Math.min(((cameraControls.getZoom() - 175) / 300), 0.6);
-                } else {
-                    overlayMaterial.opacity = Math.min(percentage / 100, 0.6);
-                }
-            } else {
-                overlayMaterial.opacity = 0;
-            }
-        } else {
-            overlayMaterial.opacity = 0;
-        }
+        overlayMaterial.opacity = 0;
     }
 
     //动画

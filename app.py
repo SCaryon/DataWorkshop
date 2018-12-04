@@ -1,7 +1,7 @@
 import ast
 import copy
-import pandas as pd
-import numpy as np
+# import pandas as pd
+# import numpy as np
 import csv
 import os
 import platform
@@ -24,17 +24,18 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 
-from aip import AipOcr #引入百度api
-import jieba
-import wav2text  # wav转text的自定义py文件
-from docx import Document
+# from aip import AipOcr  # 引入百度api
+# import jieba
+# import wav2text  # wav转text的自定义py文件
+# from docx import Document
+
 # 连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -327,6 +328,11 @@ def master():
     return render_template('geogoo/master.html')
 
 
+@app.route('/masterpoint/', methods=['POST', 'GET'])
+def masterpoint():
+    return render_template('geogoo/masterpoint.html')
+
+
 # 地图方法begin
 
 # In short, this method is to store the data uploaded by
@@ -500,6 +506,184 @@ def file2db2json(file, jsonfile):
     return 'success'
 
 
+def yearfile2db2json(file, jsonfile):
+    bk = open_workbook(file, encoding_override="utf-8")
+    try:
+        sh_export = bk.sheet_by_name("countries")
+        sh_product = bk.sheet_by_name("products")
+        sh_cate = bk.sheet_by_name('categories')
+    except:
+        return "no such sheet!"
+    else:
+        # Create a temporary database link, then create a new temporary table, drop it after use.
+        # I don’t need db.session, it’s too hard to use.
+        # Here to explain, each user has their own database table, are used
+        # to temporarily store data and calculate, so you can drop at any time
+        email = 0
+        dbcur = pymysql.connect(host="localhost", user='root', password='qazxswedcvfr', database='data')
+        cursor = dbcur.cursor()
+        sql = "drop table if exists export%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists product%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists category%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists country_pro%s" % email
+        cursor.execute(sql)
+        sql = "drop table if exists country%s" % email
+        cursor.execute(sql)
+        sql = "create table export%s (fromISO varchar(128),toISO varchar(128),product varchar(128)," \
+              "year INT ,Quantity FLOAT, primary key(fromISO,toISO,product,year))" % email
+        cursor.execute(sql)
+        sql = "create table category%s (color varchar(128),cateID INT ,name varchar(128),year int,total int default 0" \
+              ",primary key (color,year))" % email
+        cursor.execute(sql)
+        sql = "create table product%s(products varchar(128),name varchar(128),year int default 0,color varchar(128)," \
+              "proID int,sale float default 0,primary key(products,year))" % email
+        cursor.execute(sql)
+        sql = "create table country_pro%s(fromISO varchar(128),product varchar(128),year int,sale float," \
+              "primary key(fromISO,product,year))" % email
+        cursor.execute(sql)
+        sql = "create table country%s(fromISO varchar(128),year int,export double, primary key(fromISO,year))" % email
+        cursor.execute(sql)
+        # values = []
+        nrows = sh_export.nrows
+        for i in range(0, nrows):
+            row_data = sh_export.row_values(i)
+            row = (row_data[0], row_data[1], row_data[2], row_data[3], row_data[4])
+            # values.append(row)
+            sql = "insert into export%s" % email + " values('%s','%s',%d, %d, %f)" % row
+            cursor.execute(sql)
+        sql = "insert into country_pro%s " \
+              "select fromISO,product,year,sum(Quantity) from export%s group by fromISO,product,year" % (email, email)
+        cursor.execute(sql)
+        sql = "insert into country%s " \
+              "select fromISO,year,sum(Quantity) from export%s group by fromISO,year" % (email, email)
+        cursor.execute(sql)
+
+        dbcur.commit()
+
+        # values = []
+        nrows = sh_product.nrows
+        for i in range(0, nrows):
+            row_data = sh_product.row_values(i)
+            row = (row_data[0], row_data[1], row_data[2], row_data[3])
+            # values.append(row)
+            for year in range(1985, 2012):
+                sql = "insert into product%s(products,name,color,proID,year)" % email + \
+                      " values(%d,'%s','%s',%d,%d)" % (row_data[0], row_data[1], row_data[2], row_data[3], year)
+                cursor.execute(sql)
+        cursor.execute("select product,year,sum(Quantity) from export%s group by product,year" % email)
+        result = cursor.fetchall()
+        # print(result)
+        for row in result:
+            pro = row[0]
+            ye = row[1]
+            sa = row[2]
+            # print("update product%s set sale=%f where products=%s" % (email, sa, pro))
+            cursor.execute("update product%s set sale=%f where products=%s and year=%d" % (email, sa, pro, ye))
+        dbcur.commit()
+        cursor.execute('delete from product0 where sale=0')
+
+        # values = []
+        nrows = sh_cate.nrows
+        for i in range(0, nrows):
+            row_data = sh_cate.row_values(i)
+            # values.append(row)
+            for year in range(1985, 2012):
+                row = (row_data[0], row_data[1], row_data[2], year, 0)
+                sql = "insert into category0(color,cateID,name,year,total) values('%s','%s','%s',%d,%d)" % row
+                cursor.execute(sql)
+        dbcur.commit()
+        cursor.execute('select year,color,count(*) from product0 group by year,color ')
+        result = cursor.fetchall()
+        for row in result:
+            cursor.execute("update category0 set total=%d where color='%s' and year=%d"%(row[2], row[1], row[0]))
+        cursor.execute('delete from category0 where total=0')
+        dbcur.commit()
+
+        for i in range(1985, 2012):
+            with open(jsonfile, "r", encoding="UTF-8") as load_f:
+                load_dict = json.load(load_f)
+
+                all_particle = 0
+                dollars = 120
+
+                for key in load_dict["countries"]:
+                    load_dict["countries"][key]['products'] = {}
+                    country = key
+                    # print(country)
+                    sql = "select * from country_pro%s where fromISO='%s' and year=%d" % (email, country, i)
+                    # print(sql)
+                    cursor.execute(sql)
+                    result = cursor.fetchall()
+                    particles = 0
+                    for row in result:
+                        particles += row[3] / dollars
+                        load_dict["countries"][key]['products'][row[1]] = row[3]
+                    load_dict["countries"][key]['particles'] = int(particles)
+                    all_particle += int(particles)
+
+                    sql = "select export from country%s where fromISO='%s' and year = %d" % (email, country, i)
+                    cursor.execute(sql)
+                    result = cursor.fetchall()
+                    for row in result:
+                        load_dict["countries"][key]['exports'] = row[0]
+                print(all_particle)
+
+                load_dict["categories"] = {}
+                sql = "select * from category%s where year = %d" % (email, i)
+                cursor.execute(sql)
+                result = cursor.fetchall()
+
+                for row in result:
+                    load_dict['categories'][row[0]] = {}
+                    load_dict['categories'][row[0]]['id'] = row[1]
+                    load_dict['categories'][row[0]]['active'] = True
+                    load_dict['categories'][row[0]]['name'] = row[2]
+                    load_dict['categories'][row[0]]['total'] = row[4]
+
+                load_dict['products'] = {}
+                sql = "select * from product%s where year=%d" % (email, i)
+                cursor.execute(sql)
+                result = cursor.fetchall()
+
+                for row in result:
+                    load_dict['products'][row[0]] = {}
+                    load_dict['products'][row[0]]['x'] = 0
+                    load_dict['products'][row[0]]['y'] = 0
+                    load_dict['products'][row[0]]['name'] = row[1]
+                    load_dict['products'][row[0]]['color'] = row[3]
+                    load_dict['products'][row[0]]['sales'] = row[5]
+                    load_dict['products'][row[0]]['id'] = row[4]
+                    load_dict['products'][row[0]]["atlasid"] = row[0]
+
+                with codecs.open("./static/data/master/year/countries%d.json" % i, "w", encoding="UTF-8") as f:
+                    json.dump(load_dict, f, ensure_ascii=False)
+
+                # with codecs.open(jsonfile, "w", encoding="UTF-8") as f:
+                #     json.dump(load_dict, f, ensure_ascii=False)
+                print("加载入文件完成...")
+                # print(load_dict["countries"])
+                # print(i["products"])
+
+        cursor.close()
+        dbcur.close()
+    return 'success'
+
+
+@app.route("/geo/thisis/", methods=['GET', 'POST'])
+def geo_thisis():
+    if not os.path.exists("./static/user/service/data/countries.json"):
+        shutil.copy("./static/data/geogoo/countries.json",
+                    "./static/user/service/data/countries.json")
+    path = "./static/user/service/data/"
+    if yearfile2db2json(path + "countries.xlsx", path + 'countries.json') == "no such sheet!":
+        return "no such sheet!"
+    else:
+        return render_template('geogoo/master.html')
+
+
 # 进入地图的index界面
 @app.route('/geo/', methods=['GET', 'POST'])
 def geo_index():
@@ -668,7 +852,7 @@ def geo_points():
     return render_template('geogoo/geo_points.html')
 
 
-@app.route('/geo/get/points/', methods=['GET','POST'])
+@app.route('/geo/get/points/', methods=['GET', 'POST'])
 def geo_get_points():
     final_data = csv.reader(open('./examples/geo/geo_points.csv'))
     point = []
@@ -679,7 +863,8 @@ def geo_get_points():
     final_data_object['points'] = point
     return jsonify(final_data_object)
 
-@app.route('/geo/line/',methods=['GET','POST'])
+
+@app.route('/geo/line/', methods=['GET', 'POST'])
 def geo_line():
     return render_template('geogoo/geo_line.html')
 
@@ -957,9 +1142,6 @@ def table_upload():
         return render_template('user/login.html')
 
 
-
-
-
 @app.route('/text_upload', methods=['GET', 'POST'])
 def text_upload():
     if session.get('email'):
@@ -1011,7 +1193,7 @@ def clean_table():
                            frame=table_fea, data_list=data_list_transform)
 
 
-#streaming data start------------------------------------------------------
+# streaming data start------------------------------------------------------
 @app.route('/streaming_data', methods=['GET', 'POST'])
 def streaming_data():
     email = session.get('email')
@@ -1310,9 +1492,11 @@ def Moving_averaging():
             result.append(str(s_pre_single[a]))
         re_result = ':'.join(result)
         return re_result
-#streaming data end------------------------------------------------------
 
-#cluster start------------------------------------------------------------
+
+# streaming data end------------------------------------------------------
+
+# cluster start------------------------------------------------------------
 @app.route('/cluster')
 def cluster():
     if session.get('email'):
@@ -1337,7 +1521,7 @@ def cluster_way():
             features_list = i
         else:
             no_identifiers_data_list.append(i)
-        length = length+1
+        length = length + 1
     parameters = {}
     draw_id = str(request.get_json()['draw_id'])
     body = 'page-top' + draw_id
@@ -1419,9 +1603,10 @@ def cluster_code():
                     return 'virus!!!'
                     '''
 
-#cluster end-------------------------------------------------
 
-#text_OCR--------------------------------------------------
+# cluster end-------------------------------------------------
+
+# text_OCR--------------------------------------------------
 
 @app.route('/textgoo', methods=['GET', 'POST'])
 def textgoo():
@@ -1437,7 +1622,7 @@ def textgoo():
                 list_num.append(str)
             my_dic = data_list_to_dictionary(features_list, list_num)
             text_no_identifiers_data_dictionary.append(my_dic)
-        return render_template('textgoo/draw_text.html',text_data=text_no_identifiers_data_dictionary)
+        return render_template('textgoo/draw_text.html', text_data=text_no_identifiers_data_dictionary)
     else:
         email = session.get('email')
         user1 = user.query.filter_by(email=email).first()
@@ -1466,7 +1651,7 @@ def textgoo():
                     list_num.append(str)
                 my_dic = data_list_to_dictionary(features_list, list_num)
                 text_no_identifiers_data_dictionary.append(my_dic)
-            return render_template('textgoo/draw_text.html',  user=user1,text_data=text_no_identifiers_data_dictionary)
+            return render_template('textgoo/draw_text.html', user=user1, text_data=text_no_identifiers_data_dictionary)
 
 
 @app.route('/word_cloud_OCR', methods=['GET', 'POST'])
@@ -1476,7 +1661,7 @@ def picture_OCR():
         if type == 'wav':
             f = request.files['wav']
             base_path = os.path.dirname(
-                __file__ + '/static/user/' + session.get('email') + "/img")# 当前文件所在路径
+                __file__ + '/static/user/' + session.get('email') + "/img")  # 当前文件所在路径
             upload_path = os.path.join(base_path, '', secure_filename('doc_by_upload.wav'))
             f.save(upload_path)
             result = wav2text.wav2word(upload_path)
@@ -1534,7 +1719,9 @@ def picture_OCR():
             return "we don't support this type of file!"
     else:
         return jsonify(False)
-#text_OCR--------------------------------------------------
+
+
+# text_OCR--------------------------------------------------
 
 if __name__ == '__main__':
     app.run(processes=10)

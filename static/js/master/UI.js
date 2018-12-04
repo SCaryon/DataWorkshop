@@ -215,24 +215,24 @@ function UI() {
         "img": "images/master/icon/listmap.png",
         "desc": "按照产品类别展示产品分布"
     });
-    buttons.push({
-        "id": "productButton3",
-        "title": "3D产品",
-        "img": "images/master/icon/product3D.png",
-        "desc": "产品空间的3D版本，通过单击节点来跳转"
-    });
-    buttons.push({
-        "id": "productButton",
-        "title": "平面产品",
-        "img": "images/master/icon/product2D.png",
-        "desc": "显示其类别中的所有产品，排列在称为产品空间的相似性图表中。"
-    });
-    buttons.push({
-        "id": "productButton2",
-        "title": "产品堆积",
-        "img": "images/master/icon/producttower.png",
-        "desc": "按类别堆叠产品"
-    });
+    // buttons.push({
+    //     "id": "productButton3",
+    //     "title": "3D产品",
+    //     "img": "images/master/icon/product3D.png",
+    //     "desc": "产品空间的3D版本，通过单击节点来跳转"
+    // });
+    // buttons.push({
+    //     "id": "productButton",
+    //     "title": "平面产品",
+    //     "img": "images/master/icon/product2D.png",
+    //     "desc": "显示其类别中的所有产品，排列在称为产品空间的相似性图表中。"
+    // });
+    // buttons.push({
+    //     "id": "productButton2",
+    //     "title": "产品堆积",
+    //     "img": "images/master/icon/producttower.png",
+    //     "desc": "按类别堆叠产品"
+    // });
 
 
     newDiv = "<table>";
