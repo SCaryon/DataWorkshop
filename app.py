@@ -876,6 +876,16 @@ def graph_id(id):
     return render_template('graphgoo/product/%s.html' % id)
 
 
+@app.route('/alert')
+def alert():
+    if session.get('email'):
+        email = session.get('email')
+        last_page = session.get('last_page')
+        return redirect(last_page)
+    else:
+        return redirect('/login/')
+
+
 def read_graph_data(filename):
     temp_data = pd.read_csv(filename, encoding='gbk')
     graph_nodes = temp_data.columns
@@ -887,6 +897,20 @@ def read_graph_data(filename):
     for temp_list in range(len(graph_nodes)):
         del graph_matrix[temp_list][0]
     return graph_nodes, graph_matrix
+
+
+def check_graph_data(nodes, matrix):
+    matrix = np.array(matrix)
+    try:
+        rows, columns = matrix.shape
+        if rows != columns:
+            return False
+        if len(nodes) != rows:
+            return False
+    except:
+        return False
+    else:
+        return True
 
 
 @app.route('/graphgoo', methods=['POST', 'GET'])
@@ -925,6 +949,11 @@ def graph_upload():
                     except IOError:
                         return '上传文件失败'
                     os.rename(path + filedata.filename, path + "graph.csv")
+                    graph_nodes, graph_matrix = read_graph_data(path + "graph.csv")
+                    if not check_graph_data(graph_nodes, graph_matrix):
+                        os.remove(path + "graph.csv")
+                        session["last_page"] = '/graphgoo'
+                        return render_template('data_error.html')
                 else:
                     return "filename invalid or network error"
             return redirect(url_for('graphgoo'))
@@ -1151,7 +1180,8 @@ def table_upload():
                         "./static/user/" + email + "/data/table.csv")
                     if not check_table_data(table_data):
                         os.remove(path + "table.csv")
-                        return 'data error, please clean your data and then upload again'
+                        session["last_page"] = '/tablegoo'
+                        return render_template('data_error.html')
                 else:
                     return "filename invalid or network error"
             return redirect(url_for('tablegoo'))
