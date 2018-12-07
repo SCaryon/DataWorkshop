@@ -11,7 +11,7 @@
     <script src="/static/js/upload/jschardet.min.js"></script>
     <script src="/static/js/tablegoo/embedding_upload.js"></script>
     <script src="/static/js/d3.vs.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/user.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
     <link href="/static/css/bootstrap/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
           integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
@@ -528,7 +528,7 @@ var url='/mining/embedding';
                 data:JSON.stringify(this_method),//还需要加一个draw_id用于表示要画在哪个div上面。
                 contentType:'application/json; charset=UTF-8',
                 success : function(res) {//返回数据根据结果进行相应的处理,res数组的0位置是评价方法，1及其之后都是图片的编号
-                    window.location.href = '/data_workshop'
+                    window.location.href = '/tablegoo'
                     //a = document.createElement('a');
                             //a.href = '/data_workshop';
                             //a.click();
