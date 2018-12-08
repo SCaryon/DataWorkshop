@@ -42,60 +42,45 @@
                 <li class="smoothScroll"><a href="#" id="geo_points">Points</a></li>
                 <li class="smoothScroll"><a href="/geo/line/" id="geo_line">Line</a></li>
                 <li class="smoothScroll"><a href="/geo/index/">back</a></li>
-                <li class="smoothScroll">
-                    <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
-                </li>
-                {% if user %}
-                    <li class="user_img smoothScroll"><a href="/user/">
-                        <div class="to3" style="margin-top: -10px;">
-                            <div class="to2">
-                                <div class="to1">
-                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    </li>
-                    <li class="smoothScroll"><a href="/login/">Quit</a></li>
-                {% else %}
-                    <li>
-                        <a href="/login/" class="smoothScroll">Log in/Sign up</a>
-                    </li>
-                {% endif %}
-                {% if user %}
-                    {% if user.permission==100 %}
-                        <li class="smoothScroll">
-                            <a href="/admin/?manager={{ user.username }}" class="">manage</a>
-                        </li>
-                    {% endif %}
-                {% endif %}
             </ul>
-            {% if user %}
-                <script>
-                    var permi = '' +{{ user.permission }};
-                    console.log("permission:", permi);
-                    switch (permi) {
-                        case "1":
-                            $('.to3').css('background-color', '#aac4bc');
-                            break;
-                        case "2":
-                            $('.to3').css('background-color', '#ae853b');
-                            break;
-                        case "3":
-                            $('.to3').css('background-color', '#dfdc5d');
-                            break;
-                        case "100":
-                            $('.to3').css('background-color', '#ede4b8');
-                            break;
-                        default:
-                            $('.to3').css('background-color', 'white');
-                    }
-                </script>
-            {% endif %}
         </div>
     </div>
 </div>
+<div style="margin-top:150px;float: left;width: 15%;color: white">
+    <div>
+        <label for="attr_select" class="mdui-radio">Select Attribute</label>
+        <form class="mdui-theme-accent-blue" id="attr_select">
+            {% for k in attr %}
+                <label class="mdui-radio">
+                    <input type="radio" name="attribute" value="{{ k }}"/>
+                    <i class="mdui-radio-icon"></i>
+                    {{ k }}
+                </label>
+            {% endfor %}
+        </form>
+    </div>
 
+    <div>
+        <label for="color_select" class="mdui-radio">Color Bar</label>
+        <select class="mdui-select" mdui-select id="color_select"></select>
+    </div>
+    <div>
+        <div>min</div>
+        <div id="color_bar">
+            <canvas id="color_canvas" width="200" height="40"></canvas>
+        </div>
+    </div>
+    <button id="color_reverse" class="button_blue">reverse</button>
+    <br>
+
+    <form method="post" action="/geo/admin/upload/" enctype="multipart/form-data">
+        <input class="button_blue" id="file_path" name="file_path" type="button"
+               onclick="file.click()" value="File Upload">
+        <input type="file" id="file" style="display:none" name="file"
+               onchange="file_path.value=this.value">
+        <input class="button_blue" type="submit" value="Submit">
+    </form>
+</div>
 <div id="container" style="margin-top: 90px;"></div>
 <script src="https://webapi.amap.com/loca?key=2dd663dd485017c4b832632ff9751da0"></script>
 <!-- UI组件库 1.0 -->
