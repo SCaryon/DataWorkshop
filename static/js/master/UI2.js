@@ -191,30 +191,6 @@ function UI() {
     divY = 60;
     step = 30;
     ring = false;
-    // buttons.push({
-    //     "id": "gridSphereButton",
-    //     "title": "全球视图",
-    //     "img": "images/master/icon/globemap.png",
-    //     "desc": "通过将国家/地区放置在国家/地区内来显"
-    // });
-    // buttons.push({
-    //     "id": "gridButton",
-    //     "title": "世界视图",
-    //     "img": "images/master/icon/planemap.png",
-    //     "desc": "通过将国家/地区放置在国家/地区内来显"
-    // });
-    // buttons.push({
-    //     "id": "towersButton",
-    //     "title": "地图堆积",
-    //     "img": "images/master/icon/towermap.png",
-    //     "desc": "堆叠一个国家/地区在地图上导出的每个产品，每行代表25亿美元"
-    // });
-    // buttons.push({
-    //     "id": "groupButton",
-    //     "title": "分类产品",
-    //     "img": "images/master/icon/listmap.png",
-    //     "desc": "按照产品类别展示产品分布"
-    // });
     buttons.push({
         "id": "productButton3",
         "title": "3D产品",

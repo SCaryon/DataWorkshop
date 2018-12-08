@@ -24,10 +24,10 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 
-from aip import AipOcr  # 引入百度api
-import jieba
+# from aip import AipOcr  # 引入百度api
+# import jieba
 import wav2text  # wav转text的自定义py文件
-from docx import Document
+# from docx import Document
 
 # 连接百度服务器的密钥
 APP_ID = '14658891'
@@ -35,7 +35,7 @@ API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -326,6 +326,11 @@ def products():
         return render_template('products.html')
 
 
+@app.route('/gallery/', methods=['POST', 'GET'])
+def gallery():
+    return render_template('gallery.html')
+
+
 @app.route('/master/', methods=['POST', 'GET'])
 def master():
     return render_template('geogoo/master.html')
@@ -601,7 +606,7 @@ def yearfile2db2json(file, jsonfile):
         cursor.execute('select year,color,count(*) from product0 group by year,color ')
         result = cursor.fetchall()
         for row in result:
-            cursor.execute("update category0 set total=%d where color='%s' and year=%d"%(row[2], row[1], row[0]))
+            cursor.execute("update category0 set total=%d where color='%s' and year=%d" % (row[2], row[1], row[0]))
         cursor.execute('delete from category0 where total=0')
         dbcur.commit()
 
@@ -1570,7 +1575,8 @@ def cluster_way():
     if session.get('email'):
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
             # run cluster way except user's way
-            table_data, table_features, table_identifiers = read_table_data("./static/user/" + session.get('email') + "/data/table.csv")
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + session.get('email') + "/data/table.csv")
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
     else:
@@ -1619,7 +1625,8 @@ def mining_cluster():
     if session.get('email'):
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
             # run cluster way except user's way
-            table_data, table_features, table_identifiers = read_table_data("./static/user/" + session.get('email') + "/data/table.csv")
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + session.get('email') + "/data/table.csv")
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
     else:
@@ -1722,7 +1729,8 @@ def projection_way():
     if session.get('email'):
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
             # run cluster way except user's way
-            table_data, table_features, table_identifiers = read_table_data("./static/user/" + session.get('email') + "/data/table.csv")
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + session.get('email') + "/data/table.csv")
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
     else:
@@ -1742,7 +1750,8 @@ def mining_embedding():
     if session.get('email'):
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
             # run cluster way except user's way
-            table_data, table_features, table_identifiers = read_table_data("./static/user/" + session.get('email') + "/data/table.csv")
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + session.get('email') + "/data/table.csv")
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
     else:
@@ -1776,6 +1785,8 @@ def mining_embedding():
                            anomaly_detection_data=table_ano_de_da,
                            regression_data=table_reg_da,
                            visualization_method=table_visualization_method)
+
+
 # embedding end---------------------------------------------
 
 
@@ -1898,6 +1909,7 @@ def get_file_content(filePath):
     with open(filePath, 'rb') as fp:
         return fp.read()
 
+
 @app.route('/upload_pic', methods=['POST', 'GET'])
 def upload_pic():
     # text=pytesseract.image_to_string(Image.open('show.jpg'),lang='chi_sim') #设置为中文文字的识别
@@ -1933,6 +1945,7 @@ def upload_pic():
     else:
         session['last_page'] = '/textgoo'
         return jsonify(False)
+
 
 # text_OCR--------------------------------------------------
 
