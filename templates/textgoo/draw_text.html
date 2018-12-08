@@ -187,6 +187,7 @@ a {
                 <li><a href="/"  class="smoothScroll">Home</a></li>
                 <li><a href="/textgoo" class="smoothScroll">Knowledge Graph</a></li>
                 <li><a onclick="draw_wordcloud()" class="smoothScroll">Word Cloud</a></li>
+                 <li><a onclick="show()" class="smoothScroll">Text Recognition</a></li>
                 <li>
                     <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
                 </li>
@@ -1326,5 +1327,123 @@ if(fileType=='csv')
     }
     }
 </script>
+
+
+<script>
+    function show() //显示隐藏层和弹出层
+    {
+        var hideobj = document.getElementById("hidebg");
+        hidebg.style.display = "block"; //显示隐藏层
+        hidebg.style.height = document.body.clientHeight + "px"; //设置隐藏层的高度为当前页面高度
+        document.getElementById("lghidebox").style.display = "block"; //显示弹出层
+    };
+
+    function hide() //去除隐藏层和弹出层
+    {
+        document.getElementById("hidebg").style.display = "none";
+        document.getElementById("lghidebox").style.display = "none";
+    };
+</script>
+<style>
+    #hidebg {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        background-color: #000;
+        width: 100%;
+        height:100%;
+        /*宽度设置为100%，这样才能使隐藏背景层覆盖原页面*/
+        filter: alpha(opacity=60);
+        /*设置透明度为60%*/
+        opacity: 0.6;
+        /*非IE浏览器下设置透明度为60%*/
+        display: none;
+        /* http://www.jb51.net */
+        z-Index: 2;
+    }
+
+    #lghidebox {
+        position: absolute;
+        left: 20%;
+        top: 20%;
+        width: 60%;
+        height: 40%;
+        background-color: #fff;
+        display: none;
+        cursor: pointer;
+        z-Index: 3;
+    }
+
+    #activatebtn {
+        text-align: center;
+        cursor: pointer;
+        z-Index: 1;
+    }
+#hidebtn{
+        position:relative;
+        left: 0;
+        top: 0;
+    }
+</style>
+
+<script>
+ function preview(file)
+ {
+ var prevDiv = document.getElementById('preview');
+ if (file.files && file.files[0])
+ {
+ var reader = new FileReader();
+ reader.onload = function(evt){
+ prevDiv.innerHTML = '<img style="width:100%" src="' + evt.target.result + '" />';
+}
+ reader.readAsDataURL(file.files[0]);
+}
+ else
+ {
+ prevDiv.innerHTML = '<div class="img" style="filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod=scale,src=\'' + file.value + '\'"></div>';
+ }
+ }
+    function gosubmit(file){
+        preview(file);
+            var formdata_tr=new FormData();
+            //formdata.append('name', 'uploadImage');
+            formdata_tr.append('uploadImage',$('#uploadImage').get(0).files[0]);
+            formdata_tr.append('recid','133');
+            preview(document.getElementById('uploadImage') )
+
+            $.ajax({
+                url:'/upload_pic',
+                type:'post',
+                contentType:false,
+                data:formdata_tr,
+                processData:false,
+                success:function(info){
+                    if(!info){
+                        window.location.href = '/login/'
+                    }
+                    else {
+                        console.log(info);
+                        $('#lgtext').text("结果：" + info)
+                    }
+                },
+                error:function(err){
+                    console.log(err)
+                }
+            });
+        }
+</script>
+<div id="hidebg"></div>
+<div id="lghidebox">
+
+    <button id="hidebtn" onClick="hide();" >点击关闭</button>
+    <div id="lgocr">
+
+            <input type="file" name="uploadImage" id="uploadImage">
+            <input type="submit" onclick="gosubmit(this)" id="imgbtn" value="上传" />
+
+        <div id="preview"></div>
+        <div id="lgtext"></div>
+    </div>
+</div>
 
 
