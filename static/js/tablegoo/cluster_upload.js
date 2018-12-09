@@ -64,7 +64,7 @@ if(fileType=='csv')
                 {
                 var fd=new FormData();
 
-                fd.append("file",document.getElementById('time_csvfile').files[0]);//这是获取上传的文件
+                fd.append("file",document.getElementById('cluster_csvfile').files[0]);//这是获取上传的文件
                     fd.append('label','csv');
 
                     var xhr=new XMLHttpRequest();
