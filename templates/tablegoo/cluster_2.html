@@ -13,14 +13,15 @@
     <script src="/static/js/d3.vs.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
     <link rel="stylesheet" type="text/css"  href="/static/css/tablegoo/cluster_css.css">
     <link rel="stylesheet" type="text/css"  href="/static/css/tablegoo/parallel.css">
 
     <script src="/static/js/jscolor.js"></script>
-<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="http://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
 
     <title>cluster</title>
@@ -738,7 +739,7 @@ window.default = {
          draw_operators.setAttribute('class','draw_operators');
          draw_operators.setAttribute('id','draw_operators'+j.toString());
 
-         if(target_draw_bar_id!='draw_evaluation_bar'){//当前评价指标里面是没有save功能的
+         if(target_draw_bar_id!='draw_evaluation_bar'){
          var draw_operators_save_div = document.createElement('div');//save的div
          draw_operators_save_div.setAttribute('class','far fa-check-circle');
          draw_operators_save_div.setAttribute('id','draw_operators_save_div'+j.toString());
@@ -760,18 +761,9 @@ window.default = {
          draw_operators_delete_span.innerHTML='delete';
          draw_operators_delete_div.appendChild(draw_operators_delete_span);
 
-         var draw_operators_view_div = document.createElement('div');//view的div
-         draw_operators_view_div.setAttribute('class','fa fa-eye');
-         draw_operators_view_div.setAttribute('id','draw_operators_view_div'+j.toString());
-         var draw_operators_view_span = document.createElement('span');
-         draw_operators_view_span.setAttribute('class','tooltipp');
-         draw_operators_view_span.setAttribute('id','draw_operators_delete_span'+j.toString());
-         draw_operators_view_span.innerHTML='view';
-         draw_operators_view_div.appendChild(draw_operators_view_span);
 
          //把save，delete，view放入operator
          draw_operators.appendChild(draw_operators_delete_div);
-         draw_operators.appendChild(draw_operators_view_div);
 
          draw_inf_body.appendChild(cluster_way_inf);//把operator放入body
         draw_inf_body.appendChild(draw_operators);
@@ -956,18 +948,9 @@ window.default = {
          draw_operators_delete_span.innerHTML='delete';
          draw_operators_delete_div.appendChild(draw_operators_delete_span);
 
-         var draw_operators_view_div = document.createElement('div');//view的div
-         draw_operators_view_div.setAttribute('class','fa fa-eye');
-         draw_operators_view_div.setAttribute('id','draw_operators_view_div'+j.toString());
-         var draw_operators_view_span = document.createElement('span');
-         draw_operators_view_span.setAttribute('class','tooltipp');
-         draw_operators_view_span.setAttribute('id','draw_operators_delete_span'+j.toString());
-         draw_operators_view_span.innerHTML='view';
-         draw_operators_view_div.appendChild(draw_operators_view_span);
 
-         //把save，delete，view放入operator
+         //把delete放入operator
          draw_operators.appendChild(draw_operators_delete_div);
-         draw_operators.appendChild(draw_operators_view_div);
 
          draw_inf_body.appendChild(cluster_way_inf);//把operator放入body
         draw_inf_body.appendChild(draw_operators);
