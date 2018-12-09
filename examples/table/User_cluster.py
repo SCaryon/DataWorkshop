@@ -3,7 +3,8 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.cluster import KMeans
 global labels
-data = np.array(final_data_object['no_identifiers_data_list'])
+table_data, table_features, table_identifiers = read_table_data('examples/table/car.csv')
+data = np.array(table_data)
 data = preprocessing.MinMaxScaler().fit_transform(data)
 model = KMeans(n_clusters=6)
 clustering = model.fit(data)
