@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-    <title>GraphGoo</title>
+    <title>DaGoo Gallery</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="description" content="">
@@ -11,11 +11,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.css">
-    <link rel="stylesheet" href="/static/font-awesome-4.7.0/css/font-awesome.css">
 
     <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
-    <link rel="stylesheet" href="/static/css/graphgoo/graphgoo_homepage.css">
-    <link rel="stylesheet" href="/static/css/graphgoo/vis-network.min.css">
+    <link rel="stylesheet" href="../static/css/bootstrap/user_img.css">
+    <link rel="stylesheet" href="../static/css/gallery.css">
 
 </head>
 <body>
@@ -23,27 +22,79 @@
 <div class="navbar custom-navbar navbar-fixed-top" role="navigation">
     <div class="container">
 
+        <!-- NAVBAR HEADER -->
         <div class="navbar-header">
             <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="icon icon-bar"></span>
                 <span class="icon icon-bar"></span>
                 <span class="icon icon-bar"></span>
             </button>
-            <a href="#" class="navbar-brand">DaGoo</a>
+            <!-- lOGO -->
+            <a href="#" class="navbar-brand">DaGoo!</a>
         </div>
 
+        <!-- MENU LINKS -->
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/" class="smoothScroll">Home</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
-                <li><a href="#" class="smoothScroll">Contact us</a></li>
+                <li><a href="/contact_us" class="smoothScroll">Contact us</a></li>
+                <li>
+                    <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
+                </li>
+                {% if user %}
+                    <li class="user_img"><a class="page-scroll" href="/user/">
+                        <div class="to3" style="margin-top: -10px;">
+                            <div class="to2">
+                                <div class="to1">
+                                    <img class="to" src="/static/user/{{ user.email }}/img/user_img.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    </li>
+                    <li><a href="/login/" class="page-scroll">Quit</a></li>
+                {% else %}
+                    <li>
+                        <a href="/login/" class="">Log in/Sign up</a>
+                    </li>
+                {% endif %}
+                {% if user %}
+                    {% if user.permission==100 %}
+                        <li>
+                            <a href="/admin/?manager={{ user.username }}" class="">manage</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
             </ul>
+            {% if user %}
+                <script>
+
+                    var permi = '' +{{ user.permission }};
+                    switch (permi) {
+                        case "1":
+                            $('.to3').css('background-color', '#aac4bc');
+                            break;
+                        case "2":
+                            $('.to3').css('background-color', '#ae853b');
+                            break;
+                        case "3":
+                            $('.to3').css('background-color', '#dfdc5d');
+                            break;
+                        case "100":
+                            $('.to3').css('background-color', '#ede4b8');
+                            break;
+                        default:
+                            $('.to3').css('background-color', 'white');
+                    }
+                </script>
+            {% endif %}
         </div>
 
     </div>
 </div>
 
-<section id="graph_layout2d" class="parallax-section">
+<section id="gallery" class="parallax-section">
     <div class="section-title">
         <h1>
             Gallery
@@ -77,10 +128,5 @@
 <script src="/static/js/bootstrap/SmoothScroll.js"></script>
 <script src="/static/js/bootstrap/main.js"></script>
 <script src="/static/js/bootstrap/custom.js"></script>
-<script src="/static/js/d3.v3.min.js"></script>
-<script src="/static/js/graphgoo/circleGraph.js"></script>
-<script src="/static/js/graphgoo/d3.geom.min.js"></script>
-<script src="/static/js/graphgoo/underscore-min.js"></script>
-<script src="/static/js/graphgoo/vis.js"></script>
 </body>
 </html>
