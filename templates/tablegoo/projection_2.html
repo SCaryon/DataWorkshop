@@ -144,7 +144,7 @@
    <button id="generate"onclick="generate()">Generate</button>
 
                             <form class="upload" style='float:right'>
-                               <input type="file" id="embedding_csvfile" style="display:none" name="cluster_csvfile"  onchange="embedding_data_file_path.value=this.value">
+                               <input type="file" id="embedding_csvfile" style="display:none" name="embedding_csvfile"  onchange="embedding_data_file_path.value=this.value">
                                <div id="embedding_data_file_path" name="embedding_data_file_path" class="fas fa-plus-circle"   onclick="embedding_csvfile.click()" data-title='select your file'></div>
                                <div class='fas fa-upload' onclick="read_embedding_file()" data-title='upload your file'></div>
 
@@ -451,18 +451,9 @@
          draw_operators_delete_span.innerHTML='delete';
          draw_operators_delete_div.appendChild(draw_operators_delete_span);
 
-         var draw_operators_view_div = document.createElement('div');//view的div
-         draw_operators_view_div.setAttribute('class','fa fa-eye');
-         draw_operators_view_div.setAttribute('id','draw_operators_view_div'+j.toString());
-         var draw_operators_view_span = document.createElement('span');
-         draw_operators_view_span.setAttribute('class','tooltipp');
-         draw_operators_view_span.setAttribute('id','draw_operators_delete_span'+j.toString());
-         draw_operators_view_span.innerHTML='view';
-         draw_operators_view_div.appendChild(draw_operators_view_span);
 
          draw_operators.appendChild(draw_operators_save_div);//把save，delete，view放入operator
          draw_operators.appendChild(draw_operators_delete_div);
-         draw_operators.appendChild(draw_operators_view_div);
 
          draw_inf_body.appendChild(cluster_way_inf);//把operator放入body
         draw_inf_body.appendChild(draw_operators);
