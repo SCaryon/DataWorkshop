@@ -26,10 +26,10 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 
-# from aip import AipOcr  # 引入百度api
-# import jieba
+from aip import AipOcr  # 引入百度api
+import jieba
 import wav2text  # wav转text的自定义py文件
-# from docx import Document
+from docx import Document
 
 # 连接百度服务器的密钥
 APP_ID = '14658891'
@@ -37,7 +37,7 @@ API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
