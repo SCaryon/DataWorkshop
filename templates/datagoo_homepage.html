@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <title>DaGoo</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
@@ -11,10 +10,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     <link rel="stylesheet" href="../static/css/bootstrap/bootstrap.css">
+    <link rel="stylesheet" href="../static/css/bootstrap/font-awesome.min.css">
+    <script src="../static/js/bootstrap/jquery.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap/style.css">
 
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="../static/css/bootstrap/tooplate-style.css">
-    <link rel="stylesheet" href="../static/css/bootstrap/user_img.css">
+
 </head>
 <body>
 
@@ -37,8 +39,8 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/products" class="smoothScroll">Products</a></li>
-                <li><a href="/gallery/" class="smoothScroll">Gallery</a></li>
-                <li><a href="/contact_us" class="smoothScroll">Contact us</a></li>
+                <li><a href="#visual_charts" class="smoothScroll">Gallery</a></li>
+                <li><a href="#" class="smoothScroll">Contact us</a></li>
                 <li>
                     <div style="width: 2px; height: 20px; background-color: white; margin: 15px"></div>
                 </li>
@@ -103,6 +105,9 @@
                 <div class="home-text">
                     <h1>Welcome to DaGoo!</h1>
                     <br>
+                    <br>
+                    <br>
+                    <h1 style="font-size:24px;margin-left:135px">Analyze the data with simple clicks. See <a href="/static/PDF/DaGoo.pdf" class="smoothScroll" style="font-weight: normal;color:#BBBBBF;font-size: 25px;">Instructions!</a></h1>
                 </div>
             </div>
         </div>
@@ -123,5 +128,11 @@
 <script src="../static/js/bootstrap/SmoothScroll.js"></script>
 <script src="../static/js/bootstrap/main.js"></script>
 <script src="../static/js/bootstrap/custom.js"></script>
+<script src="../static/js/upload/upload.js"></script>
+<script src="../static/js/upload/papaparse.js"></script>
+<script src="../static/js/upload/jschardet.min.js"></script>
 </body>
+<style>
+a:hover{text-decoration:underline;color: white;}
+</style>
 </html>
