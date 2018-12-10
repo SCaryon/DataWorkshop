@@ -179,8 +179,8 @@ def login_signup():
     else:
         return "error"
     verify = data['verify']
-    confirm1 = mailconfirm.query.filter_by(email=email, num=verify).first()
-    if confirm1 is not None and confirm1.invalid > datetime.now():  # 首先看验证码是否正确
+    confirm1 = mailconfirm.search(email, verify)
+    if confirm1 is not None:  # 首先看验证码是否正确
         theuser = user.query.filter_by(email=email).first()
         if theuser is not None:  # 然后看用户是否存在
             return "email already exist"
