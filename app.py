@@ -328,9 +328,28 @@ def products():
         return render_template('products.html')
 
 
+@app.route('/contact_us', methods=['POST', 'GET'])
+def contact_us():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('contact_us.html', user=user1)
+    else:
+        return render_template('contact_us.html')
+
+
 @app.route('/gallery/', methods=['POST', 'GET'])
 def gallery():
-    return render_template('gallery.html')
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('gallery.html', user=user1)
+    else:
+        return render_template('gallery.html')
 
 
 @app.route('/master/', methods=['POST', 'GET'])
@@ -1877,6 +1896,7 @@ def cluster_code():
     else:
         session['last_page'] = '/cluster'
         return jsonify('please sign in first!')
+
 
 # cluster end-------------------------------------------------
 # embedding start---------------------------------------------
