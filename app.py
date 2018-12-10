@@ -1843,7 +1843,9 @@ def cluster_code():
             filename = os.path.join(basepath, '/code/Mining/User_cluster.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
             # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
-            f.save(basepath + '/User_cluster.zip')
+            if os.path.exists(filename):
+                os.remove(filename)
+            f.save(filename)
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
                 # print(file)  # 打印zip归档中目录
@@ -1859,6 +1861,8 @@ def cluster_code():
             if (request.form.get('label') == 'csv'):  # csv
                 user_cluster_url = basepath + '/data/table.csv'
             if user_cluster_url is not None:
+                if os.path.exists(user_cluster_url):
+                    os.remove(user_cluster_url)
                 f.save(user_cluster_url)
                 return 'upload the cluster code file successfully !'
                 '''cd = pyclamd.ClamdAgnostic()
