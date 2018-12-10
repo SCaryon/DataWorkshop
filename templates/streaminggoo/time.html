@@ -204,17 +204,19 @@
 </style>
 
 <div id="echarts_river_pie">
-    <form class="upload" style='float:right;margin-top:100px'>
+    <form class="upload" style='float:right;margin-top:110px;margin-right: 20px;'>
                         <input type="file" id="time_csvfile" style="display:none" name="time_csvfile"
                                onchange="data_file_path.value=this.value">
                         <div id="data_file_path" name="data_file_path" class="fas fa-plus-circle"
                              onclick="time_csvfile.click()" data-title='select your file'></div>
                         <div class='fas fa-upload' onclick="read_time_file()" data-title='upload your file'></div>
+                        <!--
                         <div data-title='save your way' style="font-weight: 900">
                             <a data-toggle="modal" data-target="#login" href=""
                                style="color:black;display:inline-block">
                                 <span class="glyphicon glyphicon-log-in"></span></a>
                         </div>
+                        -->
                     </form>
                     <!--用户上传自己的方法并给它命名-->
     <div id="main" style="margin-top:100px;display:inline-block;width: 600px;height:400px;"></div>
