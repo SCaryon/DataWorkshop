@@ -1859,7 +1859,7 @@ def cluster_code():
         # basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
         #  文件所要放入的路径
 
-        basepath = "./static/user/" + session.get('email')
+        basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
         # upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if (request.form.get('label') == 'zip'):
             filename = os.path.join(basepath, '/code/Mining/User_cluster.zip')  # 要解压的文件
