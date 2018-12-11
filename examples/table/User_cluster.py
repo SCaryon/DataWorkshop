@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.cluster import KMeans
+global labels
 if session.get('email') and os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
     table_data, table_features, table_identifiers = read_table_data(
         "./static/user/" + session.get('email') + "/data/table.csv")
