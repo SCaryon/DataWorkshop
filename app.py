@@ -1858,9 +1858,9 @@ def User_cluster():
                                    # final_data_object['data_dictionary'],
                                    method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
         if (exist == False):
-            return 'please upload file of your method first!'
+            return jsonify({'prompt':'please upload file of your method first!'})
     else:
-        return 'please sign in first!'
+        return jsonify({'prompt':'please sign in first!'})
 
 
 
