@@ -1802,52 +1802,66 @@ def User_cluster():
     else:
         table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
     table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
-    if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
-        file_object = open(os.path.join(target_url, 'User_cluster.py'))
-        try:
-            code = file_object.read()
-            codeOut = StringIO()
-            codeErr = StringIO()
-            sys.stdout = codeOut
-            sys.stderr = codeErr
-            exec(code)
-            sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
-            s = codeOut.getvalue()
-            codeOut.close()
-            codeErr.close()
-        finally:
-            print(session.get('embedding_method'))
-            pca = getattr(ProjectionWay(), session.get('embedding_method'))(table_data)
-            data_pca = pca['data']
-            samples, features = data_pca.shape
-            data_pca = data_pca.tolist()
-            for i in range(samples):
-                data_pca[i].append(labels[i])
-            file_object.close()
-        os.chdir(current_path)  # 切换回原来的工作路径
+    if session.get('email'):
+        exist = False
+        if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
+            exist = True
+            file_object = open(os.path.join(target_url, 'User_cluster.py'))
+            try:
+                code = file_object.read()
+                codeOut = StringIO()
+                codeErr = StringIO()
+                sys.stdout = codeOut
+                sys.stderr = codeErr
+                exec(code)
+                sys.stdout = sys.__stdout__
+                sys.stderr = sys.__stderr__
+                s = codeOut.getvalue()
+                codeOut.close()
+                codeErr.close()
+            finally:
+                print(session.get('embedding_method'))
+                pca = getattr(ProjectionWay(), session.get('embedding_method'))(table_data)
+                data_pca = pca['data']
+                samples, features = data_pca.shape
+                data_pca = data_pca.tolist()
+                for i in range(samples):
+                    data_pca[i].append(labels[i])
+                file_object.close()
+            os.chdir(current_path)  # 切换回原来的工作路径
 
-        return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic, #final_data_object['data_dictionary'],
-                               method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
-    if os.path.exists(os.path.join(target_url, 'User_cluster.jar')):
-        # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
-        startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s" % (os.path.join(target_url, 'User_cluster.jar')))
-        os.chdir(target_url)  # in the user file folder to run the file
-        user_way_class = JClass('exercise.user_way')
-        user_way = user_way_class()
-        data_pca = user_way.run()
-        shutdownJVM()
-        os.chdir(current_path)  # 切换回原来的工作路径
-        return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,#final_data_object['data_dictionary'],
-                               method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
-    if os.path.exists(os.path.join(target_url, 'User_cluster.so')):
-        os.chdir(target_url)  # in the user file folder to run the file
-        if platform.system() == 'Linux':
-            user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_cluster.so'))
-            data_pca = user_way.run()  # 返回结果
-        os.chdir(current_path)  # 切换回原来的工作路径
-        return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,#final_data_object['data_dictionary'],
-                               method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+            return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,
+                                   # final_data_object['data_dictionary'],
+                                   method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+        if os.path.exists(os.path.join(target_url, 'User_cluster.jar')):
+            exist = True
+            # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
+            startJVM(getDefaultJVMPath(), "-ea",
+                     "-Djava.class.path=%s" % (os.path.join(target_url, 'User_cluster.jar')))
+            os.chdir(target_url)  # in the user file folder to run the file
+            user_way_class = JClass('exercise.user_way')
+            user_way = user_way_class()
+            data_pca = user_way.run()
+            shutdownJVM()
+            os.chdir(current_path)  # 切换回原来的工作路径
+            return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,
+                                   # final_data_object['data_dictionary'],
+                                   method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+        if os.path.exists(os.path.join(target_url, 'User_cluster.so')):
+            exist = True
+            os.chdir(target_url)  # in the user file folder to run the file
+            if platform.system() == 'Linux':
+                user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_cluster.so'))
+                data_pca = user_way.run()  # 返回结果
+            os.chdir(current_path)  # 切换回原来的工作路径
+            return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,
+                                   # final_data_object['data_dictionary'],
+                                   method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+        if (exist == False):
+            return 'please upload file of your method first!'
+    else:
+        return 'please sign in first!'
+
 
 
 @app.route('/save_cluster_file', methods=['POST', 'GET'])
@@ -1981,26 +1995,26 @@ def User_code():
     if request.method == 'POST' and session.get('email'):
         f = request.files['file']
         # basepath = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/user_code"  # 文件所要放入的路径
-        basepath = "./static/user/" + session.get('email')+'/code/Mining'
+        basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
 
         if (request.form.get('label') == 'zip'):
-            filename = os.path.join(basepath, 'User_embedding.zip')  # 要解压的文件
+            filename = os.path.join(basepath, '/code/Mining/User_embedding.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
             # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
-            f.save(basepath + '/User_embedding.zip')
+            f.save(basepath + '/code/Mining/User_embedding.zip')
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
                 # print(file)  # 打印zip归档中目录
                 fz.extract(file, filedir)
         if (request.form.get('label') == 'py'):
             # python
-            user_cluster_url = os.path.join(basepath, 'User_embedding.py')
+            user_cluster_url = os.path.join(basepath, '/code/Mining/User_embedding.py')
         if (request.form.get('label') == 'jar'):  # java
-            user_cluster_url = os.path.join(basepath, 'User_embedding.jar')
+            user_cluster_url = os.path.join(basepath, '/code/Mining/User_embedding.jar')
         if (request.form.get('label') == 'so'):  # c/c++
-            user_cluster_url = os.path.join(basepath, 'User_embedding.so')
+            user_cluster_url = os.path.join(basepath, '/code/Mining/User_embedding.so')
         if (request.form.get('label') == 'csv'):  # c/c++
-            user_cluster_url = os.path.join("./static/user/" + session.get('email'), 'data/table.csv')
+            user_cluster_url = os.path.join(basepath, 'data/table.csv')
         if user_cluster_url is not None:
             if os.path.exists(user_cluster_url):
                 os.remove(user_cluster_url)
@@ -2021,56 +2035,60 @@ def User_code():
 def User_method():
     # run user's embedding way
     current_path = os.getcwd()
-    if session.get('email') and os.path.exists("./static/user/" + session.get('email') + "/code/Mining/User_embedding.py"):
-        target_url = "./static/user/" + session.get('email') + "/code/Mining"
-        draw_id = str(request.get_json()['draw_id'])
-        if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
+    if session.get('email'):
+        if os.path.exists("./static/user/" + session.get('email') + "/code/Mining/User_embedding.py"):
+            target_url = "./static/user/" + session.get('email') + "/code/Mining"
+            draw_id = str(request.get_json()['draw_id'])
+            if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
                 table_data, table_features, table_identifiers = read_table_data(
                     "./static/user/" + session.get('email') + "/data/table.csv")
-        else:
-            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-        table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
-        if os.path.exists(os.path.join(target_url, 'User_embedding.py')):
-            file_object = open(os.path.join(target_url, 'User_embedding.py'))
-            try:
-                code = file_object.read()
-                codeOut = StringIO()
-                codeErr = StringIO()
-                sys.stdout = codeOut
-                sys.stderr = codeErr
-                exec(code)
-                sys.stdout = sys.__stdout__
-                sys.stderr = sys.__stderr__
-                s = codeOut.getvalue()
-                codeOut.close()
-                codeErr.close()
-            finally:
-                file_object.close()
-                # os.remove('User_code.py')
-            return render_template("tablegoo/projection.html", data=User_data, data_obj=table_da_dic,
-                                   method='User_method' + draw_id)
+            else:
+                table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
+            if os.path.exists(os.path.join(target_url, 'User_embedding.py')):
+                file_object = open(os.path.join(target_url, 'User_embedding.py'))
+                try:
+                    code = file_object.read()
+                    codeOut = StringIO()
+                    codeErr = StringIO()
+                    sys.stdout = codeOut
+                    sys.stderr = codeErr
+                    exec(code)
+                    sys.stdout = sys.__stdout__
+                    sys.stderr = sys.__stderr__
+                    s = codeOut.getvalue()
+                    codeOut.close()
+                    codeErr.close()
+                finally:
+                    file_object.close()
+                    # os.remove('User_code.py')
+                return render_template("tablegoo/projection.html", data=User_data, data_obj=table_da_dic,
+                                       method='User_method' + draw_id)
 
-        if os.path.exists(os.path.join(target_url, 'User_embedding.jar')):
-            # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
-            #os.chdir(target_url)
-            startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s" % (os.path.join(target_url, 'User_embedding.jar')))
-            user_way_class = JClass('exercise.user_way')
-            user_way = user_way_class()
-            User_data_jar = user_way.run()
-            shutdownJVM()
-            os.chdir(current_path)  # 切换回原来的工作路径
-            return render_template("tablegoo/projection.html", data=User_data_jar, data_obj=table_da_dic,
-                                   method='User_method' + draw_id)
-        if os.path.exists(os.path.join(target_url, 'User_embedding.so')):
-            # os.chdir(target_url)
-            if platform.system() == 'Linux':
-                user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_embedding.so'))
-                User_data_so = user_way.run()  # 返回结果
-            os.chdir(current_path)  # 切换回原来的工作路径
-            return render_template("tablegoo/projection.html", data=User_data_so, data_obj=table_da_dic,
-                                   method='User_method' + draw_id)
+            if os.path.exists(os.path.join(target_url, 'User_embedding.jar')):
+                # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
+                # os.chdir(target_url)
+                startJVM(getDefaultJVMPath(), "-ea",
+                         "-Djava.class.path=%s" % (os.path.join(target_url, 'User_embedding.jar')))
+                user_way_class = JClass('exercise.user_way')
+                user_way = user_way_class()
+                User_data_jar = user_way.run()
+                shutdownJVM()
+                os.chdir(current_path)  # 切换回原来的工作路径
+                return render_template("tablegoo/projection.html", data=User_data_jar, data_obj=table_da_dic,
+                                       method='User_method' + draw_id)
+            if os.path.exists(os.path.join(target_url, 'User_embedding.so')):
+                # os.chdir(target_url)
+                if platform.system() == 'Linux':
+                    user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_embedding.so'))
+                    User_data_so = user_way.run()  # 返回结果
+                os.chdir(current_path)  # 切换回原来的工作路径
+                return render_template("tablegoo/projection.html", data=User_data_so, data_obj=table_da_dic,
+                                       method='User_method' + draw_id)
+        else:
+            return 'please upload file of your method first!'
     else:
-        return ''
+        return 'please sign in first!'
 
 # embedding end---------------------------------------------
 
