@@ -26,18 +26,20 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 
-# from aip import AipOcr  # 引入百度api
-# import jieba
+from aip import AipOcr  # 引入百度api
+import jieba
 import wav2text  # wav转text的自定义py文件
-# from docx import Document
+from docx import Document
 
+# 用于执行病毒查杀
+import pyclamd
 # 连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -1349,7 +1351,6 @@ def time_upload():
             if feature != 'year':
                 themeriver_features.append(feature)
         themeriver['features'] = themeriver_features
-        print(themeriver)
         return jsonify(themeriver)
     else:
         session["last_page"] = '/streaming_data'
@@ -1482,6 +1483,7 @@ def Exponential_smoothing():
         result.append(str(new_year[a]))
         result.append(str(s_pre_triple[a]))
     re_result = ':'.join(result)
+    print(re_result)
     return re_result
 
 
@@ -1884,8 +1886,7 @@ def cluster_code():
                 if os.path.exists(user_cluster_url):
                     os.remove(user_cluster_url)
                 f.save(user_cluster_url)
-                return 'upload the cluster code file successfully !'
-                '''cd = pyclamd.ClamdAgnostic()
+                cd = pyclamd.ClamdAgnostic()
                 is_virus = cd.scan_file(user_cluster_url)
                 if is_virus is None:
                     # return redirect(url_for('cluster_code'))
@@ -1893,7 +1894,6 @@ def cluster_code():
                 else:
                     os.remove(user_cluster_url)
                     return 'virus!!!'
-                    '''
     else:
         session['last_page'] = '/cluster'
         return jsonify('please sign in first!')
@@ -2005,8 +2005,6 @@ def User_code():
             if os.path.exists(user_cluster_url):
                 os.remove(user_cluster_url)
             f.save(user_cluster_url)
-            return 'upload the embedding code file successfully !'
-            '''
             cd = pyclamd.ClamdAgnostic()
             is_virus = cd.scan_file(user_cluster_url)
             if is_virus is None:
@@ -2015,7 +2013,6 @@ def User_code():
             else:
                 os.remove(user_cluster_url)
                 return 'virus!!!'
-                '''
     else:
         session['last_page'] = '/embedding'
         return 'please sign in first!'
