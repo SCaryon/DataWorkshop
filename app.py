@@ -1789,20 +1789,17 @@ def get_usermethod_labels():
 def User_cluster():
     # 首先修改当前的工作路径，执行完程序后改回原来的工作路径
     current_path = os.getcwd()
-    target_url = os.path.join("./static/user/" + session.get('email') + "/code/Mining")
-    draw_id = str(request.get_json()['draw_id'])
-    body = 'page-top' + draw_id
-    node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
     if session.get('email'):
+        target_url = os.path.join("./static/user/" + session.get('email') + "/code/Mining")
+        draw_id = str(request.get_json()['draw_id'])
+        body = 'page-top' + draw_id
+        node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
-            table_data, table_features, table_identifiers = read_table_data(
-                "./static/user/" + session.get('email') + "/data/table.csv")
+                table_data, table_features, table_identifiers = read_table_data(
+                    "./static/user/" + session.get('email') + "/data/table.csv")
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-    else:
-        table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-    table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
-    if session.get('email'):
+        table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
         exist = False
         if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
             exist = True
@@ -2086,9 +2083,9 @@ def User_method():
                 return render_template("tablegoo/projection.html", data=User_data_so, data_obj=table_da_dic,
                                        method='User_method' + draw_id)
         else:
-            return 'please upload file of your method first!'
+            return jsonify({'prompt': 'please upload file of your method first!'})
     else:
-        return 'please sign in first!'
+        return jsonify({'prompt': 'please sign in first!'})
 
 # embedding end---------------------------------------------
 
