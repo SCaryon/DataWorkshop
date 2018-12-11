@@ -187,12 +187,6 @@
     body {
         font: 12px Arial;
     }
-
-    path {
-        stroke-width: 2;
-        fill: none;
-    }
-
     .axis path,
     .axis line {
         fill: none;
@@ -219,7 +213,7 @@
                         -->
                     </form>
                     <!--用户上传自己的方法并给它命名-->
-    <div id="main" style="margin-top:100px;display:inline-block;width: 600px;height:400px;"></div>
+    <div id="main" style="margin-top:100px;display:inline-block;width: 700px;height:400px;"></div>
     <div id="data_pie" style="margin-top:100px;display:inline-block;width: 500px;height:400px;"></div>
 </div>
     <!--change the data of themeriver-->
@@ -383,7 +377,7 @@
                     show: true,
                     lineStyle: {
                         type: 'dashed',
-                        opacity: 0.2
+                        opacity: 1
                     }
                 }
             },
@@ -914,11 +908,9 @@ pie_Chart.setOption(pie_option);
 
         var linePath = d3.svg.line()//创建一个直线生成器
             .x(function (d) {
-                console.log(d[0])
                 return xScale(d[0]);
             })
             .y(function (d) {
-                console.log(d[1])
                 return yScale(d[1]);
             })
             .interpolate("basis")//插值模式
