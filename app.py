@@ -1995,21 +1995,23 @@ def User_code():
         basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
 
         if (request.form.get('label') == 'zip'):
-            filename = os.path.join(basepath, '/code/Mining/User_embedding.zip')  # 要解压的文件
+            filename = os.path.join(basepath, 'code/Mining/User_embedding.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
             # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
-            f.save(basepath + '/code/Mining/User_embedding.zip')
+            if os.path.exists(filename):
+                os.remove(filename)
+            f.save(filename)
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
                 # print(file)  # 打印zip归档中目录
                 fz.extract(file, filedir)
         if (request.form.get('label') == 'py'):
             # python
-            user_cluster_url = os.path.join(basepath, '/code/Mining/User_embedding.py')
+            user_cluster_url = os.path.join(basepath, 'code/Mining/User_embedding.py')
         if (request.form.get('label') == 'jar'):  # java
-            user_cluster_url = os.path.join(basepath, '/code/Mining/User_embedding.jar')
+            user_cluster_url = os.path.join(basepath, 'code/Mining/User_embedding.jar')
         if (request.form.get('label') == 'so'):  # c/c++
-            user_cluster_url = os.path.join(basepath, '/code/Mining/User_embedding.so')
+            user_cluster_url = os.path.join(basepath, 'code/Mining/User_embedding.so')
         if (request.form.get('label') == 'csv'):  # c/c++
             user_cluster_url = os.path.join(basepath, 'data/table.csv')
         if user_cluster_url is not None:
