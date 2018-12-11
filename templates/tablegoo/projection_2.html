@@ -492,11 +492,17 @@
                 url : url,
                 data:JSON.stringify(parameters),//一个draw_id用于表示要画在哪个div上面。
                 contentType:'application/json; charset=UTF-8',
-                dataType:"html",
+                //dataType:"html",
                 success : function(res) {//返回数据根据结果进行相应的处理
-                    create_draw_element(draw_count,projection_way_inf);//首先创建一个div用来画图
-                    var count="#draw_"+draw_count.toString();
-                     $(count).html(res);
+                     if (res.hasOwnProperty('prompt'))
+                    {
+                        alert(res.prompt);
+                    }
+                    else {
+                         create_draw_element(draw_count, projection_way_inf);//首先创建一个div用来画图
+                         var count = "#draw_" + draw_count.toString();
+                         $(count).html(res);
+                     }
                 },
                 error:function(){
                     alert("获取数据失败！");
