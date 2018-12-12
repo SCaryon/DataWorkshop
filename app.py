@@ -113,10 +113,10 @@ def login_pass_name():
 def sendmail(to_mail, num):
     # 邮件外主体
     smtp = ''
-    smtpserver = "smtp.qq.com"
-    smtpport = 465
-    from_mail = "1361377791@qq.com"
-    password = "ejpulrvmshuyibba"
+    smtpserver = "smtp.live.com"
+    smtpport = 25
+    from_mail = "DagooTeam@hotmail.com"
+    password = "dagoo2018"
     # 邮件内容主体
     subject = "激活您的Data Workshop账户"
     from_name = "Data Workshop"
@@ -130,7 +130,8 @@ def sendmail(to_mail, num):
     msg["To"] = to_mail
     msg.attach(msgtext)
     try:
-        smtp = smtplib.SMTP_SSL(smtpserver, smtpport)
+        smtp = smtplib.SMTP(smtpserver, smtpport)
+        smtp.starttls()
         smtp.login(from_mail, password)
         smtp.sendmail(from_mail, to_mail, msg.as_string())
         smtp.quit()
