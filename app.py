@@ -343,6 +343,18 @@ def contact_us():
         return render_template('contact_us.html')
 
 
+@app.route('/about_us', methods=['POST', 'GET'])
+def about_us():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('about_us.html', user=user1)
+    else:
+        return render_template('about_us.html')
+
+
 @app.route('/gallery/', methods=['POST', 'GET'])
 def gallery():
     if session.get('email'):
