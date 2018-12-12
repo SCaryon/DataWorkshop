@@ -777,6 +777,11 @@ def read_geo_admin_csv(filename):
     return final_data_object
 
 
+@app.route('/geo/world/',methods=['GET','POST'])
+def geo_world():
+    return render_template('geogoo/geo_world.html')
+
+
 # 行政热力图
 @app.route('/geo/admin/', methods=['GET', 'POST'])
 def geo_admin():
