@@ -61,10 +61,10 @@
     <div class="col-lg-4 table_upload">
         <form method="post" action="/table_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
             <input  type="file"  style="display:none" name="file" id="file">
-            <div id="data_file_path" name="data_file_path" class="fa fa-plus-circle"
-                 onclick="file.click()" data-title='select your file' style="margin-left: 20px;margin-right: 50px;"></div>
+            <div id="data_file_path" class="fa fa-plus-circle"
+                 onclick="file.click()" rel="tooltip" data-placement="top" data-original-title="select your file" style="margin-left: 20px;margin-right: 50px;"></div>
             <input id='upload_kg' name="upload_kg" type="submit" style="display:none" >
-            <div class='fa fa-upload' onclick="upload_kg.click()"></div>
+            <div class='fa fa-upload' onclick="upload_kg.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
         </form>
     </div>
     <div class="container">
@@ -179,10 +179,10 @@
     <div class="col-lg-4 table_upload">
         <form method="post" action="/table_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
             <input  type="file"  style="display:none" name="file2" id="file2">
-            <div id="data_file_path2" name="data_file_path2" class="fa fa-plus-circle"
-                 onclick="file2.click()" data-title='select your file'  style="margin-left: 20px;margin-right: 50px;"></div>
+            <div id="data_file_path2" class="fa fa-plus-circle"
+                 onclick="file2.click()" rel="tooltip" data-placement="top" data-original-title="select your file"  style="margin-left: 20px;margin-right: 50px;"></div>
             <input id='upload_kg2' name="upload_kg2" type="submit" style="display:none" >
-            <div class='fa fa-upload' onclick="upload_kg2.click()"></div>
+            <div class='fa fa-upload' onclick="upload_kg2.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
         </form>
     </div>
     <div class="container">

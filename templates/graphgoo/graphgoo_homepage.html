@@ -58,7 +58,6 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/" class="smoothScroll">Home</a></li>
-                <li><a data-toggle="modal" data-target="#myModal" class="btn btn-lg">Upload File</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
                 <li><a href="#" class="smoothScroll">Contact us</a></li>
             </ul>
@@ -68,90 +67,91 @@
 </div>
 
 <section id="graph_layout2d" class="parallax-section">
-    <div class="section-title">
-        <h1>
-            Graph Layout
-        </h1>
+    <div class="section-title col-lg-4">
+    </div>
+    <div class="section-title col-lg-4">
+        <h1>Graph Layout</h1>
+    </div>
+    <div class="col-lg-4 table_upload">
+        <form method="post" action="/graph_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
+            <input  type="file"  style="display:none" name="file" id="file">
+            <div id="data_file_path" class="fa fa-plus-circle"
+                 onclick="file.click()" rel="tooltip" data-placement="top" data-original-title="select your file" style="margin-left: 20px;margin-right: 50px;"></div>
+            <input id='upload_kg' name="upload_kg" type="submit" style="display:none" >
+            <div class='fa fa-upload' onclick="upload_kg.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
+        </form>
     </div>
 	<div class="container">
-        <div class="row" style="text-align: center">
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+        <div  class="row graph2d">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Circular Layout
                 </h5>
                 <a onclick="set_layout2d_visual('circular_layout')"><img src="/static/images/graph_data/circular2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Chord Diagram
                 </h5>
                 <a onclick="set_layout2d_visual('chord_layout')"><img src="/static/images/graph_data/chord2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Tree Layout
                 </h5>
                 <a onclick="set_layout2d_visual('tree_layout')"><img src="/static/images/graph_data/tree2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width:14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Pack Layout
                 </h5>
                 <a onclick="set_layout2d_visual('pack_layout')"><img src="/static/images/graph_data/pack2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
-                <h5>
-                    Radial layout
-                </h5>
-                <a onclick="set_layout2d_visual('radial_layout')"><img src="/static/images/graph_data/radial2d.PNG" style="width: 150px;height: 150px;"></a>
-            </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Grid Layout
                 </h5>
                 <a onclick="set_layout2d_visual('grid_layout')"><img src="/static/images/graph_data/grid2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Hierarchical Layout
                 </h5>
                 <a onclick="set_layout2d_visual('hierarchical_layout')"><img src="/static/images/graph_data/hierarchical2d.PNG" style="width: 150px;height: 150px;"></a>
             </div>
-
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+        </div>
+        <div id="layout2d">
+            <div id="circular_layout" style="display: none;">
+            </div>
+            <div id="chord_layout" style="display: none;">
+            </div>
+            <div id="grid_layout" style="display: none;">
+            </div>
+            <div id="hierarchical_layout" style="display: none;">
+            </div>
+            <div id="pack_layout" style="display: none;">
+            </div>
+            <div id="tree_layout" style="display: none;">
+            </div>
+        </div>
+        <div class="row graph2d">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Product3D
                 </h5>
                 <a href="/graph/<product3D>"><img src="/static/images/graph_data/product3D.png" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Product2D
                 </h5>
                 <a href="/graph/<product2D>"><img src="/static/images/graph_data/product2D.png" style="width: 150px;height: 150px;"></a>
             </div>
-            <div class="col-lg-2" style="width: 14%;height: 300px;">
+            <div class="col-lg-2 graph2d_img">
                 <h5>
                     Product Tower
                 </h5>
                 <a href="/graph/<producttower>"><img src="/static/images/graph_data/producttower.png" style="width: 150px;height: 150px;"></a>
-            </div>
-        </div>
-        </div>
-        <div id="layout2d">
-            <div class="row" id="circular_layout" style="display: none;">
-            </div>
-            <div class="row" id="chord_layout" style="display: none;">
-            </div>
-            <div class="row" id="grid_layout" style="display: none;">
-            </div>
-            <div class="row" id="hierarchical_layout" style="display: none;">
-            </div>
-            <div class="row" id="pack_layout" style="display: none;">
-            </div>
-            <div class="row" id="radial_layout" style="display: none;">
-            </div>
-            <div class="row" id="tree_layout" style="display: none;">
             </div>
         </div>
     </div>
@@ -170,26 +170,6 @@
     </ul>
 </div>
 
-<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade" style="display: none;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
-                <h4 id="myModalLabel" class="modal-title">Upload File</h4>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="/graph_upload" enctype="multipart/form-data">
-                    <input type="file" name="file" id="file">
-                    <input type="submit" value="upload">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Close</button>
-                <input class="button_blue" type="button" onclick="read_file()" value="Submit">
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="../../static/js/bootstrap/jquery.js"></script>
 <script src="../../static/js/bootstrap/bootstrap.min.js"></script>
@@ -919,7 +899,6 @@ function tree_redraw() {
             document.getElementById('grid_layout').style.display = 'none';
             document.getElementById('hierarchical_layout').style.display = 'none';
             document.getElementById('pack_layout').style.display = 'none';
-            document.getElementById('radial_layout').style.display = 'none';
             document.getElementById('tree_layout').style.display = 'none';
             document.getElementById(layout_selected).style.display = 'block';
         }
