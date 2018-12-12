@@ -70,6 +70,12 @@ class mailconfirm(db.Model):
         self.num = num
         self.invalid = datetime.now() + timedelta(minutes=5)
 
+    def search(email, num):
+        user = mailconfirm.query.filter(mailconfirm.email == email and mailconfirm.num == num).first()
+        if user is None:
+            return None
+        else:
+            return user
 
 class methoduse(db.Model):
     __tablename__ = 'methoduse'

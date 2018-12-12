@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import csv
 import os
+from io import StringIO
+import sys
 import platform
 import random
 import shutil
@@ -24,18 +26,20 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 
-# from aip import AipOcr  # 引入百度api
-# import jieba
+from aip import AipOcr  # 引入百度api
+import jieba
 import wav2text  # wav转text的自定义py文件
-# from docx import Document
+from docx import Document
 
+# 用于执行病毒查杀
+import pyclamd
 # 连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 
@@ -109,10 +113,10 @@ def login_pass_name():
 def sendmail(to_mail, num):
     # 邮件外主体
     smtp = ''
-    smtpserver = "smtp.qq.com"
-    smtpport = 465
-    from_mail = "1361377791@qq.com"
-    password = "ejpulrvmshuyibba"
+    smtpserver = "smtp.live.com"
+    smtpport = 25
+    from_mail = "DagooTeam@hotmail.com"
+    password = "dagoo2018"
     # 邮件内容主体
     subject = "激活您的Data Workshop账户"
     from_name = "Data Workshop"
@@ -126,7 +130,8 @@ def sendmail(to_mail, num):
     msg["To"] = to_mail
     msg.attach(msgtext)
     try:
-        smtp = smtplib.SMTP_SSL(smtpserver, smtpport)
+        smtp = smtplib.SMTP(smtpserver, smtpport)
+        smtp.starttls()
         smtp.login(from_mail, password)
         smtp.sendmail(from_mail, to_mail, msg.as_string())
         smtp.quit()
@@ -177,8 +182,8 @@ def login_signup():
     else:
         return "error"
     verify = data['verify']
-    confirm1 = mailconfirm.query.filter_by(email=email, num=verify).first()
-    if confirm1 is not None and confirm1.invalid > datetime.now():  # 首先看验证码是否正确
+    confirm1 = mailconfirm.search(email, verify)
+    if confirm1 is not None:  # 首先看验证码是否正确
         theuser = user.query.filter_by(email=email).first()
         if theuser is not None:  # 然后看用户是否存在
             return "email already exist"
@@ -326,9 +331,28 @@ def products():
         return render_template('products.html')
 
 
+@app.route('/contact_us', methods=['POST', 'GET'])
+def contact_us():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('contact_us.html', user=user1)
+    else:
+        return render_template('contact_us.html')
+
+
 @app.route('/gallery/', methods=['POST', 'GET'])
 def gallery():
-    return render_template('gallery.html')
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        return render_template('gallery.html', user=user1)
+    else:
+        return render_template('gallery.html')
 
 
 @app.route('/master/', methods=['POST', 'GET'])
@@ -1264,6 +1288,9 @@ def streaming_data():
     email = session.get('email')
     user1 = user.query.filter_by(email=email).first()
     if user1 is not None:
+        path = "./static/user/" + email + "/data/user_data.csv"
+        if os.path.exists(path):
+            os.remove(path)
         return render_template('streaminggoo/time.html', user=user1)
     else:
         return render_template('streaminggoo/time.html')
@@ -1332,172 +1359,193 @@ def time_upload():
         themeriver['features'] = themeriver_features
         return jsonify(themeriver)
     else:
-        print("please sign in first")
-        return 'please sign in first'
+        session["last_page"] = '/streaming_data'
+        return jsonify('please sign in first')
 
 
 @app.route('/streaming_data_fourier', methods=['GET', 'POST'])
 def streamingdata_fourier():
     if session.get('email') and request.method == 'POST':
-        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
-        year = []
-        attribution = []  # 创建一个包含30个点的余弦波信号
-        length = 0
-        year_location = 0
-        attribution_location = 0
-        for i in original_data:
-            if length == 0:
-                for f in range(len(i)):
-                    if i[f] == 'year':
-                        year_location = f
-                    if i[f] == request.get_json()['attribution']:
-                        attribution_location = f
-            else:
-                year.append(i[year_location])
-                attribution.append(float(i[attribution_location]))
-            length = length + 1
-        wave = np.cos(attribution)
-        transformed = np.fft.fft(wave)  # 使用fft函数对余弦波信号进行傅里叶变换。
-        result = {}
-        result['xdata'] = year
-        result['ydata'] = []  # transformed.tolist()
-        for i in transformed:
-            result['ydata'].append(round(abs(i), 4))
-        return jsonify(result)
+        user_path = "./static/user/" + session.get('email') + "/data/user_data.csv"
+        if os.path.exists(user_path):
+            path = user_path
+        else:
+            path = "./static/data/streaming_data/initial_streaming_data.csv"
     else:
-        return 'please sign in first'
+        path = "./static/data/streaming_data/initial_streaming_data.csv"
+    original_data = csv.reader(open(path))
+    year = []
+    attribution = []  # 创建一个包含30个点的余弦波信号
+    length = 0
+    year_location = 0
+    attribution_location = 0
+    for i in original_data:
+        if length == 0:
+            for f in range(len(i)):
+                if i[f] == 'year':
+                    year_location = f
+                if i[f] == request.get_json()['attribution']:
+                    attribution_location = f
+        else:
+            year.append(i[year_location])
+            attribution.append(float(i[attribution_location]))
+        length = length + 1
+    wave = np.cos(attribution)
+    transformed = np.fft.fft(wave)  # 使用fft函数对余弦波信号进行傅里叶变换。
+    result = {}
+    result['xdata'] = year
+    result['ydata'] = []  # transformed.tolist()
+    for i in transformed:
+        result['ydata'].append(round(abs(i), 4))
+    return jsonify(result)
 
 
 @app.route('/time/ex/', methods=['POST', 'GET'])
 def Exponential_smoothing():
     # global time_data_object
+
     if session.get('email') and request.method == 'POST':
-        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
-        year = []
-        number = []  # 创建一个包含30个点的余弦波信号
-        length = 0
-        year_location = 0
-        attribution_location = 0
-        for i in original_data:
-            if length == 0:
-                for f in range(len(i)):
-                    if i[f] == 'year':
-                        year_location = f
-                    if i[f] == request.get_json()['attribution']:
-                        attribution_location = f
-            else:
-                year.append(int(i[year_location]))
-                number.append(float(i[attribution_location]))
-            length = length + 1
-        alpha = .70  # 设置alphe，即平滑系数
-        data = []
-        for i in range(len(year)):
-            data_i = [year[i], number[i]]
-            data.append(data_i)
-        for i in range(len(year)):
-            abcyear = int(year[i])
-        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
-        initial_line = np.array(
-            [0, number[0]])  # 初始化，由于平滑指数是根据上一期的数值进行预测的，原始数据中的最早数据为1995，没有1994年的数据，这里定义1994年的数据和1995年数据相同
-        initial_data = np.insert(data, 0, values=initial_line, axis=0)  # 插入初始化数据
-        initial_year, initial_number = initial_data.T  # 插入初始化年
-        s_single = np.zeros(initial_number.shape)
-        s_single[0] = initial_number[0]
-        for i in range(1, len(s_single)):
-            s_single[i] = alpha * initial_number[i] + (1 - alpha) * s_single[i - 1]
-        s_double = np.zeros(s_single.shape)
-        s_double[0] = s_single[0]
-        for i in range(1, len(s_double)):
-            s_double[i] = alpha * s_single[i] + (1 - alpha) * s_double[
-                i - 1]  # 计算二次平滑字数，二次平滑指数是在一次指数平滑的基础上进行的，三次指数平滑以此类推
+        user_path = "./static/user/" + session.get('email') + "/data/user_data.csv"
+        if os.path.exists(user_path):
+            path = user_path
+        else:
+            path = "./static/data/streaming_data/initial_streaming_data.csv"
+    else:
+        path = "./static/data/streaming_data/initial_streaming_data.csv"
+    original_data = csv.reader(open(path))
+    year = []
+    number = []  # 创建一个包含30个点的余弦波信号
+    length = 0
+    year_location = 0
+    attribution_location = 0
+    for i in original_data:
+        if length == 0:
+            for f in range(len(i)):
+                if i[f] == 'year':
+                    year_location = f
+                if i[f] == request.get_json()['attribution']:
+                    attribution_location = f
+        else:
+            year.append(int(i[year_location]))
+            number.append(float(i[attribution_location]))
+        length = length + 1
+    alpha = .70  # 设置alphe，即平滑系数
+    data = []
+    for i in range(len(year)):
+        data_i = [year[i], number[i]]
+        data.append(data_i)
+    for i in range(len(year)):
+        abcyear = int(year[i])
+    pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+    initial_line = np.array(
+        [0, number[0]])  # 初始化，由于平滑指数是根据上一期的数值进行预测的，原始数据中的最早数据为1995，没有1994年的数据，这里定义1994年的数据和1995年数据相同
+    initial_data = np.insert(data, 0, values=initial_line, axis=0)  # 插入初始化数据
+    initial_year, initial_number = initial_data.T  # 插入初始化年
+    s_single = np.zeros(initial_number.shape)
+    s_single[0] = initial_number[0]
+    for i in range(1, len(s_single)):
+        s_single[i] = alpha * initial_number[i] + (1 - alpha) * s_single[i - 1]
+    s_double = np.zeros(s_single.shape)
+    s_double[0] = s_single[0]
+    for i in range(1, len(s_double)):
+        s_double[i] = alpha * s_single[i] + (1 - alpha) * s_double[
+            i - 1]  # 计算二次平滑字数，二次平滑指数是在一次指数平滑的基础上进行的，三次指数平滑以此类推
 
-        a_double = 2 * s_single - s_double  # 计算二次指数平滑的a
-        b_double = (alpha / (1 - alpha)) * (s_single - s_double)  # 计算二次指数平滑的b
-        s_pre_double = np.zeros(s_double.shape)  # 建立预测轴
-        for i in range(1, len(initial_year)):
-            s_pre_double[i] = a_double[i - 1] + b_double[i - 1]  # 循环计算每一年的二次指数平滑法的预测值，下面三次指数平滑法原理相同
-        pre_next_year = a_double[-1] + b_double[-1] * 1  # 预测下一年
-        pre_next_two_year = a_double[-1] + b_double[-1] * 2  # 预测下两年
-        insert_year = np.array([pre_next_year, pre_next_two_year])
-        s_pre_double = np.insert(s_pre_double, len(s_pre_double), values=np.array([pre_next_year, pre_next_two_year]),
-                                 axis=0)  # 组合预测值
-        s_triple = np.zeros(s_double.shape)
-        s_triple[0] = s_double[0]
-        for i in range(1, len(s_triple)):
-            s_triple[i] = alpha * s_double[i] + (1 - alpha) * s_triple[i - 1]
+    a_double = 2 * s_single - s_double  # 计算二次指数平滑的a
+    b_double = (alpha / (1 - alpha)) * (s_single - s_double)  # 计算二次指数平滑的b
+    s_pre_double = np.zeros(s_double.shape)  # 建立预测轴
+    for i in range(1, len(initial_year)):
+        s_pre_double[i] = a_double[i - 1] + b_double[i - 1]  # 循环计算每一年的二次指数平滑法的预测值，下面三次指数平滑法原理相同
+    pre_next_year = a_double[-1] + b_double[-1] * 1  # 预测下一年
+    pre_next_two_year = a_double[-1] + b_double[-1] * 2  # 预测下两年
+    insert_year = np.array([pre_next_year, pre_next_two_year])
+    s_pre_double = np.insert(s_pre_double, len(s_pre_double), values=np.array([pre_next_year, pre_next_two_year]),
+                             axis=0)  # 组合预测值
+    s_triple = np.zeros(s_double.shape)
+    s_triple[0] = s_double[0]
+    for i in range(1, len(s_triple)):
+        s_triple[i] = alpha * s_double[i] + (1 - alpha) * s_triple[i - 1]
 
-        a_triple = 3 * s_single - 3 * s_double + s_triple
-        b_triple = (alpha / (2 * ((1 - alpha) ** 2))) * (
-                (6 - 5 * alpha) * s_single - 2 * ((5 - 4 * alpha) * s_double) + (4 - 3 * alpha) * s_triple)
-        c_triple = ((alpha ** 2) / (2 * ((1 - alpha) ** 2))) * (s_single - 2 * s_double + s_triple)
+    a_triple = 3 * s_single - 3 * s_double + s_triple
+    b_triple = (alpha / (2 * ((1 - alpha) ** 2))) * (
+            (6 - 5 * alpha) * s_single - 2 * ((5 - 4 * alpha) * s_double) + (4 - 3 * alpha) * s_triple)
+    c_triple = ((alpha ** 2) / (2 * ((1 - alpha) ** 2))) * (s_single - 2 * s_double + s_triple)
 
-        s_pre_triple = np.zeros(s_triple.shape)
+    s_pre_triple = np.zeros(s_triple.shape)
 
-        for i in range(1, len(initial_year)):
-            s_pre_triple[i] = a_triple[i - 1] + b_triple[i - 1] * 1 + c_triple[i - 1] * (1 ** 2)
+    for i in range(1, len(initial_year)):
+        s_pre_triple[i] = a_triple[i - 1] + b_triple[i - 1] * 1 + c_triple[i - 1] * (1 ** 2)
 
-        pre_next_year = a_triple[-1] + b_triple[-1] * 1 + c_triple[-1] * (1 ** 2)
-        pre_next_two_year = a_triple[-1] + b_triple[-1] * 2 + c_triple[-1] * (2 ** 2)
-        insert_year = np.array([pre_next_year, pre_next_two_year])
-        s_pre_triple = np.insert(s_pre_triple, len(s_pre_triple), values=np.array([pre_next_year, pre_next_two_year]),
-                                 axis=0)
+    pre_next_year = a_triple[-1] + b_triple[-1] * 1 + c_triple[-1] * (1 ** 2)
+    pre_next_two_year = a_triple[-1] + b_triple[-1] * 2 + c_triple[-1] * (2 ** 2)
+    insert_year = np.array([pre_next_year, pre_next_two_year])
+    s_pre_triple = np.insert(s_pre_triple, len(s_pre_triple), values=np.array([pre_next_year, pre_next_two_year]),
+                             axis=0)
 
-        new_year = np.insert(year, len(year), values=pre_year, axis=0)
-        output = np.array([new_year, s_pre_double, s_pre_triple])
-        result = []
-        for a in range(1, len(new_year)):
-            result.append(str(new_year[a]))
-            result.append(str(s_pre_triple[a]))
-        re_result = ':'.join(result)
-        return re_result
+    new_year = np.insert(year, len(year), values=pre_year, axis=0)
+    output = np.array([new_year, s_pre_double, s_pre_triple])
+    result = []
+    for a in range(1, len(new_year)):
+        result.append(str(new_year[a]))
+        result.append(str(s_pre_triple[a]))
+    re_result = ':'.join(result)
+    print(re_result)
+    return re_result
 
 
 @app.route('/time/ar/', methods=['POST', 'GET'])
 def Arithmetic_averaging():
     if session.get('email') and request.method == 'POST':
-        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
-        year = []
-        number = []  # 创建一个包含30个点的余弦波信号
-        length = 0
-        year_location = 0
-        attribution_location = 0
-        for i in original_data:
-            if length == 0:
-                for f in range(len(i)):
-                    if i[f] == 'year':
-                        year_location = f
-                    if i[f] == request.get_json()['attribution']:
-                        attribution_location = f
-            else:
-                year.append(int(i[year_location]))
-                number.append(float(i[attribution_location]))
-            length = length + 1
-        data = []
-        for i in range(len(year)):
-            data_i = [year[i], number[i]]
-            data.append(data_i)
-        for i in range(len(year)):
-            abcyear = year[i]
-        number = np.array(number)
-        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
-        s_single = np.zeros(number.shape)
-        s_single[0] = number[0]
-        for i in range(1, len(s_single)):
-            s_single[i] = sum(number[:i]) / i
-        # 计算一次平滑
-        s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
-        pre_next_year = sum(number[:]) / len(number)  # 预测下一年
-        pre_next_two_year = (sum(number[:]) + pre_next_year) / (len(number) + 1)  # 预测下两年
-        insert_year = np.array([pre_next_year, pre_next_two_year])
-        s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
-                                 axis=0)  # 组合预测值
-        new_year = np.insert(year, len(year), values=pre_year, axis=0)
-        result = []
-        for a in range(1, len(new_year)):
-            result.append(str(new_year[a]))
-            result.append(str(s_pre_single[a]))
-        re_result = ':'.join(result)
-        return re_result
+        user_path = "./static/user/" + session.get('email') + "/data/user_data.csv"
+        if os.path.exists(user_path):
+            path = user_path
+        else:
+            path = "./static/data/streaming_data/initial_streaming_data.csv"
+    else:
+        path = "./static/data/streaming_data/initial_streaming_data.csv"
+    original_data = csv.reader(open(path))
+    year = []
+    number = []  # 创建一个包含30个点的余弦波信号
+    length = 0
+    year_location = 0
+    attribution_location = 0
+    for i in original_data:
+        if length == 0:
+            for f in range(len(i)):
+                if i[f] == 'year':
+                    year_location = f
+                if i[f] == request.get_json()['attribution']:
+                    attribution_location = f
+        else:
+            year.append(int(i[year_location]))
+            number.append(float(i[attribution_location]))
+        length = length + 1
+    data = []
+    for i in range(len(year)):
+        data_i = [year[i], number[i]]
+        data.append(data_i)
+    for i in range(len(year)):
+        abcyear = year[i]
+    number = np.array(number)
+    pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+    s_single = np.zeros(number.shape)
+    s_single[0] = number[0]
+    for i in range(1, len(s_single)):
+        s_single[i] = sum(number[:i]) / i
+    # 计算一次平滑
+    s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
+    pre_next_year = sum(number[:]) / len(number)  # 预测下一年
+    pre_next_two_year = (sum(number[:]) + pre_next_year) / (len(number) + 1)  # 预测下两年
+    insert_year = np.array([pre_next_year, pre_next_two_year])
+    s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
+                             axis=0)  # 组合预测值
+    new_year = np.insert(year, len(year), values=pre_year, axis=0)
+    result = []
+    for a in range(1, len(new_year)):
+        result.append(str(new_year[a]))
+        result.append(str(s_pre_single[a]))
+    re_result = ':'.join(result)
+    return re_result
 
 
 def simplle_smoothing(s):
@@ -1511,52 +1559,59 @@ def simplle_smoothing(s):
 @app.route('/time/mo/', methods=['POST', 'GET'])
 def Moving_averaging():
     if session.get('email') and request.method == 'POST':
-        original_data = csv.reader(open("./static/user/" + session.get('email') + "/data/user_data.csv"))
-        year = []
-        number = []  # 创建一个包含30个点的余弦波信号
-        length = 0
-        year_location = 0
-        attribution_location = 0
-        for i in original_data:
-            if length == 0:
-                for f in range(len(i)):
-                    if i[f] == 'year':
-                        year_location = f
-                    if i[f] == request.get_json()['attribution']:
-                        attribution_location = f
-            else:
-                year.append(int(i[year_location]))
-                number.append(float(i[attribution_location]))
-            length = length + 1
-        number = np.array(number)
-        data = []
-        for i in range(len(year)):
-            data_i = [year[i], number[i]]
-            data.append(data_i)
-        for i in range(len(year)):
-            abcyear = year[i]
-        pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
-        s_single = np.zeros(number.shape)
-        s_single[0:5] = number[0:5]
-        for i in range(5, len(s_single)):
-            s_single[i] = sum(number[i - 5:i]) / 5
-        # 计算一次平滑
-        s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
-        yearnumbertotal = len(year)
-        select = yearnumbertotal - 5
-        select1 = yearnumbertotal - 4
-        pre_next_year = sum(number[select:]) / 5  # 预测下一年
-        pre_next_two_year = (sum(number[select1:]) + pre_next_year) / 5  # 预测下两年
-        insert_year = np.array([pre_next_year, pre_next_two_year])
-        s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
-                                 axis=0)  # 组合预测值
-        new_year = np.insert(year, len(year), values=pre_year, axis=0)
-        result = []
-        for a in range(1, len(new_year)):
-            result.append(str(new_year[a]))
-            result.append(str(s_pre_single[a]))
-        re_result = ':'.join(result)
-        return re_result
+        user_path = "./static/user/" + session.get('email') + "/data/user_data.csv"
+        if os.path.exists(user_path):
+            path = user_path
+        else:
+            path = "./static/data/streaming_data/initial_streaming_data.csv"
+    else:
+        path = "./static/data/streaming_data/initial_streaming_data.csv"
+    original_data = csv.reader(open(path))
+    year = []
+    number = []  # 创建一个包含30个点的余弦波信号
+    length = 0
+    year_location = 0
+    attribution_location = 0
+    for i in original_data:
+        if length == 0:
+            for f in range(len(i)):
+                if i[f] == 'year':
+                    year_location = f
+                if i[f] == request.get_json()['attribution']:
+                    attribution_location = f
+        else:
+            year.append(int(i[year_location]))
+            number.append(float(i[attribution_location]))
+        length = length + 1
+    number = np.array(number)
+    data = []
+    for i in range(len(year)):
+        data_i = [year[i], number[i]]
+        data.append(data_i)
+    for i in range(len(year)):
+        abcyear = year[i]
+    pre_year = np.array([abcyear + 1, abcyear + 2])  # 将需要预测的两年存入numpy的array对象里
+    s_single = np.zeros(number.shape)
+    s_single[0:5] = number[0:5]
+    for i in range(5, len(s_single)):
+        s_single[i] = sum(number[i - 5:i]) / 5
+    # 计算一次平滑
+    s_pre_single = np.zeros(s_single.shape)  # 建立预测轴
+    yearnumbertotal = len(year)
+    select = yearnumbertotal - 5
+    select1 = yearnumbertotal - 4
+    pre_next_year = sum(number[select:]) / 5  # 预测下一年
+    pre_next_two_year = (sum(number[select1:]) + pre_next_year) / 5  # 预测下两年
+    insert_year = np.array([pre_next_year, pre_next_two_year])
+    s_pre_single = np.insert(s_single, len(s_single), values=np.array([pre_next_year, pre_next_two_year]),
+                             axis=0)  # 组合预测值
+    new_year = np.insert(year, len(year), values=pre_year, axis=0)
+    result = []
+    for a in range(1, len(new_year)):
+        result.append(str(new_year[a]))
+        result.append(str(s_pre_single[a]))
+    re_result = ':'.join(result)
+    return re_result
 
 
 # streaming data end------------------------------------------------------
@@ -1577,6 +1632,7 @@ def cluster():
 
 @app.route('/cluster/cluster_way', methods=['POST', 'GET'])
 def cluster_way():
+    # run cluster way except user's way
     if session.get('email'):
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
             # run cluster way except user's way
@@ -1670,23 +1726,165 @@ def mining_cluster():
                            regression_data=table_reg_da,
                            visualization_method=table_visualization_method)
 
+@app.route('/cluster/cluster_way_evaluation', methods=['POST', 'GET'])
+def cluster_way_evaluation():  # 需要的参数是各个图所展示出来的聚类方法以及他们对应的参数
+    # 返回的结果是聚类方法：聚类的评价值的键值对
+    if session.get('email'):
+        if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
+            # run cluster way except user's way
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + session.get('email') + "/data/table.csv")
+        else:
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+    else:
+        table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+    result = []
+    evaluation_way = request.get_json()[0]
+    result.append(evaluation_way)
+    for count in range(len(request.get_json())):
+        if count == 0:
+            continue
+        cluster_way = request.get_json()[count]
+        print(cluster_way)
+        cluster_way['data'] = table_data
+        print(cluster_way['Cluster method'])
+        cluster_result = {}
+        if cluster_way['Cluster method'] == 'User_cluster':
+            target_url = os.path.join("./static/user/" + session.get('email') + "/code/Mining")
+            if os.path.exists("./static/user/" + session.get('email') + "/code/Mining/User_cluster.py"):
+                print('user labels')
+                cluster_result['labels'] = get_usermethod_labels()
+        else:
+            cluster_result = getattr(ClusterWay(), cluster_way['Cluster method'])(cluster_way)
+            clustering = cluster_result['clustering']
+        if cluster_result.get('labels') is None:
+            initial_labels = clustering.labels_
+        else:
+            initial_labels = cluster_result.get('labels')
+        try:
+            score = getattr(EvaluationWay(), evaluation_way)(table_data,
+                                                             initial_labels)
+        except ValueError as e:
+            score = 0
+        result.append(str(score))
+    result_str = ':'.join(result)
+    return result_str
+
+def get_usermethod_labels():
+    target_url = os.path.join("./static/user/" + session.get('email') + "/code/Mining")
+    if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
+        file_object = open(os.path.join(target_url, 'User_cluster.py'))
+        try:
+            code = file_object.read()
+            codeOut = StringIO()
+            codeErr = StringIO()
+            sys.stdout = codeOut
+            sys.stderr = codeErr
+            exec(code)
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
+            s = codeOut.getvalue()
+            codeOut.close()
+            codeErr.close()
+        finally:
+            user_labels = labels
+            file_object.close()
+            return user_labels
+
+@app.route('/cluster/User_cluster', methods=['POST', 'GET'])
+def User_cluster():
+    # 首先修改当前的工作路径，执行完程序后改回原来的工作路径
+    current_path = os.getcwd()
+    if session.get('email'):
+        target_url = os.path.join("./static/user/" + session.get('email') + "/code/Mining")
+        draw_id = str(request.get_json()['draw_id'])
+        body = 'page-top' + draw_id
+        node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
+        if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
+                table_data, table_features, table_identifiers = read_table_data(
+                    "./static/user/" + session.get('email') + "/data/table.csv")
+        else:
+            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+        table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
+        exist = False
+        if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
+            exist = True
+            file_object = open(os.path.join(target_url, 'User_cluster.py'))
+            try:
+                code = file_object.read()
+                codeOut = StringIO()
+                codeErr = StringIO()
+                sys.stdout = codeOut
+                sys.stderr = codeErr
+                exec(code)
+                sys.stdout = sys.__stdout__
+                sys.stderr = sys.__stderr__
+                s = codeOut.getvalue()
+                codeOut.close()
+                codeErr.close()
+            finally:
+                print(session.get('embedding_method'))
+                pca = getattr(ProjectionWay(), session.get('embedding_method'))(table_data)
+                data_pca = pca['data']
+                samples, features = data_pca.shape
+                data_pca = data_pca.tolist()
+                for i in range(samples):
+                    data_pca[i].append(labels[i])
+                file_object.close()
+            os.chdir(current_path)  # 切换回原来的工作路径
+
+            return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,
+                                   # final_data_object['data_dictionary'],
+                                   method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+        if os.path.exists(os.path.join(target_url, 'User_cluster.jar')):
+            exist = True
+            # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
+            startJVM(getDefaultJVMPath(), "-ea",
+                     "-Djava.class.path=%s" % (os.path.join(target_url, 'User_cluster.jar')))
+            os.chdir(target_url)  # in the user file folder to run the file
+            user_way_class = JClass('exercise.user_way')
+            user_way = user_way_class()
+            data_pca = user_way.run()
+            shutdownJVM()
+            os.chdir(current_path)  # 切换回原来的工作路径
+            return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,
+                                   # final_data_object['data_dictionary'],
+                                   method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+        if os.path.exists(os.path.join(target_url, 'User_cluster.so')):
+            exist = True
+            os.chdir(target_url)  # in the user file folder to run the file
+            if platform.system() == 'Linux':
+                user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_cluster.so'))
+                data_pca = user_way.run()  # 返回结果
+            os.chdir(current_path)  # 切换回原来的工作路径
+            return render_template("tablegoo/cluster.html", data=data_pca, data_obj=table_da_dic,
+                                   # final_data_object['data_dictionary'],
+                                   method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
+        if (exist == False):
+            return jsonify({'prompt':'please upload file of your method first!'})
+    else:
+        return jsonify({'prompt':'please sign in first!'})
+
+
 
 @app.route('/save_cluster_file', methods=['POST', 'GET'])
 def cluster_code():
-    if request.method == 'POST':
+    #upload user file.include csv,py,jar,so
+    if request.method == 'POST' and session.get('email'):
         f = request.files['file']
         # 1361377791@qq.com
         # basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
         #  文件所要放入的路径
-        basepath = os.path.join("/home/ubuntu/dagoo", 'static', 'user', '1361377791@qq.com',
-                                'user_code')  # + '/static/user/1361377791@qq.com/user_code'  # 文件所要放入的路径
-        path = "./static/user/" + session.get('email')
+
+        basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
         # upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if (request.form.get('label') == 'zip'):
             filename = os.path.join(basepath, '/code/Mining/User_cluster.zip')  # 要解压的文件
             filedir = basepath  # 解压后放入的目录
             # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
-            f.save(basepath + '/User_cluster.zip')
+            if os.path.exists(filename):
+                os.remove(filename)
+            f.save(filename)
             fz = zipfile.ZipFile(filename, 'r')
             for file in fz.namelist():
                 # print(file)  # 打印zip归档中目录
@@ -1694,15 +1892,16 @@ def cluster_code():
             return 'upload the cluster code file successfully !'
         else:
             if (request.form.get('label') == 'py'):  # python
-                user_cluster_url = os.path.join(basepath, '/code/Mining/User_cluster.py')
+                user_cluster_url = basepath + '/code/Mining/User_cluster.py'
             if (request.form.get('label') == 'jar'):  # java
-                user_cluster_url = os.path.join(basepath, '/code/Mining/User_cluster.jar')
+                user_cluster_url = basepath + '/code/Mining/User_cluster.jar'
             if (request.form.get('label') == 'so'):  # c/c++
-                user_cluster_url = os.path.join(basepath, '/code/Mining/User_cluster.so')
+                user_cluster_url = basepath + '/code/Mining/User_cluster.so'
             if (request.form.get('label') == 'csv'):  # csv
-                user_cluster_url = os.path.join(basepath, '/data/User_cluster.csv')
-            '''
-                        if user_cluster_url is not None:
+                user_cluster_url = basepath + '/data/table.csv'
+            if user_cluster_url is not None:
+                if os.path.exists(user_cluster_url):
+                    os.remove(user_cluster_url)
                 f.save(user_cluster_url)
                 cd = pyclamd.ClamdAgnostic()
                 is_virus = cd.scan_file(user_cluster_url)
@@ -1712,7 +1911,9 @@ def cluster_code():
                 else:
                     os.remove(user_cluster_url)
                     return 'virus!!!'
-                    '''
+    else:
+        session['last_page'] = '/cluster'
+        return jsonify('please sign in first!')
 
 
 # cluster end-------------------------------------------------
@@ -1791,6 +1992,108 @@ def mining_embedding():
                            regression_data=table_reg_da,
                            visualization_method=table_visualization_method)
 
+@app.route('/User_code', methods=['POST', 'GET'])
+def User_code():
+    # save user's embedding file
+    if request.method == 'POST' and session.get('email'):
+        f = request.files['file']
+        # basepath = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/user_code"  # 文件所要放入的路径
+        basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
+
+        if (request.form.get('label') == 'zip'):
+            filename = os.path.join(basepath, 'code/Mining/User_embedding.zip')  # 要解压的文件
+            filedir = basepath  # 解压后放入的目录
+            # 如果他是压缩文件，就对它进行解压，不是的话就不进行操作
+            if os.path.exists(filename):
+                os.remove(filename)
+            f.save(filename)
+            fz = zipfile.ZipFile(filename, 'r')
+            for file in fz.namelist():
+                # print(file)  # 打印zip归档中目录
+                fz.extract(file, filedir)
+        if (request.form.get('label') == 'py'):
+            # python
+            user_cluster_url = os.path.join(basepath, 'code/Mining/User_embedding.py')
+        if (request.form.get('label') == 'jar'):  # java
+            user_cluster_url = os.path.join(basepath, 'code/Mining/User_embedding.jar')
+        if (request.form.get('label') == 'so'):  # c/c++
+            user_cluster_url = os.path.join(basepath, 'code/Mining/User_embedding.so')
+        if (request.form.get('label') == 'csv'):  # c/c++
+            user_cluster_url = os.path.join(basepath, 'data/table.csv')
+        if user_cluster_url is not None:
+            if os.path.exists(user_cluster_url):
+                os.remove(user_cluster_url)
+            f.save(user_cluster_url)
+            cd = pyclamd.ClamdAgnostic()
+            is_virus = cd.scan_file(user_cluster_url)
+            if is_virus is None:
+                # return redirect(url_for('cluster_code'))
+                return 'upload the embedding code file successfully !'
+            else:
+                os.remove(user_cluster_url)
+                return 'virus!!!'
+    else:
+        session['last_page'] = '/embedding'
+        return 'please sign in first!'
+
+@app.route('/projection/User_method', methods=['POST', 'GET'])
+def User_method():
+    # run user's embedding way
+    current_path = os.getcwd()
+    if session.get('email'):
+        if os.path.exists("./static/user/" + session.get('email') + "/code/Mining/User_embedding.py"):
+            target_url = "./static/user/" + session.get('email') + "/code/Mining"
+            draw_id = str(request.get_json()['draw_id'])
+            if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
+                table_data, table_features, table_identifiers = read_table_data(
+                    "./static/user/" + session.get('email') + "/data/table.csv")
+            else:
+                table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
+            table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
+            if os.path.exists(os.path.join(target_url, 'User_embedding.py')):
+                file_object = open(os.path.join(target_url, 'User_embedding.py'))
+                try:
+                    code = file_object.read()
+                    codeOut = StringIO()
+                    codeErr = StringIO()
+                    sys.stdout = codeOut
+                    sys.stderr = codeErr
+                    exec(code)
+                    sys.stdout = sys.__stdout__
+                    sys.stderr = sys.__stderr__
+                    s = codeOut.getvalue()
+                    codeOut.close()
+                    codeErr.close()
+                finally:
+                    file_object.close()
+                    # os.remove('User_code.py')
+                return render_template("tablegoo/projection.html", data=User_data, data_obj=table_da_dic,
+                                       method='User_method' + draw_id)
+
+            if os.path.exists(os.path.join(target_url, 'User_embedding.jar')):
+                # 用户程序必须打包，名字为user_way，要执行的方法类名必须是user_way,执行的方法名必须是run
+                # os.chdir(target_url)
+                startJVM(getDefaultJVMPath(), "-ea",
+                         "-Djava.class.path=%s" % (os.path.join(target_url, 'User_embedding.jar')))
+                user_way_class = JClass('exercise.user_way')
+                user_way = user_way_class()
+                User_data_jar = user_way.run()
+                shutdownJVM()
+                os.chdir(current_path)  # 切换回原来的工作路径
+                return render_template("tablegoo/projection.html", data=User_data_jar, data_obj=table_da_dic,
+                                       method='User_method' + draw_id)
+            if os.path.exists(os.path.join(target_url, 'User_embedding.so')):
+                # os.chdir(target_url)
+                if platform.system() == 'Linux':
+                    user_way = cdll.LoadLibrary(os.path.join(target_url, 'User_embedding.so'))
+                    User_data_so = user_way.run()  # 返回结果
+                os.chdir(current_path)  # 切换回原来的工作路径
+                return render_template("tablegoo/projection.html", data=User_data_so, data_obj=table_da_dic,
+                                       method='User_method' + draw_id)
+        else:
+            return jsonify({'prompt': 'please upload file of your method first!'})
+    else:
+        return jsonify({'prompt': 'please sign in first!'})
 
 # embedding end---------------------------------------------
 

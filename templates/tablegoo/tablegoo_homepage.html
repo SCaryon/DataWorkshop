@@ -12,7 +12,6 @@
 
     <link rel="stylesheet" href="../../static/css/bootstrap/bootstrap.css">
     <link rel="stylesheet" href="../../static/font-awesome-4.7.0/css/font-awesome.css">
-
     <!-- MAIN CSS -->
     <link rel="stylesheet" href="../../static/css/bootstrap/tooplate-style.css">
     <link rel="stylesheet" href="../../static/css/tablegoo/tablegoo_homepage.css">
@@ -43,10 +42,9 @@
         <!-- MENU LINKS -->
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a onclick="download_report()" class="smoothScroll">Report</a></li>
                 <li><a href="/" class="smoothScroll">Home</a></li>
-                <li><a data-toggle="modal" data-target="#myModal" class="btn btn-lg">Upload File</a></li>
                 <li><a href="/products" class="smoothScroll">Products</a></li>
+                <li><a href="/gallery/" class="smoothScroll">Gallery</a></li>
                 <li><a href="#" class="smoothScroll">Contact us</a></li>
             </ul>
         </div>
@@ -54,194 +52,223 @@
     </div>
 </div>
 
-<!-- Analysis -->
-<div id="analysis">
-    <div class="section-title">
+<section id = "analysis" class="parallax-section">
+    <div class="section-title col-lg-4">
+    </div>
+    <div class="section-title col-lg-4">
         <h1>Analysis</h1>
     </div>
-    <div id="analysis_container">
-        <ul class="analysis_menu" id="analysis_menu">
-            <li onclick="set_mining_tab(0)" class="active_analysis_part">Attributes Analysis</li>
-            <li onclick="set_mining_tab(1)">Cluster&Embedding</li>
-            <li onclick="set_mining_tab(2)">Anomaly Detection</li>
-            <li onclick="set_mining_tab(3)">Classification</li>
-            <li onclick="set_mining_tab(4)">Regression</li>
-        </ul>
-        <div class="each_analysis_part" id="each_analysis_part">
-            <ul id="analysis_attributions_analysis">
-                <div class="row">
-                    <div class="col-lg-3" id="analysis_list">
-                        <div class="col-xs-12 smart-margin-bottom-20">
-                            <button id="corr_matrix_button" onclick="set_corr_matrix_svg_visual()" rel="tooltip" data-placement="right" data-original-title="change the method" type="button" class="btn"><i class="fa fa-exchange"></i></button>
-                        </div>
-                    </div>
-                    <div class="col-lg-5" id="analysis_corr_matrix_svg" style="display: none">
-                        <text>Order:</text>
-                        <div>
-                            <select id="order">
-                                <option value="name">by Name</option>
-                                <option value="count">by Correlation</option>
-                                <option value="group">by Cluster</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-5" id="analysis_attributions_analysis_svg" style="display: inline"></div>
-                    <div class="col-lg-3" id="analysis_corr_force_info" >
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                We calculate the correlation coefficient between
-                                    all pairs of attributes and draw a graph. The nodes
-                                    of the graph represent the attributes. The correlation
-                                    between the pairs of attributes whose absolute value
-                                    is greater than 0.4, and the line length represents
-                                    the absolute value of the correlation coefficient.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3" id="analysis_corr_matrix_info" style="display: none">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                We calculate the correlation coefficient between
-                                    all pairs of attributes and draw a matrix graph.
-                                    Each rectangle represents a pair of attributes.
-                                    The brighter the color of the rectangle, the higher
-                                    the correlation coefficient.You can put the mouse on
-                                    the rectangle to check the correlation coefficient
-                                    between the two attributes.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </ul>
-            <ul id="analysis_cluster_embedding">
-                <div class="row">
-                    <div class="col-lg-1" id="analysis_list">
-                        <div class="col-xs-12 smart-margin-bottom-20">
-                            <button id="corr_matrix_button" onclick="action_performed('/cluster')" rel="tooltip" data-placement="right" data-original-title="cluster methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
-                        </div>
-                        <div class="col-xs-12 smart-margin-bottom-20">
-                            <button id="corr_matrix_button" onclick="action_performed('/embedding')" rel="tooltip" data-placement="right" data-original-title="embedding methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
-                        </div>
-                    </div>
-                    <div class="col-lg-5" id="analysis_cluster_embedding_svg"></div>
-                    <div class="col-lg-6" id="analysis_user_image"></div>
-                </div>
-            </ul>
-            <ul id="analysis_anomaly_detection">
-                <div class="row">
-                    <div class="col-lg-3" id="analysis_list"></div>
-                    <div class="col-lg-6" id="analysis_anomaly_detection_svg"></div>
-                    <div class="col-lg-3" id="analysis_info"></div>
-                </div>
-            </ul>
-            <ul id="analysis_classification">
-                <div class="row">
-                    <div class="col-lg-3" id="analysis_list"></div>
-                    <div class="col-lg-6" id="analysis_classification_svg"></div>
-                    <div class="col-lg-3" id="analysis_info"></div>
-                </div>
-            </ul>
-            <ul id="analysis_regression">
-                <div class="row">
-                    <div class="col-lg-3" id="analysis_list"></div>
-                    <div class="col-lg-6" id="analysis_regression_svg"></div>
-                    <div class="col-lg-3" id="analysis_info"></div>
-                </div>
-            </ul>
-        </div>
+    <div class="col-lg-4 table_upload">
+        <form method="post" action="/table_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
+            <input  type="file"  style="display:none" name="file" id="file">
+            <div id="data_file_path" class="fa fa-plus-circle"
+                 onclick="file.click()" rel="tooltip" data-placement="top" data-original-title="select your file" style="margin-left: 20px;margin-right: 50px;"></div>
+            <input id='upload_kg' name="upload_kg" type="submit" style="display:none" >
+            <div class='fa fa-upload' onclick="upload_kg.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
+        </form>
     </div>
-</div>
-
-<!-- Visual Charts -->
-<section id="visual_charts" class="parallax-section">
     <div class="container">
         <div class="row">
-    <div class="section-title">
-        <h1>Visual Charts</h1>
-    </div>
-    <div class="visual_charts_tab">
-        <input  id="one" name="visual_charts_tab" type="radio">
-        <label for="one">Radviz</label>
+            <div class="col-md-12">
+                <div class="smart-body">
+                    <ul class="nav nav-tabs primary bordered">
+                        <li class="active">
+                            <a href="#analysis_attributions_analysis" data-toggle="tab">
+                                <span class="visible-xs"><i class="icon-home"></i></span>
+                                <span class="hidden-xs">Attributes Analysis</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#analysis_cluster_embedding" data-toggle="tab">
+                                <span class="visible-xs"><i class="icon-man"></i></span>
+                                <span class="hidden-xs">Cluster&Embedding</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#analysis_anomaly_detection" data-toggle="tab">
+                                <span class="visible-xs"><i class="icon-email"></i></span>
+                                <span class="hidden-xs">Anomaly Detection</span>
+                            </a>
+                        </li>
 
-        <input id="two" name="visual_charts_tab" type="radio" value="Two">
-        <label for="two">Scatter Plot</label>
-
-        <input checked id="three" name="visual_charts_tab" type="radio">
-        <label for="three">Parallel Coordinates</label>
-
-        <div class="panels">
-            <div class="panel" id="draw_radviz">
-                <div id="radviz_select_bar">
-                    <!-- CENTER COLUMN -->
-                    <div class="radviz_column-center">
-                        <div id="visDiv"></div>
-                    </div>
-                    <!-- LEFT COLUMN -->
-                    <div class="radviz_column-left">
-                        <form action="" id="setVars" class="radviz_displayStyle">
-                            <p style="margin-bottom: 10px;margin-top: 15px;" class="radviz_title">Select Variables</p>
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td id="numeric" class="radviz_selectionAlignment"></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </form>
-                        <form action="" id="setColorVar" class="radviz_displayStyle">
-                            <p>Color by:</p>
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td id="colorVar" class="radviz_selectionAlignment">
-                                        <g>
-                                            <input type="radio" value="-1" label="None" name="colorAttribute"
-                                                   checked="">
-                                            <text>None</text>
-                                            <p></p>
-                                        </g>
-                                        <g id="colorGroup"></g>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="panel" id="draw_scatter">
-
-            </div>
-            <div class="panel" id="draw_parallel">
-
-            </div>
-        </div>
-        </div>
-        </div>
+                    </ul>
+                    <div class="tab-content">
+								<div class="tab-pane fade active in" id="analysis_attributions_analysis">
+									<div class="slimScrollBar" style="position: relative; overflow: hidden; width: auto; height: 450px;">
+										<div class="scrollable" data-height="120" style="overflow: hidden; width: auto; height: 450px;">
+                                            <div class="row">
+                                                <div class="col-lg-3" id="analysis_list">
+                                                    <div class="col-xs-12 smart-margin-bottom-20">
+                                                        <button id="corr_matrix_button" onclick="set_corr_matrix_svg_visual()" rel="tooltip" data-placement="right" data-original-title="change the method" type="button" class="btn"><i class="fa fa-exchange"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-5" id="analysis_corr_matrix_svg" style="display: none">
+                                                    <text>Order:</text>
+                                                    <div>
+                                                        <select id="order">
+                                                            <option value="name">by Name</option>
+                                                            <option value="count">by Correlation</option>
+                                                            <option value="group">by Cluster</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-5" id="analysis_attributions_analysis_svg" style="display: inline"></div>
+                                                <div class="col-lg-3" id="analysis_corr_force_info" >
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-body">
+                                                            We calculate the correlation coefficient between
+                                                            all pairs of attributes and draw a graph. The nodes
+                                                            of the graph represent the attributes. The correlation
+                                                            between the pairs of attributes whose absolute value
+                                                            is greater than 0.4, and the line length represents
+                                                            the absolute value of the correlation coefficient.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3" id="analysis_corr_matrix_info" style="display: none">
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-body">
+                                                            We calculate the correlation coefficient between
+                                                            all pairs of attributes and draw a matrix graph.
+                                                            Each rectangle represents a pair of attributes.
+                                                            The brighter the color of the rectangle, the higher
+                                                            the correlation coefficient.You can put the mouse on
+                                                            the rectangle to check the correlation coefficient
+                                                            between the two attributes.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+								<div class="tab-pane fade in" id="analysis_cluster_embedding">
+                                    <div class="row">
+                                        <div class="col-lg-1" id="analysis_list">
+                                            <div class="col-xs-12 smart-margin-bottom-20">
+                                                <button id="corr_matrix_button" onclick="action_performed('/cluster')" rel="tooltip" data-placement="right" data-original-title="cluster methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
+                                            </div>
+                                            <div class="col-xs-12 smart-margin-bottom-20">
+                                                <button id="corr_matrix_button" onclick="action_performed('/embedding')" rel="tooltip" data-placement="right" data-original-title="embedding methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-5" id="analysis_cluster_embedding_svg"></div>
+                                        <div class="col-lg-6" id="analysis_user_image"></div>
+                                    </div>
+                                </div>
+								<div class="tab-pane fade in" id="analysis_anomaly_detection">
+                                    <div class="row">
+                                        <div class="col-lg-3" id="analysis_list"></div>
+                                        <div class="col-lg-6" id="analysis_anomaly_detection_svg"></div>
+                                        <div class="col-lg-3" id="analysis_info"></div>
+                                    </div>
+                                </div>
+							</div>
+						</div>
+					</div>
+				</div>
     </div>
 </section>
 
-<div id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" class="modal fade" style="display: none;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
-                <h4 id="myModalLabel" class="modal-title">Upload File</h4>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="/table_upload" enctype="multipart/form-data">
-                    <input type="file" name="file" id="file">
-                    <input type="submit" value="upload">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Close</button>
-                <input class="button_blue" type="button" onclick="read_file()" value="Submit">
-            </div>
-        </div>
+<section id = "visual_charts" class="parallax-section">
+    <div class="section-title col-lg-4">
     </div>
-</div>
+    <div class="section-title col-lg-4">
+        <h1>Visual Charts</h1>
+    </div>
+    <div class="col-lg-4 table_upload">
+        <form method="post" action="/table_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
+            <input  type="file"  style="display:none" name="file2" id="file2">
+            <div id="data_file_path2" class="fa fa-plus-circle"
+                 onclick="file2.click()" rel="tooltip" data-placement="top" data-original-title="select your file"  style="margin-left: 20px;margin-right: 50px;"></div>
+            <input id='upload_kg2' name="upload_kg2" type="submit" style="display:none" >
+            <div class='fa fa-upload' onclick="upload_kg2.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
+        </form>
+    </div>
+    <div class="container">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="smart-body">
+							<ul class="nav nav-tabs primary bordered">
+								<li class="active">
+									<a href="#draw_radviz" data-toggle="tab">
+										<span class="visible-xs"><i class="icon-home"></i></span>
+										<span class="hidden-xs">Radviz</span>
+									</a>
+								</li>
+								<li>
+									<a href="#draw_scatter" data-toggle="tab">
+										<span class="visible-xs"><i class="icon-man"></i></span>
+										<span class="hidden-xs">Scatter Plot</span>
+									</a>
+								</li>
+								<li>
+									<a href="#draw_parallel" data-toggle="tab">
+										<span class="visible-xs"><i class="icon-email"></i></span>
+										<span class="hidden-xs">Parallel Coordinates</span>
+									</a>
+								</li>
 
+							</ul>
+							<div class="tab-content">
+								<div class="tab-pane fade active in" id="draw_radviz">
+									<div class="slimScrollBar" style="position: relative; overflow: hidden; width: auto; height: 450px;">
+										<div class="scrollable" data-height="120" style="overflow: hidden; width: auto; height: 450px;">
+                                            <div class="row">
+                                                <div id="radviz_select_bar">
+                                                    <!-- CENTER COLUMN -->
+                                                    <div class="radviz_column-center">
+                                                        <div id="visDiv"></div>
+                                                    </div>
+                                                    <!-- LEFT COLUMN -->
+                                                    <div class="radviz_column-left">
+                                                        <form action="" id="setVars" class="radviz_displayStyle">
+                                                            <p style="margin-bottom: 10px;margin-top: 15px;" class="radviz_title">Select Variables</p>
+                                                            <table>
+                                                                <tbody>
+                                                                <tr>
+                                                                    <td id="numeric" class="radviz_selectionAlignment"></td>
+                                                                </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </form>
+                                                        <form action="" id="setColorVar" class="radviz_displayStyle">
+                                                            <p>Color by:</p>
+                                                            <table>
+                                                                <tbody>
+                                                                <tr>
+                                                                    <td id="colorVar" class="radviz_selectionAlignment">
+                                                                        <g>
+                                                                            <input type="radio" value="-1" label="None" name="colorAttribute"
+                                                                                   checked="">
+                                                                            <text>None</text>
+                                                                            <p></p>
+                                                                        </g>
+                                                                        <g id="colorGroup"></g>
+                                                                    </td>
+                                                                </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+								<div class="tab-pane fade in" id="draw_scatter">
+
+                                </div>
+								<div class="tab-pane fade in" id="draw_parallel">
+
+                                </div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+</section>
 
 <div class="getdata">
     <ul id="table_features">
@@ -1605,7 +1632,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .append('g')
         //.call(anomaly_zoom)
         //.append("g")
-        .attr('transform', 'translate(' + 0 + ','+ 0 + ')');
+        .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
     anomaly_svg.append('rect')
         .classed("frame", true)
         .attr("width", analysis_svgsize)
@@ -1648,129 +1675,11 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         anomaly_svg_url = anomaly_canvas.toDataURL("image/png");
     };
     </script>
-<!--classification-->
-<script>
-</script>
-<!--regression-->
-<script type="text/javascript">
-    var brushcell = undefined;
-    cx_max = d3.max(cluster_embedding_dataset, function (d) {return d[0];});
-    cx_min = d3.min(cluster_embedding_dataset, function (d) {return d[0];});
-    cy_max = d3.max(cluster_embedding_dataset, function (d) {return d[1];});
-    cy_min = d3.min(cluster_embedding_dataset, function (d) {return d[1];});
-    cmax = cx_max > cy_max ? cx_max : cy_max;
-    cmin = cx_min < cy_min ? cx_min : cy_min;
-    var xScale = d3.scale.linear()
-        .domain([cmin, cmax])
-        .range([padding, analysis_svgsize - padding]);
-    var yScale = d3.scale.linear()
-        .domain([cmin, cmax])
-        .range([analysis_svgsize - padding, padding]);
-    /*var regression_zoom = d3.behavior.zoom()
-        .scaleExtent([0, 20])
-        .on("zoom", regression_zoomed);*/
-    regression_svg = d3.select("#analysis_regression_svg")       //create svg
-        .append('svg')
-        .attr('id', 'regression_svg')
-        .attr('width', analysis_svgsize*1.1)
-        .attr('height', analysis_svgsize*1.1)
-        .append("g")
-        //.call(regression_zoom)
-        //.append("g");
-        .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
-    regression_svg.append('rect')
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
-        .attr('fill', 'none')
-        .attr('pointer-events', 'all')
-        .attr('stroke', 'black');
-
-    circles = regression_svg.selectAll('circle')
-        .data(cluster_embedding_dataset)
-        .enter()
-        .append('circle')
-        .attr("transform", function(d) { return "translate(" + xScale(d[0]) + "," + yScale(d[1]) + ")"; })
-        .style('stroke', 'white')
-        .attr('r', 4)
-        .style('fill', function (d) {
-            return 'black'
-        });
-
-    line = regression_svg.append('line')
-        .attr('x1', xScale(regression_dataset[0][0]))
-        .attr('x2', xScale(regression_dataset[0][1]))
-        .attr('y1', yScale(regression_dataset[1][0]))
-        .attr('y2', yScale(regression_dataset[1][1]))
-        .attr("stroke","black")
-        .attr("stroke-width",1);
-
-    var serializer = new XMLSerializer();
-    var regression_source = serializer.serializeToString(document.getElementById('regression_svg'));
-    regression_source = '<?xml version="1.0" standalone="no"?>\r\n' + regression_source;
-    var regression_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(regression_source);
-    var regression_canvas = document.createElement("canvas");
-    regression_canvas.width = analysis_svgsize*1.1;
-    regression_canvas.height = analysis_svgsize*1.1;
-    var regression_context = regression_canvas.getContext("2d");
-    var regression_image = new Image;
-    regression_image.src = regression_url;
-    regression_image.onload = function () {
-        regression_context.drawImage(regression_image, 0, 0);
-        regression_svg_url = regression_canvas.toDataURL("image/png");
-    };
-
-    /*function regression_zoomed() {
-        regression_svg.attr("transform", "translate(" + regression_zoom.translate() + ")" + "scale(" + regression_zoom.scale() + ")");
-    }*/
-</script>
 <!--visualization-->
 <script>
-    document.getElementById('one').addEventListener('click', function () {
-        if(d3.select('#scatter_svg')){
-            d3.select('#scatter_svg').remove();
-        }
-        if(d3.select('#parallel_svg')){
-            d3.select('#parallel_svg').remove();
-        }
-        draw_radviz();
-    });
-
-    document.getElementById('two').addEventListener('click', function () {
-        if(d3.select('#radviz_svg')){
-            d3.select('#radviz_svg').remove();
-        }
-        if(d3.select('#parallel_svg')){
-            d3.select('#parallel_svg').remove();
-        }
-        draw_scatter();
-    });
-
-    document.getElementById('three').addEventListener('click', function () {
-        if(d3.select('#radviz_svg')){
-            d3.select('#radviz_svg').remove();
-        }
-        if(d3.select('#scatter_svg')){
-            d3.select('#scatter_svg').remove();
-        }
-        draw_parallel();
-    });
-
     draw_parallel();
-
-    var serializer = new XMLSerializer();
-    var radviz_source = serializer.serializeToString(document.getElementById('parallel_svg'));
-    radviz_source = '<?xml version="1.0" standalone="no"?>\r\n' + radviz_source;
-    var radviz_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(radviz_source);
-    var radviz_canvas = document.createElement("canvas");
-    radviz_canvas.width = 1200;
-    radviz_canvas.height = 400;
-    var radviz_context = radviz_canvas.getContext("2d");
-    var radviz_image = new Image;
-    radviz_image.src = radviz_url;
-    radviz_image.onload = function () {
-        radviz_context.drawImage(radviz_image, 0, 0);
-        radviz_svg_url = radviz_canvas.toDataURL("image/png");
-    };
+    draw_scatter();
+    draw_radviz();
 </script>
 <!--report-->
 <script>
