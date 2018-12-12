@@ -1,6 +1,7 @@
 /*---------------------------------------
    Analysis
 -----------------------------------------*/
+
 #analysis{
  background: rgb(246, 246, 246);
   padding-top: 5%;
@@ -17,48 +18,12 @@
 #analysis h3,
 #analysis p {
   margin: 0;
+    color: black;
 }
 
 #analysis_container {
-    width: 1200px;
     height: 800px;
     margin: 0px auto;
-}
-.analysis_menu{
-  margin:0;
-  padding:0;
-  width: 1200px;
-  background: rgb(246, 246, 246);
-}
-#analysis_info{
-    text-align: center;
-    padding: 20px;
-}
-.analysis_menu li{
-  display:block;
-  float: left;
-  padding-top: 15px;
-  padding-bottom: 40px;
-  width:240px;
-  height: 30px;
-  text-align: center;
-  cursor:pointer;
-  background: rgb(150, 150, 150);
-  color: rgb(51, 51,51);
-  border-bottom: solid 1px #FFF;
-}
-.analysis_menu li.active_analysis_part{
-  background: white;
-}
-#each_analysis_part{
-  background: white;
-}
-#each_analysis_part ul{
-  display: none;
-    padding: 0px;
-}
-#each_analysis_part ul#analysis_attributions_analysis{
-  display: block;
 }
 
 .zoom_button{
@@ -80,6 +45,44 @@
 #corr_matrix_svg {
   font: 10px sans-serif;
 }
+
+.table_upload{
+    cursor: pointer;
+    padding-bottom: 50px;
+}
+
+.nav-tabs.primary.bordered+.tab-content{
+min-height:500px;
+-webkit-border-radius:0 0 1px 1px;
+-webkit-background-clip:padding-box;
+-moz-border-radius:0 0 1px 1px;
+-moz-background-clip:padding;
+
+padding:20px;
+margin-bottom:20px;
+background-color:white;
+line-height:24px;
+color:black;
+box-shadow: 10px 10px 5px rgb(220,220,220)
+}
+
+.nav-tabs.primary > li > a{
+margin-right:2px;
+line-height:1.42857143;
+background-color:rgb(150, 150, 150);
+color:black;
+}
+
+.nav-tabs.primary > li > a:hover{
+background-color:rgb(246, 246, 246);
+color:black;
+}
+
+.nav-tabs.primary > li.active > a{
+background-color:white;
+color:black;
+}
+
 /*---------------------------------------
    Visual Charts
 -----------------------------------------*/
@@ -161,4 +164,5 @@
 .visual_charts_tab .panel h2 {
     margin: 0;
 }
+
 

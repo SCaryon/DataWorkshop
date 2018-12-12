@@ -3,7 +3,7 @@
 
     // Table scroll
     $('.scrollable').slimScroll({
-      height: '120px'
+      height: '450px'
     });
 	
 	  // POPOVER & TOOLTIP
