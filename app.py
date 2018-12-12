@@ -1057,7 +1057,9 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
         data_embedding[i].append(lll)
     table_clu_emb_da = data_embedding
     #  table anomaly detection data
-    table_ano_de_da = AnonalyMethod.clfdetection(table_clu_emb_da)
+    table_ano_de_da, table_ano_de_ind = AnonalyMethod.clfdetection(table_clu_emb_da)
+    for i in range(len(table_ano_de_ind)):
+        table_ano_de_da[i].append(table_ano_de_ind[i])
     # table regression data
     table_reg_da = fitSLR(data_embedding)
     return (table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da,
@@ -1130,7 +1132,7 @@ def tablegoo():
                                max=table_stt_da['max'],
                                var=table_stt_da['var'],
                                corr=table_stt_da['corr'],
-                               features_list=table_features[1:],
+                               features_list=table_features,
                                cluster_embedding_data=table_clu_emb_da,
                                n_clusters=table_clusters,
                                cluster_method=table_cluster_method,
@@ -1163,7 +1165,7 @@ def tablegoo():
                                    max=table_stt_da['max'],
                                    var=table_stt_da['var'],
                                    corr=table_stt_da['corr'],
-                                   features_list=table_features[1:],
+                                   features_list=table_features,
                                    cluster_embedding_data=table_clu_emb_da,
                                    n_clusters=table_clusters,
                                    cluster_method=table_cluster_method,
@@ -1193,7 +1195,7 @@ def tablegoo():
                                    max=table_stt_da['max'],
                                    var=table_stt_da['var'],
                                    corr=table_stt_da['corr'],
-                                   features_list=table_features[1:],
+                                   features_list=table_features,
                                    cluster_embedding_data=table_clu_emb_da,
                                    n_clusters=table_clusters,
                                    cluster_method=table_cluster_method,

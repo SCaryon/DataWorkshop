@@ -13,9 +13,11 @@ class AnonalyMethod:
         clf_pre=clf.fit_predict(data)
         clf_pre = clf_pre.tolist()
         Y = []
+        index = []
         for i in range(len(clf_pre)):
             if clf_pre[i] == -1:
                 Y.append(data[i])
+                index.append(i)
         '''scores_pred = clf.negative_outlier_factor_
         scores_pred = scores_pred.tolist()
         outlierlist=list()
@@ -24,7 +26,7 @@ class AnonalyMethod:
                 outlierlist.append(a)
         outlierarray=np.array(outlierlist)
         return(outlierarray)'''
-        return Y
+        return Y, index
 
     def suppport_vector_machine(data):
         clf = svm.OneClassSVM(nu=0.1, kernel="rbf", gamma=0.1)

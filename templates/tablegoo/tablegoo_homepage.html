@@ -475,10 +475,11 @@
     variances = "";
     feature_list = new Array();
     array = document.getElementById("table_features").getElementsByTagName("li");
-    for (i = 0; i < array.length; i++) {
+    first_feature = array[0].innerHTML;
+    for (i = 1; i < array.length; i++) {
         feature_list.push(array[i].innerHTML);
     }
-    for (i = 0; i < array.length; i++) {
+    for (i = 1; i < array.length; i++) {
         features_string = features_string + '"' + array[i].innerHTML + '"' + " ";
     }
     array = document.getElementById("means").getElementsByTagName("li");
@@ -560,6 +561,10 @@
         arr_str = arr[i].innerHTML;
         var obj = eval('(' + arr_str + ')');
         data_dictionary.push(obj);
+    }
+    identifiers_list = [];
+    for(i = 0; i < data_dictionary.length; i++){
+        identifiers_list.push(data_dictionary[i][first_feature]);
     }
     cluster_embedding_dataset = new Array()
     arr = document.getElementById("cluster_embedding_data").getElementsByTagName('li');
@@ -1654,6 +1659,24 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .attr('r', 4)
         .style('fill', function (d) {
             return d3Colors(d[2]);
+        })
+        .on("mouseover", function (d, i) {
+            key_name = new Array();
+            for (var key in data_dictionary[d[3]]) {
+                console.log(data_dictionary[d[3]]);
+                key_value = key + ':' + data_dictionary[d[3]][key];
+                key_name.push(key_value)
+            }
+            table = key_name.toString();
+            table_n = table.replace(/,/g, '\n');
+            anomaly_svg.append("title").text('ID:' + i + "\n" + table_n).attr("id", "Ttitle");
+            d3.select(this)
+                .attr("r", 8);
+        })
+        .on("mouseout", function (d) {
+            d3.select(this)
+                .attr("r", 4);
+            d3.select("#Ttitle").remove();
         });
 
     /*function anomaly_zoomed() {
