@@ -1,21 +1,20 @@
 <html>
 <head>
     <meta charset="UTF-8">
-
-    <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.css">
-    <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/cropper.min.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/ImgCropping.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/user_img.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/draw_text.css" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
-
     <script type="text/javascript" src="/static/js/textgoo/jquery-1.11.3.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
+    <link rel="stylesheet" href="/static/css/textgoo/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/user_img.css">
     <script type='text/javascript' src='/static/js/textgoo/cropper.min.js'></script>
     <script src="/static/js/textgoo/upload.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/cropper.min.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/ImgCropping.css" />
     <script src="https://cdn.bootcss.com/PapaParse/4.4.0/papaparse.js"></script>
     <script src=" https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
-
+    <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/draw_text.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <title>Text Graph</title>
     <meta name="description" content="">
     <meta name="author" content="">
@@ -222,7 +221,7 @@
 </div>
 
     <!--图片裁剪框 start-->
-<div style="display: none;margin:60px" class="tailoring-container">
+<div style="display: none;margin-top: 60px" class="tailoring-container">
     <div class="black-cloth" onclick="closeTailor(this)"></div>
     <div   class="tailoring-content">
         <div class="tailoring-content-one">
@@ -1280,7 +1279,7 @@ if(fileType=='csv')
                     }
                     else {
                         console.log(info);
-                        $('#lgtext').text("结果：" + info)
+                        $('#lgtext').text("结果：       " + info)
                     }
                 },
                 error:function(err){
@@ -1299,7 +1298,7 @@ if(fileType=='csv')
             <input type="submit" onclick="gosubmit(this)" id="imgbtn" value="上传" />
 
         <div id="preview"></div>
-        <div id="lgtext"></div>
+        <div id="lgtext" ></div>
     </div>
 </div>
 
