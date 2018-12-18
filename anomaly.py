@@ -9,7 +9,7 @@ from sklearn.ensemble import IsolationForest
 class AnonalyMethod:
 
     def clfdetection(data):
-        clf = LocalOutlierFactor(n_neighbors=20)
+        clf = LocalOutlierFactor(n_neighbors=10)
         clf_pre=clf.fit_predict(data)
         clf_pre = clf_pre.tolist()
         Y = []
