@@ -1,7 +1,18 @@
-#gallery{
-	background: black;
-  padding-top: 5%;
-  padding-bottom: 5%;
+#gallery1{
+background: black;
+    padding-top: 3%;
   text-align: center;
   color: white;
+}
+
+#gallery{
+background: black;
+    padding-top: 0;
+  text-align: center;
+  color: white;
+}
+
+#gallery video{
+    width: 500px;
+    height: auto;
 }

@@ -1,20 +1,21 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <script type="text/javascript" src="/static/js/textgoo/jquery-1.11.3.js"></script>
+
+    <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.css">
     <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
-    <link rel="stylesheet" href="/static/css/textgoo/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/user_img.css">
-    <script type='text/javascript' src='/static/js/textgoo/cropper.min.js'></script>
-    <script src="/static/js/textgoo/upload.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/textgoo/cropper.min.css" />
     <link rel="stylesheet" type="text/css" href="/static/css/textgoo/ImgCropping.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/user_img.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/draw_text.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+    <script type="text/javascript" src="/static/js/textgoo/jquery-1.11.3.js"></script>
+    <script type='text/javascript' src='/static/js/textgoo/cropper.min.js'></script>
+    <script src="/static/js/textgoo/upload.js"></script>
     <script src="https://cdn.bootcss.com/PapaParse/4.4.0/papaparse.js"></script>
     <script src=" https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/textgoo/draw_text.css" />
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
     <title>Text Graph</title>
     <meta name="description" content="">
     <meta name="author" content="">
@@ -221,7 +222,7 @@
 </div>
 
     <!--图片裁剪框 start-->
-<div style="display: none;margin-top: 60px" class="tailoring-container">
+<div style="display: none;margin:60px" class="tailoring-container">
     <div class="black-cloth" onclick="closeTailor(this)"></div>
     <div   class="tailoring-content">
         <div class="tailoring-content-one">
@@ -333,7 +334,6 @@ for(var i = 0;i<arr.length;i++){
     links.push(obj)
 }
 
-
 var nodes = {};
 
 links.forEach(function(link) {
@@ -342,13 +342,15 @@ links.forEach(function(link) {
 });
 
 var width = 1310,
-    height = 870;
+    height = 1370;
+
+var line_length=links[0].rela.length*30;
 
 var force = d3.layout.force()//layout将json格式转化为力学图可用的格式
     .nodes(d3.values(nodes))//设定节点数组
     .links(links)//设定连线数组
     .size([width, height])//作用域的大小
-    .linkDistance(150)//连接线长度
+    .linkDistance(line_length)//连接线长度
     .charge(-1500)//顶点的电荷数。该参数决定是排斥还是吸引，数值越小越互相排斥
     .on("tick", tick)//指时间间隔，隔一段时间刷新一次画面
     .start();//开始转换
@@ -1279,7 +1281,7 @@ if(fileType=='csv')
                     }
                     else {
                         console.log(info);
-                        $('#lgtext').text("结果：       " + info)
+                        $('#lgtext').text("结果：" + info)
                     }
                 },
                 error:function(err){
@@ -1298,7 +1300,7 @@ if(fileType=='csv')
             <input type="submit" onclick="gosubmit(this)" id="imgbtn" value="上传" />
 
         <div id="preview"></div>
-        <div id="lgtext" ></div>
+        <div id="lgtext"></div>
     </div>
 </div>
 
