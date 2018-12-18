@@ -42,7 +42,7 @@ class ProjectionWay:
             #没找到合适的评价指数
             result = {}
             result['data'] = pca.fit_transform(data_source)
-            result['params'] = 0;
+            result['params'] = 0
             return result
 
     def SparsePCA(self, source):
@@ -52,7 +52,7 @@ class ProjectionWay:
             print(pca.error_)           #不一定对的得得得得得
             result = {}
             result['data'] = pca.fit_transform(data_source)
-            result['params'] = 0;
+            result['params'] = 0
             return result
 
     def RandomizedPCA(self, source):
