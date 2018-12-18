@@ -136,8 +136,7 @@
                 <option value="AgglomerativeClustering" title="Agglomerative Clustering">AgglomerativeClustering</option>
                 <option value="SpectralClustering" title="spectral clustering techniques make use of the spectrum (eigenvalues) of the similarity matrix of the data to perform dimensionality reduction before clustering in fewer dimensions">SpectralClustering</option>
                   <option value="MiniBatchKMeans" title="a method of vector quantization, originally from signal processing, that is popular for cluster analysis in data mining">MiniBatchKMeans</option>
-         <option value="HDBSCAN" title="a method of vector quantization, originally from signal processing, that is popular for cluster analysis in data mining">HDBSCAN</option>
-        <option value="User_cluster" title="User_cluster">User method</option>
+         <option value="User_cluster" title="User_cluster">User method</option>
             </select></div>
     <button id="get_inf" onclick="get_inf()">Wikipedia</button>
     <div class='demo-bg'></div>
@@ -247,7 +246,6 @@ window.link={'KMeans':'https://en.wikipedia.org/wiki/K-means_clustering',
         'AgglomerativeClustering':'https://en.wikipedia.org/wiki/Hierarchical_clustering',//需要后期再进一步考证该链接的有效性
         'SpectralClustering':'https://en.wikipedia.org/wiki/Spectral_clustering',
     'MiniBatchKMeans':'https://en.wikipedia.org/wiki/K-means_clustering',
-    'HDBSCAN':"https://en.wikipedia.org/wiki/DBSCAN",
     }
 function get_inf(){
     var url=window.link[$('#cluster_selector option:selected').val()];
@@ -529,8 +527,7 @@ var y_min=d3.min(dataset, function(d) {
                 'AffinityPropagation':{"damping":[0.5,1,0.1],"preference":[0,20,1]},
                 'Birch':{'threshold':[0,20,1],'branching_factor':[0,20,1]},
                 'DBSCAN':{'eps':[0,1,0.1],'min_samples':[0,20,1]},
-        'HDBSCAN':{'min_cluster_size':[0,20,1],'min_samples':[0,20,1],'alpha':[0,1,0.1],'cluster_selection_method':["eom", "leaf"]},
-                'GaussianMixture':{'cluster':[0,20,1],'covariance_type':['spherical', 'tied', 'diag', 'full']},
+        'GaussianMixture':{'cluster':[0,20,1],'covariance_type':['spherical', 'tied', 'diag', 'full']},
                 'Hierarchical':{'linkage':["single",'complete','average']},
                 'AgglomerativeClustering':{'cluster':[0,20,1]},
                 'SpectralClustering':{'cluster':[0,20,1]},
@@ -542,8 +539,7 @@ window.default = {
                 'AffinityPropagation':{"damping":0.7,"preference":3},
                 'Birch':{'threshold':3,'branching_factor':3},
                 'DBSCAN':{'eps':3,'min_samples':3},
-        'HDBSCAN':{'min_cluster_size':3,'min_samples':3,'alpha':0.5,'cluster_selection_method':"eom"},
-                'GaussianMixture':{'cluster':3,'covariance_type':'spherical'},
+        'GaussianMixture':{'cluster':3,'covariance_type':'spherical'},
                 'Hierarchical':{'linkage':"single"},
                 'AgglomerativeClustering':{'cluster':3},
                 'SpectralClustering':{'cluster':3},
