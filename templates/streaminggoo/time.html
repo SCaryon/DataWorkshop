@@ -346,7 +346,7 @@
         themeriver_Chart = echarts.init(document.getElementById('main'));
         option = {
             tooltip: {
-                showContent: false,
+                //showContent: false,
                 trigger: 'axis',
                 axisPointer: {
                     type: 'line',
@@ -369,10 +369,9 @@
                 axisPointer: {
             animation: true,
             label: {
-                show: false
+                show: true
             }
         },
-                // position: 'top',
                 splitLine: {
                     show: true,
                     lineStyle: {
@@ -385,7 +384,7 @@
                 type: 'themeRiver',
                 itemStyle: {
                     emphasis: {
-                        shadowBlur: 40,
+                        shadowBlur: 20,
                         shadowColor: 'rgba(0, 0, 0, 0.8)'
                     }
                 },
