@@ -32,7 +32,7 @@ import wav2text  # wav转text的自定义py文件
 from docx import Document
 
 # 用于执行病毒查杀
-import pyclamd
+#import pyclamd
 # 连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
@@ -1880,6 +1880,8 @@ def cluster_code():
                 if os.path.exists(user_cluster_url):
                     os.remove(user_cluster_url)
                 f.save(user_cluster_url)
+                return 'upload the cluster code file successfully !'
+                '''
                 cd = pyclamd.ClamdAgnostic()
                 is_virus = cd.scan_file(user_cluster_url)
                 if is_virus is None:
@@ -1888,6 +1890,7 @@ def cluster_code():
                 else:
                     os.remove(user_cluster_url)
                     return 'virus!!!'
+                '''
     else:
         session['last_page'] = '/cluster'
         return jsonify('please sign in first!')
@@ -2001,6 +2004,8 @@ def User_code():
             if os.path.exists(user_cluster_url):
                 os.remove(user_cluster_url)
             f.save(user_cluster_url)
+            return 'upload the embedding code file successfully !'
+            '''
             cd = pyclamd.ClamdAgnostic()
             is_virus = cd.scan_file(user_cluster_url)
             if is_virus is None:
@@ -2009,6 +2014,7 @@ def User_code():
             else:
                 os.remove(user_cluster_url)
                 return 'virus!!!'
+                '''
     else:
         session['last_page'] = '/embedding'
         return 'please sign in first!'
