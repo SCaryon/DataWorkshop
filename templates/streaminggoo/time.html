@@ -410,12 +410,12 @@
                     pie_data.push({value:item[1],name:item[2]});
                 }
             }
-            draw_pie(this_year,pie_data);
+            draw_pie(this_year,features,pie_data);
         }
     });
     }
-function draw_pie(title='data Pie',pie_data=origin_pie_data){
-pie_option = {
+function draw_pie(title='data Pie',features = theme_features,pie_data=origin_pie_data){
+var pie_option1 = {
     backgroundColor: '#ffffff',
     title: {
         text: title,
@@ -470,6 +470,42 @@ pie_option = {
             animationEasing: 'elasticOut',
             animationDelay: function (idx) {
                 return Math.random() * 200;
+            }
+        }
+    ]
+};
+pie_option = {
+    title : {
+        text: title,
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item',
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
+    },
+    /*
+    * legend: {
+        type: 'scroll',
+        orient: 'vertical',
+        right: 10,
+        top: 20,
+        bottom: 20,
+        data: features,
+        //selected: data.selected
+    },*/
+    series : [
+        {
+            name: '',
+            type: 'pie',
+            radius : '55%',
+            center: ['40%', '50%'],
+            data: pie_data.sort(function (a, b) { return a.value - b.value; }),
+            itemStyle: {
+                emphasis: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
             }
         }
     ]
@@ -699,7 +735,6 @@ pie_Chart.setOption(pie_option);
                 dataway_set.push(origin_dataway_set[i]);
              }
                  }
-        console.log(dataset);
         var width = 500;
         var height = 500;
         var padding = {top: 70, right: 70, bottom: 70, left: 70};
