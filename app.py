@@ -32,7 +32,7 @@ import wav2text  # wav转text的自定义py文件
 from docx import Document
 
 # 用于执行病毒查杀
-#import pyclamd
+import pyclamd
 # 连接百度服务器的密钥
 APP_ID = '14658891'
 API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
@@ -310,12 +310,17 @@ def user_change():
 @app.route('/user/change/img/', methods=['GET', 'POST'])
 def user_change_img():
     file = request.files['file']
-    if file and '.' in file.filename and file.filename.rsplit('.', 1)[1] == 'jpg':
-        old_file = 'static/user/' + session.get('email') + '/img/user_img.jpg'
-        if os.path.exists(old_file):
-            os.remove(old_file)
-        file.save(old_file)
-        return 'success'
+    if file and '.' in file.filename:
+        file_types = ['jpg','jpeg','png','pdf']
+        this_type = file.filename.rsplit('.', 1)[1]
+        for file_type in file_types:
+            old_file = 'static/user/' + session.get('email') + '/img/user_img.'+file_type
+            if os.path.exists(old_file):
+                os.remove(old_file)
+        if this_type in file_types:
+            old_file = 'static/user/' + session.get('email') + '/img/user_img.jpg'
+            file.save(old_file)
+            return 'success'
     else:
         return "filename invalid or network error"
 
