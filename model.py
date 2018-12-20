@@ -13,7 +13,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:qazxswedcvfr@local
 # 设置这一项是每次请求结束后都会自动提交数据库中的变动
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SQLALCHEMY_POOL_SIZE'] = 100
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 3600
 # 实例化
+
 db = SQLAlchemy(app)
 
 
