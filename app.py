@@ -114,13 +114,13 @@ def login_pass_name():
 def sendmail(to_mail, num):
     # 邮件外主体
     smtp = ''
-    smtpserver = "smtp.live.com"
-    smtpport = 25
-    from_mail = "DagooTeam@hotmail.com"
-    password = "dagoo2018"
+    smtpserver = "smtp.qq.com"
+    smtpport = 465
+    from_mail = "1361377791@qq.com"
+    password = "ejpulrvmshuyibba"
     # 邮件内容主体
-    subject = "激活您的Data Workshop账户"
-    from_name = "Data Workshop"
+    subject = "激活您的DaGoo账户"
+    from_name = "DaGoo"
     body = num + "\n以上是您的验证码，请在五分钟内填写。如非本人操作，请忽略此邮件。\n" \
                  "Here is your verification code, please fill in within five minutes. " \
                  "Ignore this message if it is not my operation.\n"
@@ -131,8 +131,8 @@ def sendmail(to_mail, num):
     msg["To"] = to_mail
     msg.attach(msgtext)
     try:
-        smtp = smtplib.SMTP(smtpserver, smtpport)
-        smtp.starttls()
+        smtp = smtplib.SMTP_SSL(smtpserver, smtpport)
+        # smtp.starttls()
         smtp.login(from_mail, password)
         smtp.sendmail(from_mail, to_mail, msg.as_string())
         smtp.quit()
