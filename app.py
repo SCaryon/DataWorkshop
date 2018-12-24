@@ -49,7 +49,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 # 设定session的保存时间，当session.permanent=True的时候
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
-# test by ksw
+# test by ksw2
 
 @app.route('/')
 @app.route('/index')
