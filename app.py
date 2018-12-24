@@ -49,6 +49,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 # 设定session的保存时间，当session.permanent=True的时候
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
+# test by ksw
 
 @app.route('/')
 @app.route('/index')
@@ -2091,6 +2092,7 @@ def User_method():
 @app.route('/textgoo', methods=['GET', 'POST'])
 def textgoo():
     if not session.get('email'):
+        user1=None
         path = './examples/text/text_data.csv'
     else:
         email = session.get('email')
