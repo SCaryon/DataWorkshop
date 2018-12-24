@@ -55,7 +55,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 def index():
     g.count = 0
     session['cluster_method'] = 'KMeans'
-    session['embedding_method'] = 't_distributed_stochastic_neighbor_embedding'
+    session['embedding_method'] = 'Principal_Component_Analysis'
     session['visualization_method'] = 'Radviz'
     session['cluster_parameters'] = {}
     if session.get('email'):
@@ -1067,7 +1067,7 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
     for i in range(len(table_ano_de_ind)):
         table_ano_de_da[i].append(table_ano_de_ind[i])
     # table regression data
-    table_reg_da = fitSLR(data_embedding)
+    table_reg_da = []
     return (table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da,
             table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters)
 
@@ -2091,6 +2091,7 @@ def User_method():
 @app.route('/textgoo', methods=['GET', 'POST'])
 def textgoo():
     if not session.get('email'):
+        user1=None
         path = './examples/text/text_data.csv'
     else:
         email = session.get('email')
@@ -2236,4 +2237,4 @@ def PM25():
 # text_OCR--------------------------------------------------
 
 if __name__ == '__main__':
-    app.run(processes=16,threads=true)
+    app.run(processes=16,threaded=True)
