@@ -1357,13 +1357,17 @@ def time_upload():
                 else:
                     time_data_object[features_list[j]].append(float(final_data[i][j]))
         themeriver_data = []
+        histogram_data = []
         for item in range(len(time_data_object['year'])):
+            histogram_data_current = []
             year = time_data_object['year'][item]
             for feature in time_data_object.keys():
+                feature_data = time_data_object[feature][item]
+                histogram_data_current.append(feature_data)
                 if feature != 'year':
-                    feature_data = time_data_object[feature][item]
                     data = [str(int(year)), feature_data, feature]
                     themeriver_data.append(data)
+            histogram_data.append(histogram_data_current)
         themeriver = {}
         themeriver['data'] = themeriver_data
         themeriver_features = []
@@ -1372,6 +1376,7 @@ def time_upload():
             if feature != 'year':
                 themeriver_features.append(feature)
         themeriver['features'] = themeriver_features
+        themeriver['histogram_data'] = histogram_data
         return jsonify(themeriver)
     else:
         session["last_page"] = '/streaming_data'
@@ -2236,4 +2241,4 @@ def PM25():
 # text_OCR--------------------------------------------------
 
 if __name__ == '__main__':
-    app.run(processes=16,threads=true)
+    app.run(processes=16,threads=True)
