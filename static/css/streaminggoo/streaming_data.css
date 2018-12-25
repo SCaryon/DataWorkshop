@@ -180,7 +180,6 @@ height: 30px;
     background: white;
     text-align: center;
     align-content: center;
-    margin:10px;
     }
 .draw_bar .draw_inf .draw .draw_label {
   position: absolute;
@@ -213,7 +212,7 @@ display:inline;
   z-index: 20;
     width:550px;
     height:30px;
-    padding: 5px;
+    padding: 1px;
 }
 
 .draw_bar .draw_inf .draw_inf_body .cluster_way_inf {
