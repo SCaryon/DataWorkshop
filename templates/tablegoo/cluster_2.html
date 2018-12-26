@@ -365,7 +365,7 @@ var x_min=d3.min(dataset, function(d) {
         });
 var y_min=d3.min(dataset, function(d) {
             return d[1];
-        })
+        });
     var xScale = d3.scale.linear()
         .domain([x_min, x_min+max_range]).range([padding, svgWidth - padding * 2]);
 
@@ -375,21 +375,6 @@ var y_min=d3.min(dataset, function(d) {
         .domain([0, d3.max(dataset, function(d) {
             return d[1];
         })]).range([2, 4]);
-
-
-    var  brush = d3.svg.brush()
-        .x(xScale)
-        .y(yScale)
-        .extent([0, 0], [0, 0])
-        .on("brushstart", brushstart)
-        .on("brush", brushed)
-        .on("brushend", brushend);
-
-    svg.append("g")
-        .call(brush)
-        .selectAll("rect")
-        .style("fill-opacity", 0.1);
-
   circles =  svg.selectAll('circle')
             .data(dataset)
             .enter()
@@ -421,38 +406,6 @@ var y_min=d3.min(dataset, function(d) {
                     .attr("r", 4);
                 d3.select("#Ttitle").remove();
             });
-
-
-  function brushstart() {
-      svg.selectAll('circle')
-          .data(dataset)
-          .style("fill", function (d) {
-              return d3Colors(d[2]);
-          });
-  }
-
-  function brushed() {
-      var extend = brush.extent();
-      var xmin = extend[0][0];
-      var xmax = extend[1][0];
-      var ymin = extend[0][1];
-      var ymax = extend[1][1];
-
-      circles.style("fill", function (d) {
-          if(d[0] >= xmin && d[0] <= xmax && d[1] >= ymin && d[1] <= ymax){
-              return d3Colors(d[2]);
-          }
-          else{
-              return "grey"
-          }
-      })
-  }
-
-  function brushend() {
-      svg.selectAll('circle')
-          .data(rows);
-  }
-
     }
 </script>
 <script>
@@ -926,45 +879,13 @@ window.default = {
          var show_innerhtml=(array[0].split(': '))[1];
 
          cluster_way_inf.innerHTML=show_innerhtml;
-
-         var draw_operators = document.createElement('div');
-         draw_operators.setAttribute('class','draw_operators');
-         draw_operators.setAttribute('id','draw_operators'+j.toString());
-
-         if(target_draw_bar_id!='draw_evaluation_bar'){//当前评价指标里面是没有save功能的
-         var draw_operators_save_div = document.createElement('div');//save的div
-         draw_operators_save_div.setAttribute('class','fa fa-heart-o');
-         draw_operators_save_div.setAttribute('id','draw_operators_save_div'+j.toString());
-         var draw_operators_save_span = document.createElement('span');
-         draw_operators_save_span.setAttribute('class','tooltipp');
-         draw_operators_save_span.setAttribute('id','draw_operators_save_span'+j.toString());
-         draw_operators_save_span.innerHTML='save and return';
-         draw_operators_save_div.appendChild(draw_operators_save_span);
-         draw_operators_save_div.setAttribute('onclick','save('+j+')');//保存该id用于获取该图片下的聚类方法和参数
-             draw_operators.appendChild(draw_operators_save_div);
-}
-         var draw_operators_delete_div = document.createElement('div');//delete的div
-         draw_operators_delete_div.setAttribute('class','fa fa-trash');
-         draw_operators_delete_div.setAttribute('id','draw_operators_delete_div'+j.toString());
-         draw_operators_delete_div.setAttribute('onclick',"Delete_all("+j+",'"+target_draw_bar_id+"')");//为该删除按钮添加onclick时间，target是draw或者evaluation
-         var draw_operators_delete_span = document.createElement('span');
-         draw_operators_delete_span.setAttribute('class','tooltipp');
-         draw_operators_delete_span.setAttribute('id','draw_operators_delete_span'+j.toString());
-         draw_operators_delete_span.innerHTML='delete';
-         draw_operators_delete_div.appendChild(draw_operators_delete_span);
-
-
-         //把delete放入operator
-         draw_operators.appendChild(draw_operators_delete_div);
-
          draw_inf_body.appendChild(cluster_way_inf);//把operator放入body
-        draw_inf_body.appendChild(draw_operators);
 
          draw_inf.appendChild(draw_inf_body);//把body放入inf
 
-
-
          var draw_bar=document.getElementById(target_draw_bar_id);
+         $('#'+target_draw_bar_id).empty();
+         //draw_bar.remove();
          draw_bar.appendChild(draw_inf);
 
 
@@ -983,6 +904,7 @@ window.default = {
 
     }
     evaluation_count=[-1,-2];
+     evaluation_draw_dataset=[];
     function generate_evaluation_pic()
     {
         if(evaluation_count.length==0)
@@ -991,7 +913,7 @@ window.default = {
             return;
         }
         var pic_parameters=[];//当前所有图的聚类方法和参数
-        var draw_dataset=[];
+
         var evaluation_selected=$('#evaluation_selector option:selected').val();
         if(evaluation_selected=='')
             evaluation_selected='silhouette';
@@ -1003,7 +925,6 @@ window.default = {
      {
             var this_pic_parameter={};//i图的方法和参数
             var params=(cluster_way_infs[i]).getAttribute('value').split('<br>');
-         console.log(params);
          for(var j=0;j<params.length;j++)//把对应评价方法的那个去掉，后面如果把每张图中的评价指标去掉的话，这里需要把-1去掉
          {
              var param=params[j].split(': ');
@@ -1011,7 +932,6 @@ window.default = {
          }
          pic_parameters.push(this_pic_parameter);
      }
-     console.log(pic_parameters);
      var url='/cluster/cluster_way_evaluation';
         $.ajax({
                 type :"POST",
@@ -1028,10 +948,12 @@ window.default = {
                     }
                     var draw_count=evaluation_count.pop();
                     draw_data['draw_num_data']=draw_num_data;
-                    draw_dataset.push(draw_data);
+                    console.log(draw_data);
+                    evaluation_draw_dataset.push(draw_data);
+                    console.log(evaluation_draw_dataset);
                     create_draw_evaluation_element('draw_evaluation_bar',draw_count,'evaluation way : '+evaluation_selected);//画图和评价的id不能重复，所以评价可以从10开始
                     var count="#draw_"+draw_count;
-                    draw_evaluation_pic(draw_dataset,count)
+                    draw_evaluation_pic(evaluation_draw_dataset,count)
 
                     //var count="#draw_"+draw_count.toString();
 
@@ -1049,6 +971,7 @@ window.default = {
 <!--根据上一个函数得到的数据进行svg画图-->
 <script>
 function draw_evaluation_pic(dataset,draw_svg_id){
+
     var width=1000;
     var height=350;
      var svg = d3.select(draw_svg_id)
@@ -1064,7 +987,6 @@ var evaluation_max=0.0;
         if(curr_evaluation>evaluation_max)
             evaluation_max=curr_evaluation;
     }
-    console.log(evaluation_max);
     var xScale = d3.scale.linear().domain([0,(20-draw_counts.length)]).range([0,width-padding.left-padding.right]);//要根据画布的多少来动态指定
     var yScale = d3.scale.linear().domain([0,evaluation_max]).range([height-padding.top-padding.bottom,0]);
     var linePath=d3.svg.line()
