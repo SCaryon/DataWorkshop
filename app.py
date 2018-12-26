@@ -1042,15 +1042,8 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
     for temp_list in table_id_da:
         table_id_fea_da_dic.append(data_list_to_dictionary(table_fea, temp_list))
     # table statistics data
-    table_stt_da = {'mean': [], 'median': [], 'mode': [], 'min': [], 'max': [], 'var': [],
-                    'corr': []}
+    table_stt_da = { 'corr': []}
     stt = Statistics(table_da, table_fea[1:])
-    table_stt_da['mean'] = stt.mean
-    table_stt_da['median'] = stt.median
-    table_stt_da['mode'] = stt.mode
-    table_stt_da['min'] = stt.min
-    table_stt_da['max'] = stt.max
-    table_stt_da['var'] = stt.var
     table_stt_da['corr'] = stt.corr
     # table cluster and embedding data
     result = getattr(ClusterWay(), table_cluster_method)(parameters)
@@ -1068,7 +1061,6 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
     table_ano_de_da, table_ano_de_ind = AnonalyMethod.clfdetection(table_clu_emb_da)
     for i in range(len(table_ano_de_ind)):
         table_ano_de_da[i].append(table_ano_de_ind[i])
-    # table regression data
     return (table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da,
             table_stt_da, table_clu_emb_da, table_ano_de_da, table_clusters)
 
@@ -1139,12 +1131,6 @@ def tablegoo():
                             no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
                             no_identifiers_data_dictionary=table_fea_da_dic,
                             data_dictionary=table_id_fea_da_dic,
-                            mean=table_stt_da['mean'],
-                            median=table_stt_da['median'],
-                            mode=table_stt_da['mode'],
-                            min=table_stt_da['min'],
-                            max=table_stt_da['max'],
-                            var=table_stt_da['var'],
                             corr=table_stt_da['corr'],
                             features_list=table_features,
                             cluster_embedding_data=table_clu_emb_da,

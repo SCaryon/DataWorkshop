@@ -276,36 +276,6 @@
             <li>{{ feature }}</li>
         {% endfor %}
     </ul>
-    <ul id="means">
-        {% for m in mean %}
-            <li>{{ m }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="medians">
-        {% for m in median %}
-            <li>{{ m }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="modes">
-        {% for m in mode %}
-            <li>{{ m }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="minimums">
-        {% for m in min %}
-            <li>{{ m }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="maximums">
-        {% for m in max %}
-            <li>{{ m }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="variances">
-        {% for m in var %}
-            <li>{{ m }}</li>
-        {% endfor %}
-    </ul>
     <ul id="get_corr_data">
         {% for m in corr %}
             <li>{{ m }}</li>
@@ -331,11 +301,6 @@
     </ul>
     <ul id="anomaly_detection_data">
         {% for name in anomaly_detection_data %}
-            <li>{{ name }}</li>
-        {% endfor %}
-    </ul>
-    <ul id="regression_data">
-        {% for name in regression_data %}
             <li>{{ name }}</li>
         {% endfor %}
     </ul>
@@ -482,7 +447,7 @@
     for (i = 1; i < array.length; i++) {
         features_string = features_string + '"' + array[i].innerHTML + '"' + " ";
     }
-    array = document.getElementById("means").getElementsByTagName("li");
+    /*array = document.getElementById("means").getElementsByTagName("li");
     for (i = 0; i < array.length; i++) {
         means = means + '"' + array[i].innerHTML + '"' + " ";
     }
@@ -521,7 +486,7 @@
         statistics_strings = statistics_strings + " is " + stt_data[i + 1] + ",";
     }
     statistics_strings = statistics_strings + " as shown in the table.";
-
+    */
     corr_data = new Array();
     var arr = document.getElementById("get_corr_data").getElementsByTagName('li'), temp = [];
     for (i = 0; i < arr.length; i++) {
@@ -656,7 +621,7 @@
         anomaly_detection_dataset.push(numArray);
     }
 
-    regression_dataset = [];
+    /*regression_dataset = [];
     arr = document.getElementById("regression_data").getElementsByTagName('li');
     temp = [];
     for (i = 0; i < arr.length; i++) {
@@ -671,7 +636,7 @@
         });
         regression_dataset.push(numArray);
     }
-
+    */
     arr = document.getElementById("visualization_method").getElementsByTagName('li');
     visualization_method = arr[0].innerHTML;
 
