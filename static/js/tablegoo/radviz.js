@@ -277,3 +277,94 @@ function draw_radviz (){
             vis.setTooltipVars([]);
             vis();
 }
+
+
+function optimal_order(data) {
+    var m = data.length;
+    var n = data[0].length;
+    var tempx = new Array(m);
+    var tempy = new Array(m);
+    var vertex = new Array(n);
+
+    for (var i = 0; i < n; i++){
+        vertex[i] = new Array(n);
+        for (var j = 0; j < n; j++){
+            for (var k = 0; k < m; k++){
+                tempx[k] = data[k][i];
+                tempy[k] = data[k][j];
+            }
+            vertex[i][j] = (1 - vcorrelation(tempx, tempy)) / 2;
+        }
+    }
+    var dimorder = get_shortest_hamiltonian_cycle(vertex);
+    return dimorder;
+}
+
+
+function vcorrelation(x, y){
+    var n = x.length,
+        sumxy = 0.0,
+        sumx = 0.0,
+        sumy = 0.0,
+        sumx2 = 0.0,
+        sumy2 = 0.0;
+    for(var i = 0; i < n; i++){
+        sumxy = sumxy + x[i] * y[i];
+        sumx = sumx + x[i];
+        sumy = sumy + y[i];
+        sumx2 = sumx2 + x[i] * x[i];
+        sumy2 = sumy2 + y[i] * y[i];
+    }
+    if(((sumx2 - sumx * sumx / n) * (sumy2 - sumy * sumy / n)) == 0){
+        r = 1.0
+    }
+    else{
+        r = (sumxy - sumx * sumy / n) / Math.sqrt((sumx2 - sumx * sumx / n) * (sumy2 - sumy * sumy / n))
+    }
+    return r;
+}
+
+function get_shortest_hamiltonian_cycle(dist){
+    var n = dist.length;
+    var len = 1 << n;
+    var dp = new Array(len);
+    for(var i = 0; i < len ; i++){
+        dp[i] = new Array(n);
+        for(var j = 0; j < n; j++){
+            dp[i][j] = 1000000
+        }
+    }
+    dp[1][0] = 0;
+    for (var mask = 1; mask < len; mask += 2){
+        for (var i = 1; i < n; i++){
+            if ((mask & 1 << i) != 0){
+                for (var j = 0; j < n; j++){
+                    if ((mask & 1 << j) != 0){
+                        dp[mask][i] = Math.min(dp[mask][i], dp[mask ^ (1 << i)][j] + dist[j][i]);
+                    }
+                }
+            }
+        }
+    }
+    var res = 2000000;
+    for (var i = 1; i < n; i++){
+        res = Math.min(res, dp[(1 << n) - 1][i] + dist[i][0]);
+    }
+
+    // reconstruct path
+    var cur = (1 << n) - 1;
+    var order = new Array(n);
+    var last = 0;
+    for (var i = n - 1; i >= 1; i--){
+        var bj = -1;
+        for (var j = 1; j < n; j++){
+            if ((cur & 1 << j) != 0 && (bj == -1 || dp[cur][bj] + dist[bj][last] > dp[cur][j] + dist[j][last])){
+                bj = j;
+            }
+        }
+        order[i] = bj;
+        cur ^= 1 << bj;
+        last = bj;
+    }
+    return order;
+}
