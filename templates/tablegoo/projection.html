@@ -111,19 +111,6 @@ var y_min=d3.min(dataset, function(d) {
                 return d[1];
             })]).range([2, 4]);
 
-        var brush = d3.svg.brush()
-            .x(xScale)
-            .y(yScale)
-            .extent([0, 0], [0, 0])
-            .on("brushstart", brushstart)
-            .on("brush", brushed)
-            .on("brushend", brushend);
-
-        svg.append("g")
-            .call(brush)
-            .selectAll("rect")
-            .style("fill-opacity", 0.1);
-
         // 设置散点的坐标, 半径
         projection_circles = svg.selectAll('circle')
             .data(dataset)
@@ -159,34 +146,4 @@ var y_min=d3.min(dataset, function(d) {
                     .attr("r", 4);
                 d3.select("#Ttitle").remove();
             });
-
-        function brushstart() {
-            svg.selectAll('.' + class_circles)
-                .data(dataset)
-                .style("fill", function (d) {
-                return 'red';
-            })
-        }
-
-        function brushed() {
-            var extend = brush.extent();
-            var xmin = extend[0][0];
-            var xmax = extend[1][0];
-            var ymin = extend[0][1];
-            var ymax = extend[1][1];
-
-            svg.selectAll('.' + class_circles).style("fill", function (d) {
-                if(d[0] >= xmin && d[0] <= xmax && d[1] >= ymin && d[1] <= ymax){
-                    return 'red';
-            }
-                else{
-                    return "grey";
-                }
-            })
-        }
-
-        function brushend() {
-            svg.selectAll('.' + class_circles)
-                .data(rows);
-        }
     </script>
