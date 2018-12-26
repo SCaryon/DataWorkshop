@@ -395,7 +395,6 @@ pie_Chart = echarts.init(document.getElementById('data_pie'));
 pie_Chart.setOption(pie_option);
 }
 function draw_histogram(histogram_features=origin_histogram_data.features,num=current_histogram_data_num){
-        console.log(histogram_features);
         data = origin_histogram_data.data[num];
         var histogram_data=[];
         for(var i=1;i<data.length;i++)
