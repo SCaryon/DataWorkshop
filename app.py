@@ -1069,9 +1069,8 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
     for i in range(len(table_ano_de_ind)):
         table_ano_de_da[i].append(table_ano_de_ind[i])
     # table regression data
-    table_reg_da = []
     return (table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da,
-            table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters)
+            table_stt_da, table_clu_emb_da, table_ano_de_da, table_clusters)
 
 
 def generate_table_dic_data(table_id, table_da, table_fea):
@@ -1132,7 +1131,7 @@ def tablegoo():
     table_visualization_method = session.get('visualization_method')
     parameters = session.get('cluster_parameters')
     parameters['data'] = table_data
-    table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+    table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_clusters = generate_table_data(
         table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
     return render_template('tablegoo/tablegoo_homepage.html',
                             features_dictionary=table_fea_fea_dic,
@@ -1153,7 +1152,6 @@ def tablegoo():
                             cluster_method=table_cluster_method,
                             embedding_method=table_embedding_method,
                             anomaly_detection_data=table_ano_de_da,
-                            regression_data=table_reg_da,
                             visualization_method=table_visualization_method)
 
 
@@ -1884,44 +1882,9 @@ def projection_way():
 
 @app.route('/mining/embedding', methods=['POST', 'GET'])
 def mining_embedding():
-    if session.get('email'):
-        if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
-            # run cluster way except user's way
-            table_data, table_features, table_identifiers = read_table_data(
-                "./static/user/" + session.get('email') + "/data/table.csv")
-        else:
-            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-    else:
-        table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-    parameters = {}
-    parameters['data'] = table_data  # 用户输入的数据csv
     session['embedding_method'] = request.get_json()['embedding_method']
-    table_cluster_method = session.get('cluster_method')
-    table_embedding_method = session.get('embedding_method')
-    table_visualization_method = session.get('visualization_method')
-    table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
-        table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
-    return render_template('tablegoo/tablegoo_homepage.html',
-                           features_dictionary=table_fea_fea_dic,
-                           no_identifiers_data_list=table_data,
-                           no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
-                           no_identifiers_data_dictionary=table_fea_da_dic,
-                           data_dictionary=table_id_fea_da_dic,
-                           mean=table_stt_da['mean'],
-                           median=table_stt_da['median'],
-                           mode=table_stt_da['mode'],
-                           min=table_stt_da['min'],
-                           max=table_stt_da['max'],
-                           var=table_stt_da['var'],
-                           corr=table_stt_da['corr'],
-                           features_list=table_features[1:],
-                           cluster_embedding_data=table_clu_emb_da,
-                           n_clusters=table_clusters,
-                           cluster_method=table_cluster_method,
-                           embedding_method=table_embedding_method,
-                           anomaly_detection_data=table_ano_de_da,
-                           regression_data=table_reg_da,
-                           visualization_method=table_visualization_method)
+    return redirect(url_for('tablegoo'))
+
 
 @app.route('/User_code', methods=['POST', 'GET'])
 def User_code():
