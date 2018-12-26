@@ -1119,98 +1119,42 @@ def check_table_data(data_list):
 @app.route('/tablegoo', methods=['POST', 'GET'])
 def tablegoo():
     if not session.get('email'):
-        table_cluster_method = session.get('cluster_method')
-        table_embedding_method = session.get('embedding_method')
-        table_visualization_method = session.get('visualization_method')
-        table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-        parameters = session.get('cluster_parameters')
-        parameters['data'] = table_data
-        table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
-            table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
-        return render_template('tablegoo/tablegoo_homepage.html',
-                               features_dictionary=table_fea_fea_dic,
-                               no_identifiers_data_list=table_data,
-                               no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
-                               no_identifiers_data_dictionary=table_fea_da_dic,
-                               data_dictionary=table_id_fea_da_dic,
-                               mean=table_stt_da['mean'],
-                               median=table_stt_da['median'],
-                               mode=table_stt_da['mode'],
-                               min=table_stt_da['min'],
-                               max=table_stt_da['max'],
-                               var=table_stt_da['var'],
-                               corr=table_stt_da['corr'],
-                               features_list=table_features,
-                               cluster_embedding_data=table_clu_emb_da,
-                               n_clusters=table_clusters,
-                               cluster_method=table_cluster_method,
-                               embedding_method=table_embedding_method,
-                               anomaly_detection_data=table_ano_de_da,
-                               regression_data=table_reg_da,
-                               visualization_method=table_visualization_method)
+        path = './examples/table/car.csv'
     else:
         email = session.get('email')
         if os.path.exists("./static/user/" + email + "/data/table.csv"):
-            table_data, table_features, table_identifiers = read_table_data(
-                "./static/user/" + email + "/data/table.csv")
-            table_cluster_method = session.get('cluster_method')
-            table_embedding_method = session.get('embedding_method')
-            table_visualization_method = session.get('visualization_method')
-            parameters = session.get('cluster_parameters')
-            parameters['data'] = table_data
-            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
-                table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
-            return render_template('tablegoo/tablegoo_homepage.html',
-                                   features_dictionary=table_fea_fea_dic,
-                                   no_identifiers_data_list=table_data,
-                                   no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
-                                   no_identifiers_data_dictionary=table_fea_da_dic,
-                                   data_dictionary=table_id_fea_da_dic,
-                                   mean=table_stt_da['mean'],
-                                   median=table_stt_da['median'],
-                                   mode=table_stt_da['mode'],
-                                   min=table_stt_da['min'],
-                                   max=table_stt_da['max'],
-                                   var=table_stt_da['var'],
-                                   corr=table_stt_da['corr'],
-                                   features_list=table_features,
-                                   cluster_embedding_data=table_clu_emb_da,
-                                   n_clusters=table_clusters,
-                                   cluster_method=table_cluster_method,
-                                   embedding_method=table_embedding_method,
-                                   anomaly_detection_data=table_ano_de_da,
-                                   regression_data=table_reg_da,
-                                   visualization_method=table_visualization_method)
+            path = "./static/user/" + email + "/data/table.csv"
         else:
-            table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
-            table_cluster_method = session.get('cluster_method')
-            table_embedding_method = session.get('embedding_method')
-            table_visualization_method = session.get('visualization_method')
-            parameters = session.get('cluster_parameters')
-            parameters['data'] = table_data
-            table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
-                table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
-            return render_template('tablegoo/tablegoo_homepage.html',
-                                   features_dictionary=table_fea_fea_dic,
-                                   no_identifiers_data_list=table_data,
-                                   no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
-                                   no_identifiers_data_dictionary=table_fea_da_dic,
-                                   data_dictionary=table_id_fea_da_dic,
-                                   mean=table_stt_da['mean'],
-                                   median=table_stt_da['median'],
-                                   mode=table_stt_da['mode'],
-                                   min=table_stt_da['min'],
-                                   max=table_stt_da['max'],
-                                   var=table_stt_da['var'],
-                                   corr=table_stt_da['corr'],
-                                   features_list=table_features,
-                                   cluster_embedding_data=table_clu_emb_da,
-                                   n_clusters=table_clusters,
-                                   cluster_method=table_cluster_method,
-                                   embedding_method=table_embedding_method,
-                                   anomaly_detection_data=table_ano_de_da,
-                                   regression_data=table_reg_da,
-                                   visualization_method=table_visualization_method)
+            path = './examples/table/car.csv'
+    table_data, table_features, table_identifiers = read_table_data(path)
+    table_cluster_method = session.get('cluster_method')
+    table_embedding_method = session.get('embedding_method')
+    table_visualization_method = session.get('visualization_method')
+    parameters = session.get('cluster_parameters')
+    parameters['data'] = table_data
+    table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_reg_da, table_clusters = generate_table_data(
+        table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
+    return render_template('tablegoo/tablegoo_homepage.html',
+                            features_dictionary=table_fea_fea_dic,
+                            no_identifiers_data_list=table_data,
+                            no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
+                            no_identifiers_data_dictionary=table_fea_da_dic,
+                            data_dictionary=table_id_fea_da_dic,
+                            mean=table_stt_da['mean'],
+                            median=table_stt_da['median'],
+                            mode=table_stt_da['mode'],
+                            min=table_stt_da['min'],
+                            max=table_stt_da['max'],
+                            var=table_stt_da['var'],
+                            corr=table_stt_da['corr'],
+                            features_list=table_features,
+                            cluster_embedding_data=table_clu_emb_da,
+                            n_clusters=table_clusters,
+                            cluster_method=table_cluster_method,
+                            embedding_method=table_embedding_method,
+                            anomaly_detection_data=table_ano_de_da,
+                            regression_data=table_reg_da,
+                            visualization_method=table_visualization_method)
 
 
 @app.route('/table_upload', methods=['GET', 'POST'])
