@@ -153,8 +153,8 @@ $('#passwd_submit').click(function () {
 //这个模块的功能就是把登录和注册的前端检查都做好，并且防止坏数据传到后台，引起数据库注入，危害系统
 /* 如果注册按钮被点击，检查注册信息是否填写正确,如果正确那么将前台的数据
 * 传递给后台进行处理*/
-$('#reg').click(function () {
-    //空值检测
+function click_reg(){
+     //空值检测
     if ($('#email').val() == "") {
         $('#email').focus();
         $('#userCue').html("Email should not be empty!");
@@ -251,9 +251,14 @@ $('#reg').click(function () {
             alert("获取数据失败！");
         }
     });
+}
+$('#reg').click(click_reg);
+$('#verify').keypress(function(e) {
+    if(e.which == 13) {
+        click_reg();
+    }
 });
-
-$('#log').click(function () {
+function click_log() {
     if ($('#u').val() == "") {
         $('#u').focus();
         $('#userCue1').html("Email should not be empty!");
@@ -294,6 +299,13 @@ $('#log').click(function () {
             alert("获取数据失败！");
         }
     });
+}
+
+$('#log').click(click_log);
+$('#p').keypress(function(e) {
+    if(e.which == 13) {
+        click_log();
+    }
 });
 
 //注册获取验证码
