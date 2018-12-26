@@ -45,28 +45,6 @@ class ProjectionWay:
             result['params'] = 0
             return result
 
-    def SparsePCA(self, source):
-            min_max_scaler = preprocessing.MinMaxScaler()
-            data_source = min_max_scaler.fit_transform(source)
-            pca = decomposition.SparsePCA(n_components=2)
-            print(pca.error_)           #不一定对的得得得得得
-            result = {}
-            result['data'] = pca.fit_transform(data_source)
-            result['params'] = 0
-            return result
-
-    def RandomizedPCA(self, source):
-            min_max_scaler = preprocessing.MinMaxScaler()
-            data_source = min_max_scaler.fit_transform(source)
-            pca = decomposition.RandomizedPCA(n_components=2)
-            result = {}
-            result['data'] = pca.fit_transform(data_source)
-            rparams=0.0
-            for j in pca.explained_variance_ratio_:
-                params=params+j
-            result['params'] = params
-            return result
-
     def MiniBatchSparsePCA(self, source):
             min_max_scaler = preprocessing.MinMaxScaler()
             data_source = min_max_scaler.fit_transform(source)
@@ -74,7 +52,7 @@ class ProjectionWay:
             #没有相关参数------------------------
             result = {}
             result['data'] = pca.fit_transform(data_source)
-            result['params'] = 0;
+            result['params'] = 0
             return result
 
     def IncrementalPCA(self, source):
@@ -96,7 +74,7 @@ class ProjectionWay:
             result={}
             result['data']=pca.fit_transform(data_source)
             result['params']=pca.reconstruction_err_
-            return
+            return result
 
     def Linear_discriminant_analysis(self, source):
             min_max_scaler = preprocessing.MinMaxScaler()
@@ -212,5 +190,28 @@ class ProjectionWay:
             return result
 
 
+'''
+    def SparsePCA(self, source):
+            min_max_scaler = preprocessing.MinMaxScaler()
+            data_source = min_max_scaler.fit_transform(source)
+            pca = decomposition.SparsePCA(n_components=2)
+            print(pca.error_)           #不一定对的得得得得得
+            result = {}
+            result['data'] = pca.fit_transform(data_source)
+            result['params'] = 0
+            return result
+
+    def RandomizedPCA(self, source):
+            min_max_scaler = preprocessing.MinMaxScaler()
+            data_source = min_max_scaler.fit_transform(source)
+            pca = decomposition.RandomizedPCA(n_components=2)
+            result = {}
+            result['data'] = pca.fit_transform(data_source)
+            params=0.0
+            for j in pca.explained_variance_ratio_:
+                params=params+j
+            result['params'] = params
+            return result
+'''
 
 
