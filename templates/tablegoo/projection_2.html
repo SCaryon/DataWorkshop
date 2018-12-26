@@ -120,8 +120,6 @@
                 <option value="SparseRandomProjection" title="Sparse Random Projection">SparseRandomProjection</option>
                 <option value="Principal_Component_Analysis" title="Principal component analysis (PCA) is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of values of linearly uncorrelated variables called principal components">Principal Component Analysis (PCA)</option>
                 <option value="KernelPCA" title="kernel principal component analysis (kernel PCA) [1] is an extension of principal component analysis (PCA) using techniques of kernel methods">KernelPCA</option>
-                <option value="SparsePCA" title="Sparse principal component analysis (sparse PCA) is a specialised technique used in statistical analysis and, in particular, in the analysis of multivariate data sets">SparsePCA</option>
-                <option value="RandomizedPCA" title="Randomized Principal component analysis">RandomizedPCA</option>
                 <option value="MiniBatchSparsePCA" title="Mini Batch Sparse Principal component analysis">MiniBatchSparsePCA</option>
                 <option value="IncrementalPCA" title="Incremental Principal component analysis">IncrementalPCA</option>
                 <option value="NMF" title="Non-negative matrix factorization (NMF or NNMF), also non-negative matrix approximation is a group of algorithms in multivariate analysis and linear algebra where a matrix V is factorized into (usually) two matrices W and H, with the property that all three matrices have no negative elements.">NMF</option>
@@ -294,19 +292,6 @@
         })]).range([2, 4]);
 
 
-    var  brush = d3.svg.brush()
-        .x(xScale)
-        .y(yScale)
-        .extent([0, 0], [0, 0])
-        .on("brushstart", brushstart)
-        .on("brush", brushed)
-        .on("brushend", brushend);
-
-    svg.append("g")
-        .call(brush)
-        .selectAll("rect")
-        .style("fill-opacity", 0.1);
-
   circles =  svg.selectAll('circle')
             .data(dataset)
             .enter()
@@ -338,38 +323,6 @@
                     .attr("r", 4);
                 d3.select("#Ttitle").remove();
             });
-
-
-  function brushstart() {
-      svg.selectAll('circle')
-          .data(dataset)
-          .style("fill", function (d) {
-              return d3Colors(d[2]);
-          });
-  }
-
-  function brushed() {
-      var extend = brush.extent();
-      var xmin = extend[0][0];
-      var xmax = extend[1][0];
-      var ymin = extend[0][1];
-      var ymax = extend[1][1];
-
-      circles.style("fill", function (d) {
-          if(d[0] >= xmin && d[0] <= xmax && d[1] >= ymin && d[1] <= ymax){
-              return d3Colors(d[2]);
-          }
-          else{
-              return "grey"
-          }
-      })
-  }
-
-  function brushend() {
-      svg.selectAll('circle')
-          .data(rows);
-  }
-
     }
 </script>
 <!--获取方法和参数，画图-->
