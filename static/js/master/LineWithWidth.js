@@ -348,15 +348,15 @@ class MeshLineThunder {
 
             current.z = Math.cos(current.y * Math.PI / 180) * Math.cos(current.x * Math.PI / 180) * 200;
             current.y = Math.cos(current.y * Math.PI / 180) * Math.sin(current.x * Math.PI / 180) * 200;
-            current.x = Math.sin(current.y * Math.PI / 180) * 200;
+            current.x = Math.sin(current.y * Math.PI / 180) * 180;
 
             prev.z = Math.cos(prev.y * Math.PI / 180) * Math.cos(prev.x * Math.PI / 180) * 200;
             prev.y = Math.cos(prev.y * Math.PI / 180) * Math.sin(prev.x * Math.PI / 180) * 200;
-            prev.x = Math.sin(prev.y * Math.PI / 180) * 200;
+            prev.x = Math.sin(prev.y * Math.PI / 180) * 180;
 
             next.z = Math.cos(next.y * Math.PI / 180) * Math.cos(next.x * Math.PI / 180) * 200;
             next.y = Math.cos(next.y * Math.PI / 180) * Math.sin(next.x * Math.PI / 180) * 200;
-            next.x = Math.sin(next.y * Math.PI / 180) * 200;
+            next.x = Math.sin(next.y * Math.PI / 180) * 180;
 
             //修改x和y的比例试一试
             position[j * 3] = current.x;

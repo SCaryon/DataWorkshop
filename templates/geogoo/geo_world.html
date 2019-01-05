@@ -8,6 +8,11 @@
     <script src="https://img.hcharts.cn/highmaps/highmaps.js"></script>
     <script src="https://img.hcharts.cn/highcharts/modules/exporting.js"></script>
     <script src="https://img.hcharts.cn/highcharts/themes/grid-light.js"></script>
+    <style>
+        #try{
+            color: #fe3233;
+        }
+    </style>
 </head>
 <body>
 <!-- 所有地图数据详情见：https://img.hcharts.cn/mapdata/index.html -->
@@ -24,7 +29,7 @@
 <script>
     var index=0;
     var inner="";
-    for(var i =2003;i<=2017;i++){
+    for(var i =2003;i<=2018;i++){
         inner+="<option value="+i+">"+i+"</option>";
     }
     $('#year_select').html(inner);
@@ -49,7 +54,7 @@
             $.getJSON('https://img.hcharts.cn/mapdata/custom/world-highres2.geo.json', function (mapdata) {
                 map = new Highcharts.Map('container', {
                     title: {
-                        text: '世界地图'
+                        text: $('#year_select').val(),
                     },
                     mapNavigation: {
                         enabled: true,
@@ -59,7 +64,7 @@
                     },
                     colorAxis: {
                         min: 0,
-                        minColor: '#fff',
+                        minColor: '#ffff00',
                         maxColor: '#ff0000',
                         labels: {
                             style: {
