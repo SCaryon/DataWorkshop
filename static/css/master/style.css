@@ -168,7 +168,6 @@ span{
     color: white;
     vertical-align: bottom;
     padding: 3px;
-    padding: 0;
     width:100px;
     text-align: center;
     z-index: 99;
@@ -410,13 +409,13 @@ top:0;
 
 #storyPrompt{
     position: absolute;
-    width:100%;
+    width:130px;
     height:100%;
     background-color: rgba(0,0,0,0.4);
     z-index: 90;
     padding:0;
     text-align: center;
-    font-size: 40px;
+    font-size: 15px;
     margin: 0;
     right:0;
     top:0;
