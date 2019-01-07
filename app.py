@@ -27,10 +27,10 @@ from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 from api.new import new
 
-# from aip import AipOcr  # 引入百度api
-# import jieba
+from aip import AipOcr  # 引入百度api
+import jieba
 import wav2text  # wav转text的自定义py文件
-# from docx import Document
+from docx import Document
 
 # 用于执行病毒查杀
 import pyclamd
@@ -40,7 +40,7 @@ API_KEY = 'zWn97gcDqF9MiFIDOeKVWl04'
 SECRET_KEY = 'EEGvCjpzTtWRO3GIxqz94NLz99YSBIT9'
 # 连接百度服务器
 # 输入三个密钥，返回服务器对象
-# client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 app.register_blueprint(new)
@@ -377,16 +377,12 @@ def gallery():
 
 @app.route('/master/', methods=['POST', 'GET'])
 def master():
-    return render_template('geogoo/master_change.html')
-#可怜的被遗忘的master.html,希望有人能记起他
+    return render_template('geogoo/master.html')
+
 
 @app.route('/masterpoint/', methods=['POST', 'GET'])
 def masterpoint():
     return render_template('geogoo/masterpoint.html')
-
-@app.route('/masterchange/', methods=['POST', 'GET'])
-def masterchange():
-    return render_template('geogoo/master_change.html')
 
 
 # 地图方法begin
@@ -2173,7 +2169,7 @@ def PM25():
 	return render_template('geogoo/PM25.html')
 
 
-# text_OCR--------------------------------------------------processes=16,threaded=True
+# text_OCR--------------------------------------------------
 
 if __name__ == '__main__':
     app.run(processes=16,threaded=True)
