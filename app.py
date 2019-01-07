@@ -2176,4 +2176,4 @@ def PM25():
 # text_OCR--------------------------------------------------processes=16,threaded=True
 
 if __name__ == '__main__':
-    app.run()
+    app.run(processes=16,threaded=True)
