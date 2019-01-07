@@ -2173,7 +2173,7 @@ def PM25():
 	return render_template('geogoo/PM25.html')
 
 
-# text_OCR--------------------------------------------------
+# text_OCR--------------------------------------------------processes=16,threaded=True
 
 if __name__ == '__main__':
-    app.run(processes=16,threaded=True)
+    app.run()
