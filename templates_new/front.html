@@ -1,180 +1,41 @@
-<!DOCTYPE html>
-<html dir="ltr" lang="en-US">
-<head>
 
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<meta name="author" content="SemiColonWeb" />
+{% extends 'layout.html' %}
 
-	<!-- Stylesheets
-	============================================= -->
-{#	<link href="http://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,900" rel="stylesheet" type="text/css" />#}
-	<link rel="stylesheet" href="/static/new/theme/css/bootstrap.css" type="text/css" />
-	<link rel="stylesheet" href="/static/new/theme/style.css" type="text/css" />
-
-	<link rel="stylesheet" href="/static/new/theme/css/dark.css" type="text/css" />
-	<link rel="stylesheet" href="/static/new/theme/css/font-icons.css" type="text/css" />
-	<link rel="stylesheet" href="/static/new/theme/css/animate.css" type="text/css" />
-	<link rel="stylesheet" href="/static/new/theme/css/magnific-popup.css" type="text/css" />
-
-	<!-- Bootstrap Switch CSS -->
-	<link rel="stylesheet" href="/static/new/theme/css/components/bs-switches.css" type="text/css" />
-	<link rel="stylesheet" href="/static/new/theme/css/responsive.css" type="text/css" />
-	<meta name='viewport' content='initial-scale=1, viewport-fit=cover'>
-
-	<!-- Specific Stylesheet -->
-	<link rel="stylesheet" href="/static/new/theme/css/colors.php?color=FE9603" type="text/css" /> <!-- Theme Color -->
-	<link rel="stylesheet" href="/static/new/theme/demos/seo/css/fonts.css" type="text/css" />
-	<link rel="stylesheet" href="/static/new/theme/demos/seo/seo.css" type="text/css" />
-	<!-- / -->
-
-    <!-- Dagoo Specific Stylesheet -->
-    <link rel="stylesheet" href="/static/new/dagoo/css/style.css" type="text/css" />
-
-    <!-- / -->
-
-
-	<!-- Document Title
-	============================================= -->
-	<title>Dagoo</title>
-
-</head>
-
-<body class="stretched">
-
-	<!-- Document Wrapper
-	============================================= -->
-	<div id="wrapper" class="clearfix">
-
-		<!-- Top Bar
-		============================================= -->
-		<div id="top-bar" class="transparent-topbar">
-
-			<div class="container clearfix">
-
-				<div class="col_half nobottommargin clearfix">
+{% block content %}
 
 
 
-				</div>
+<!-- Slider
+============================================= -->
+<section id="slider" class="slider-element slider-parallax full-screen clearfix" style="background: #FFF url('/static/new/dagoo/images/frontback.png') center center no-repeat; background-size: cover;">
 
-				<div class="col_half fright dark col_last clearfix nobottommargin">
-	<!-- Top Links
-					============================================= -->
-					<div class="top-links">
-						<ul>
-							<li><a href="index.html">ABOUT</a></li>
-							<li><a href="contact.html">CONTACT</a></li>
-
-							<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang">En</a>
-								<ul>
-									<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/chi.png" alt="Lang">Cn</a></li>
-								</ul>
-							</li>
-						</ul>
-					</div><!-- .top-links end -->
-{#					<!-- Top Social#}
-{#					============================================= -->#}
-{#					<div id="top-social">#}
-{#						<ul>#}
-{#							<li><a href="http://instagram.com/semicolonweb" class="si-instagram" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text">Search</span></a></li>#}
-{#						</ul>#}
-{#					</div><!-- #top-social end -->#}
-
-				</div>
-
-			</div>
-
-		</div><!-- #top-bar end -->
-
-		<!-- Header
-		============================================= -->
-		<header id="header" class="transparent-header floating-header clearfix">
-
-			<div id="header-wrap">
-
-				<div class="container clearfix">
-
-					<div id="primary-menu-trigger"><i class="icon-reorder"></i></div>
-
-					<!-- Logo
-					============================================= -->
-					<div id="logo">
-						<a href="index.html" class="standard-logo" data-dark-logo="/static/new/theme/images/logo-dark.png"><img src="/static/new/dagoo/images/logo.png" alt="Dagoo Logo"></a>
-						<a href="index.html" class="retina-logo" data-dark-logo="/static/new/theme/images/logo-dark@2x.png"><img src="/static/new/dagoo/images/logo@2x.png" alt="Dagoo Logo"></a>
-					</div><!-- #logo end -->
-
-					<!-- Primary Navigation
-					============================================= -->
-					<nav id="primary-menu" class="with-arrows">
-
-						<ul>
-							<li class="current"><a href="#"><div>HOME</div></a></li>
-							<li><a href="#"><div>PRODUCT</div></a>
-{#								<ul>#}
-{#									<li><a href="#"><div>WORK</div></a></li>#}
-{#									<li><a href="#"><div>LAB</div></a></li>#}
-{#									<li><a href="#"><div>MARKET</div></a></li>#}
-{#									<li><a href="#"><div>LOGIN</div></a></li>#}
-{#								</ul>#}
-							</li>
-							<li><a href="#"><div>WORK</div></a></li>
-							<li><a href="#"><div>LAB</div></a></li>
-							<li><a href="#"><div>MARKET</div></a></li>
-							<li><a href="#"><div>LOGIN</div></a></li>
-						</ul>
-
-{#						<!-- Top Search#}
-{#						============================================= -->#}
-{#						<div id="top-search" class="fleft">#}
-{#							<a href="#" id="top-search-trigger"><i class="icon-search3"></i><i class="icon-line-cross"></i></a>#}
-{#							<form action="search.html" method="get">#}
-{#								<input type="text" name="q" class="form-control" value="" placeholder="Type &amp; Hit Enter..">#}
-{#							</form>#}
-{#						</div><!-- #top-search end -->#}
-
-						<!-- Menu Buttons
-						============================================= -->
-						<a href="#" class="button button-rounded fright leftmargin-sm">REGISTER</a>
-
-					</nav><!-- #primary-menu end -->
-
-				</div>
-
-			</div>
-
-		</header><!-- #header end -->
-
-		<!-- Slider
-		============================================= -->
-		<section id="slider" class="slider-element slider-parallax full-screen clearfix" style="background: #FFF url('/static/new/dagoo/images/frontback.png') center center no-repeat; background-size: cover;">
-
-			<div class="vertical-middle">
-				<div class="container topmargin-sm">
-					<div class="row">
-						<div class="col-lg-5 col-md-8">
-							<div class="slider-title">
-								<h2>DON'T JUST ANALYZE THE DATA - SHOW IT</h2>
-								<p>A versatile platform for big data with cutting-edge technologies of data analytic and visualization.
+    <div class="vertical-middle">
+        <div class="container topmargin-sm">
+            <div class="row">
+                <div class="col-lg-5 col-md-8">
+                    <div class="slider-title">
+                        <h2>DON'T JUST ANALYZE THE DATA - SHOW IT</h2>
+                        <p>A versatile platform for big data with cutting-edge technologies of data analytic and visualization.
 Analyze the data with simple clicks</p>
-								<a href="#" class="button button-rounded button-large nott ls0">Start Gooing Now</a>
-			                    <a href="#" class="" style=" color: #fff; text-decoration: underline !important;">Learn More</a>
-							</div>
-						</div>
-					</div>
-				</div>
+                        <a href="#" class="button button-rounded button-large nott ls0">Start Gooing Now</a>
+                        <a href="#" class="" style=" color: #fff; text-decoration: underline !important;">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-			</div>
+    </div>
 
-			<div class="video-wrap h-100 d-block d-lg-none">
-				<div class="video-overlay" style="background: rgba(255,255,255,0.85);"></div>
-			</div>
+    <div class="video-wrap h-100 d-block d-lg-none">
+        <div class="video-overlay" style="background: rgba(255,255,255,0.85);"></div>
+    </div>
 
 <a href="#" data-scrollto="#content" data-offset="100" class="dark one-page-arrow"><i class="icon-angle-down infinite animated fadeInDown"></i></a>
-		</section><!-- #slider end -->
+</section><!-- #slider end -->
 
-		<!-- Content
-		============================================= -->
-		<section id="content">
+<!-- Content
+============================================= -->
+<section id="content">
 
 			<div class="content-wrap pt-0">
 
@@ -716,219 +577,7 @@ Analyze the data with simple clicks</p>
 
 		</section><!-- #content end -->
 
-		<!-- Footer
-		============================================= -->
-		<footer id="footer" class="noborder bg-white">
-
-			<div class="container">
-
-				<!-- Footer Widgets
-				============================================= -->
-				<div class="footer-widgets-wrap row pb-5 clearfix">
-
-					<div class="col-md-8">
-
-						<div class="widget clearfix">
-
-{#							<img src="/static/new/theme/images/footer-widget-logo.png" alt="Footer Logo" class="alignleft" style="margin-top: 8px; padding-right: 18px; border-right: 1px solid #DDD;">#}
-
-							<p>We believe in <strong>Simple</strong>, <strong>Creative</strong> &amp; <strong>Flexible</strong> Design Standards with a Retina &amp; Responsive Approach. Browse the amazing Features this template offers.</p>
-
-							<div class="line line-sm"></div>
-
-							<div class="row">
-
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Home</a></li>
-										<li><a href="#">About</a></li>
-										<li><a href="#">FAQs</a></li>
-										<li><a href="#">Support</a></li>
-										<li><a href="#">Contact</a></li>
-									</ul>
-								</div>
-
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Shop</a></li>
-										<li><a href="#">Portfolio</a></li>
-										<li><a href="#">Blog</a></li>
-										<li><a href="#">Events</a></li>
-										<li><a href="#">Forums</a></li>
-									</ul>
-								</div>
-
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Corporate</a></li>
-										<li><a href="#">Agency</a></li>
-										<li><a href="#">eCommerce</a></li>
-										<li><a href="#">Personal</a></li>
-										<li><a href="#">One Page</a></li>
-									</ul>
-								</div>
-
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Restaurant</a></li>
-										<li><a href="#">Wedding</a></li>
-										<li><a href="#">App Showcase</a></li>
-										<li><a href="#">Magazine</a></li>
-										<li><a href="#">Landing Page</a></li>
-									</ul>
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-					<div class="col-md-4">
-
-						<div class="widget clearfix">
-
-							<div class="row clearfix">
-
-								<div class="col-12">
-									<div class="feature-box fbox-light" style="padding-left: 70px">
-										<div class="fbox-icon">
-											<i class="icon-envelope nobg noborder"></i>
-										</div>
-										<span class="text-muted">Call Us:</span><br>
-										<h3 class="nott ls0 t600">(10) 22 33445566</h3>
-									</div>
-								</div>
-
-								<div class="col-12 mt-4">
-									<div class="feature-box fbox-light" style="padding-left: 70px">
-										<div class="fbox-icon">
-											<i class="icon-phone3 nobg noborder"></i>
-										</div>
-										<span class="text-muted">Email Us:</span><br>
-										<h3 class="nott ls0 t600">info@Dagoo.com</h3>
-									</div>
-								</div>
-
-							</div>
-
-						</div>
-
-						<div class="widget subscribe-widget clearfix">
-							<h5><strong>Subscribe</strong> to Our Newsletter to get Important News, Amazing Offers &amp; Inside Scoops:</h5>
-							<div class="widget-subscribe-form-result"></div>
-							<form id="widget-subscribe-form" action="include/subscribe.php" role="form" method="post" class="nobottommargin">
-								<div class="input-group divcenter">
-									<div class="input-group-prepend">
-										<div class="input-group-text nobg"><i class="icon-email2"></i></div>
-									</div>
-									<input type="email" id="widget-subscribe-form-email" name="widget-subscribe-form-email" class="form-control required email" placeholder="Enter your Email">
-									<div class="input-group-append">
-										<button class="btn btn-success button button-color nott ls0 m-0" type="submit">Subscribe</button>
-									</div>
-								</div>
-							</form>
-						</div>
-
-						<div class="widget clearfix" style="margin-bottom: -20px;">
-
-							<div class="row">
-
-								<div class="col-lg-6 col-md-12 col-6 clearfix bottommargin-sm">
-									<a href="http://facebook.com/semicolonweb" target="_blank" class="social-icon si-dark si-colored si-facebook nobottommargin" style="margin-right: 10px;">
-										<i class="icon-facebook"></i>
-										<i class="icon-facebook"></i>
-									</a>
-									<a href="http://facebook.com/semicolonweb" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Like us</strong><br>on Facebook</small></a>
-								</div>
-								<div class="col-lg-6 col-md-12 col-6 clearfix">
-									<a href="http://themeforest.net/user/SemiColonWeb/follow" target="_blank" class="social-icon si-dark si-colored si-rss nobottommargin" style="margin-right: 10px;">
-										<i class="icon-rss"></i>
-										<i class="icon-rss"></i>
-									</a>
-									<a href="http://themeforest.net/user/SemiColonWeb/follow" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Subscribe</strong><br>to RSS Feeds</small></a>
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-				</div><!-- .footer-widgets-wrap end -->
-
-			</div>
 
 
-			<!-- Copyrights
-			============================================= -->
-			<div id="copyrights" style="background: url('/static/new/theme/demos/seo/images/hero/footer.svg') no-repeat top center; background-size: cover; padding-top: 70px;">
 
-				<div class="container clearfix">
-
-					<div class="col_half">
-						Copyrights &copy; 2018 All Rights Reserved by Dagoo Inc.<br>
-						<div class="copyright-links"><a href="#">Terms of Use</a> / <a href="#">Privacy Policy</a></div>
-					</div>
-
-					<div class="col_half col_last tright">
-						<div class="copyrights-menu copyright-links clearfix">
-							<a href="#">Home</a>/<a href="#">About Us</a>/<a href="#">Team</a>/<a href="#">Clients</a>/<a href="#">FAQs</a>/<a href="#">Contact</a>
-						</div>
-					</div>
-
-				</div>
-
-			</div><!-- #copyrights end -->
-
-		</footer><!-- #footer end -->
-
-	</div><!-- #wrapper end -->
-
-	<!-- Go To Top
-	============================================= -->
-	<div id="gotoTop" class="icon-angle-up"></div>
-
-	<!-- External JavaScripts
-	============================================= -->
-	<script src="/static/new/theme/js/jquery.js"></script>
-	<script src="/static/new/theme/js/plugins.js"></script>
-
-	<!-- Footer Scripts
-	============================================= -->
-	<script src="/static/new/theme/js/functions.js"></script>
-
-	<script>
-		//Pricing Table Script
-		jQuery(document).ready( function($){
-			function pricingSwitcher( elementCheck, elementParent, elementPricing ) {
-				elementParent.find('.pts-left,.pts-right').removeClass('pts-switch-active');
-				elementPricing.find('.pts-switch-content-left,.pts-switch-content-right').addClass('hidden');
-
-				if( elementCheck.filter(':checked').length > 0 ) {
-					elementParent.find('.pts-right').addClass('pts-switch-active');
-					elementPricing.find('.pts-switch-content-right').removeClass('hidden');
-				} else {
-					elementParent.find('.pts-left').addClass('pts-switch-active');
-					elementPricing.find('.pts-switch-content-left').removeClass('hidden');
-				}
-			}
-
-			$('.pts-switcher').each( function(){
-				var element = $(this),
-					elementCheck = element.find(':checkbox'),
-					elementParent = $(this).parents('.pricing-tenure-switcher'),
-					elementPricing = $( elementParent.attr('data-container') );
-
-				pricingSwitcher( elementCheck, elementParent, elementPricing );
-
-				elementCheck.on( 'change', function(){
-					pricingSwitcher( elementCheck, elementParent, elementPricing );
-				});
-			});
-		});
-
-	</script>
-
-</body>
-</html>
+{% endblock %}

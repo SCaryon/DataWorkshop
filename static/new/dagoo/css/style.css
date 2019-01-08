@@ -1,11 +1,17 @@
-h1,h2,h3,h4,h5,h6, a, p, div{
+h1,h2,h3,h4,h5,h6, a, p, div, label{
   font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif !important;
 }
 *, *::before, *::after{
     font-weight: normal;
-     /*font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;*/
 }
-
+label {
+    text-transform: initial;
+    margin-bottom: 3px;
+    letter-spacing:0px;
+}
+a{
+    color: #ca9e3f;
+}
 
 #header.transparent-header.floating-header .container {
     background-color: #2d2d2d;
@@ -14,6 +20,9 @@ h1,h2,h3,h4,h5,h6, a, p, div{
 #header-wrap{
         background-color: #2d2d2d;
 
+}
+#top-bar.transparent-topbar {
+        background-color: #2d2d2d !important;
 }
 
 #primary-menu ul li > a {
@@ -35,7 +44,7 @@ h1,h2,h3,h4,h5,h6, a, p, div{
 #top-bar {
     line-height: 25px;
     height: initial;
-    background-color: #2d2d2d;
+    background-color: #2d2d2d !important;
     border:none;
 }
 
@@ -55,6 +64,10 @@ h1,h2,h3,h4,h5,h6, a, p, div{
 h1, h2, h3, h4, h5, h6 {
     color: #fff;
     font-weight: normal;
+}
+
+h2{
+    font-weight: 400;
 }
 
 .button{
