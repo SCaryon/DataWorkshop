@@ -1,0 +1,57 @@
+
+*, *::before, *::after{
+    font-weight: normal;
+}
+
+
+#header.transparent-header.floating-header .container {
+    background-color: #2d2d2d;
+}
+
+#primary-menu ul li > a {
+    color: #fff;
+}
+
+#top-bar.transparent-topbar {
+        padding-top: 0px;
+    }
+#header.transparent-header.floating-header {
+    margin-top: 0px;
+}
+
+
+#header.sticky-header #header-wrap {
+    background-color: #2d2d2d;
+}
+
+#top-bar {
+    line-height: 25px;
+    height: initial;
+}
+
+.top-links ul li, .top-links li > a  {
+    height: 25px;
+    font-size: 10px;
+    font-weight: 300;
+}
+
+
+.top-links li a img {
+    width: 15px;
+    height: 15px;
+    top: -1px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #fff;
+    font-weight: normal;
+}
+
+.button{
+    background-color:#C4A04F;
+}
+
+#primary-menu ul li:hover > a, #primary-menu ul li.current > a {
+    color: #ca9e3f;
+    /*font-weight: bold;*/
+}
