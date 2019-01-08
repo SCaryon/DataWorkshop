@@ -377,7 +377,7 @@ def gallery():
 
 @app.route('/master/', methods=['POST', 'GET'])
 def master():
-    return render_template('geogoo/master.html')
+    return render_template('geogoo/master_change.html')
 
 
 @app.route('/masterpoint/', methods=['POST', 'GET'])
