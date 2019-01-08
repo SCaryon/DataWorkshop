@@ -18,19 +18,24 @@
 
 	<!-- Bootstrap Switch CSS -->
 	<link rel="stylesheet" href="/static/new/theme/css/components/bs-switches.css" type="text/css" />
-
 	<link rel="stylesheet" href="/static/new/theme/css/responsive.css" type="text/css" />
 	<meta name='viewport' content='initial-scale=1, viewport-fit=cover'>
 
-	<!-- Seo Demo Specific Stylesheet -->
+	<!-- Specific Stylesheet -->
 	<link rel="stylesheet" href="/static/new/theme/css/colors.php?color=FE9603" type="text/css" /> <!-- Theme Color -->
 	<link rel="stylesheet" href="/static/new/theme/demos/seo/css/fonts.css" type="text/css" />
 	<link rel="stylesheet" href="/static/new/theme/demos/seo/seo.css" type="text/css" />
 	<!-- / -->
 
+    <!-- Dagoo Specific Stylesheet -->
+    <link rel="stylesheet" href="/static/new/dagoo/css/style.css" type="text/css" />
+
+    <!-- / -->
+
+
 	<!-- Document Title
 	============================================= -->
-	<title>SEO Demo | Canvas</title>
+	<title>Dagoo</title>
 
 </head>
 
@@ -48,39 +53,32 @@
 
 				<div class="col_half nobottommargin clearfix">
 
-					<!-- Top Links
-					============================================= -->
-					<div class="top-links">
-						<ul>
-							<li><a href="index.html">Home</a></li>
-							<li><a href="faqs.html">FAQs</a></li>
-							<li><a href="contact.html">Contact</a></li>
-							<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/eng.png" alt="Lang">Eng</a>
-								<ul>
-									<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/fre.png" alt="Lang">Fre</a></li>
-									<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/ara.png" alt="Lang">Ara</a></li>
-									<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/tha.png" alt="Lang">Tha</a></li>
-								</ul>
-							</li>
-						</ul>
-					</div><!-- .top-links end -->
+
 
 				</div>
 
 				<div class="col_half fright dark col_last clearfix nobottommargin">
-
-					<!-- Top Social
+	<!-- Top Links
 					============================================= -->
-					<div id="top-social">
+					<div class="top-links">
 						<ul>
-							<li><a href="http://facebook.com/semicolonweb" class="si-facebook" target="_blank"><span class="ts-icon"><i class="icon-facebook"></i></span><span class="ts-text">Facebook</span></a></li>
-							<li><a href="http://twitter.com/__semicolon" class="si-twitter" target="_blank"><span class="ts-icon"><i class="icon-twitter"></i></span><span class="ts-text">Twitter</span></a></li>
-							<li><a href="http://youtube.com/semicolonweb" class="si-youtube" target="_blank"><span class="ts-icon"><i class="icon-youtube"></i></span><span class="ts-text">Youtube</span></a></li>
-							<li><a href="http://instagram.com/semicolonweb" class="si-instagram" target="_blank"><span class="ts-icon"><i class="icon-instagram2"></i></span><span class="ts-text">Instagram</span></a></li>
-							<li><a href="tel:+10.11.85412542" class="si-call"><span class="ts-icon"><i class="icon-call"></i></span><span class="ts-text">+10.11.85412542</span></a></li>
-							<li><a href="mailto:info@canvas.com" class="si-email3"><span class="ts-icon"><i class="icon-envelope-alt"></i></span><span class="ts-text">info@canvas.com</span></a></li>
+							<li><a href="index.html">ABOUT</a></li>
+							<li><a href="contact.html">CONTACT</a></li>
+
+							<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang">En</a>
+								<ul>
+									<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/chi.png" alt="Lang">Cn</a></li>
+								</ul>
+							</li>
 						</ul>
-					</div><!-- #top-social end -->
+					</div><!-- .top-links end -->
+{#					<!-- Top Social#}
+{#					============================================= -->#}
+{#					<div id="top-social">#}
+{#						<ul>#}
+{#							<li><a href="http://instagram.com/semicolonweb" class="si-instagram" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text">Search</span></a></li>#}
+{#						</ul>#}
+{#					</div><!-- #top-social end -->#}
 
 				</div>
 
@@ -101,8 +99,8 @@
 					<!-- Logo
 					============================================= -->
 					<div id="logo">
-						<a href="index.html" class="standard-logo" data-dark-logo="/static/new/theme/images/logo-dark.png"><img src="/static/new/theme/images/logo.png" alt="Canvas Logo"></a>
-						<a href="index.html" class="retina-logo" data-dark-logo="/static/new/theme/images/logo-dark@2x.png"><img src="/static/new/theme/images/logo@2x.png" alt="Canvas Logo"></a>
+						<a href="index.html" class="standard-logo" data-dark-logo="/static/new/theme/images/logo-dark.png"><img src="/static/new/dagoo/images/logo.png" alt="Canvas Logo"></a>
+						<a href="index.html" class="retina-logo" data-dark-logo="/static/new/theme/images/logo-dark@2x.png"><img src="/static/new/dagoo/images/logo@2x.png" alt="Canvas Logo"></a>
 					</div><!-- #logo end -->
 
 					<!-- Primary Navigation
@@ -110,32 +108,33 @@
 					<nav id="primary-menu" class="with-arrows">
 
 						<ul>
-							<li class="current"><a href="#"><div>Home</div></a></li>
-							<li><a href="#"><div>What We Do</div></a>
-								<ul>
-									<li><a href="#"><div>Sub Menu 1</div></a></li>
-									<li><a href="#"><div>Sub Menu 2</div></a></li>
-									<li><a href="#"><div>Sub Menu 3</div></a></li>
-									<li><a href="#"><div>Sub Menu 4</div></a></li>
-								</ul>
+							<li class="current"><a href="#"><div>HOME</div></a></li>
+							<li><a href="#"><div>PRODUCT</div></a>
+{#								<ul>#}
+{#									<li><a href="#"><div>WORK</div></a></li>#}
+{#									<li><a href="#"><div>LAB</div></a></li>#}
+{#									<li><a href="#"><div>MARKET</div></a></li>#}
+{#									<li><a href="#"><div>LOGIN</div></a></li>#}
+{#								</ul>#}
 							</li>
-							<li><a href="#"><div>Services</div></a></li>
-							<li><a href="#"><div>FAQs</div></a></li>
-							<li><a href="#"><div>Contact</div></a></li>
+							<li><a href="#"><div>WORK</div></a></li>
+							<li><a href="#"><div>LAB</div></a></li>
+							<li><a href="#"><div>MARKET</div></a></li>
+							<li><a href="#"><div>LOGIN</div></a></li>
 						</ul>
 
-						<!-- Top Search
-						============================================= -->
-						<div id="top-search" class="fleft">
-							<a href="#" id="top-search-trigger"><i class="icon-search3"></i><i class="icon-line-cross"></i></a>
-							<form action="search.html" method="get">
-								<input type="text" name="q" class="form-control" value="" placeholder="Type &amp; Hit Enter..">
-							</form>
-						</div><!-- #top-search end -->
+{#						<!-- Top Search#}
+{#						============================================= -->#}
+{#						<div id="top-search" class="fleft">#}
+{#							<a href="#" id="top-search-trigger"><i class="icon-search3"></i><i class="icon-line-cross"></i></a>#}
+{#							<form action="search.html" method="get">#}
+{#								<input type="text" name="q" class="form-control" value="" placeholder="Type &amp; Hit Enter..">#}
+{#							</form>#}
+{#						</div><!-- #top-search end -->#}
 
 						<!-- Menu Buttons
 						============================================= -->
-						<a href="#" class="button button-rounded fright leftmargin-sm">Get Started</a>
+						<a href="#" class="button button-rounded fright leftmargin-sm">REGISTER</a>
 
 					</nav><!-- #primary-menu end -->
 
@@ -147,19 +146,18 @@
 
 		<!-- Slider
 		============================================= -->
-		<section id="slider" class="slider-element slider-parallax full-screen clearfix" style="background: #FFF url('/static/new/theme/demos/seo/images/hero/hero-1.jpg') center center no-repeat; background-size: cover;">
+		<section id="slider" class="slider-element slider-parallax full-screen clearfix" style="background: #FFF url('/static/new/dagoo/images/frontback.png') center center no-repeat; background-size: cover;">
 
 			<div class="vertical-middle">
 				<div class="container topmargin-sm">
 					<div class="row">
 						<div class="col-lg-5 col-md-8">
 							<div class="slider-title">
-								<div class="badge badge-pill badge-default">SEO Ready</div>
-								<h2>Improve your SEO with Data.</h2>
-								<h3 class="text-rotater mb-2" data-separator="," data-rotate="fadeIn" data-speed="3500">- Boost your own <span class="t-rotate">Awesome,Beautiful,Great</span> Website.</h3>
-								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quia vitae mollitia dignissimos ab qui aspernatur.</p>
-								<a href="#" class="button button-rounded button-large nott ls0">Get Started</a>
-								<a href="#" class="button button-rounded button-large button-light text-dark bg-white border nott ls0">Contact Us</a>
+								<h2>DON'T JUST ANALYZE THE DATA - SHOW IT</h2>
+								<p>A versatile platform for big data with cutting-edge technologies of data analytic and visualization.
+Analyze the data with simple clicks</p>
+								<a href="#" class="button button-rounded button-large nott ls0">Start Gooing Now</a>
+			                    <a href="#" class="" style=" color: #fff; text-decoration: underline !important;">Learn More</a>
 							</div>
 						</div>
 					</div>
