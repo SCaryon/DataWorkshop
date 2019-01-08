@@ -929,8 +929,8 @@ window.onload = function () {
             parseURL.update_url(currentSetup, selectedProduct.atlasid);
         $("#productlabel").fadeIn();
         $("#pointer").css({top: "-100px"});
-        var productURL = "http://atlas.cid.harvard.edu/explore/tree_map/export/show/all/" + selectedProduct.atlasid + "/2012/";
-        $("#productlabel").html("<h1>" + selectedProduct.name + '</h1><a target="blank" href="' + productURL + '">[在 Atlas 中打开]</a>');
+        // var productURL = "http://atlas.cid.harvard.edu/explore/tree_map/export/show/all/" + selectedProduct.atlasid + "/2012/";
+        $("#productlabel").html("<h1>" + selectedProduct.name + '</h1>');
 
         if (currentSetup === "productsphere") {
             if (selectedProduct.x3) {

@@ -25,9 +25,10 @@
 <body id="dody">
 
 <!--begin首页-->
+<div id="spinner"></div>
+
 <div id="storyPrompt">
     <!--加载过程中的动态gif展示来让用户等待异步请求-->
-    <div id="spinner"></div>
 
     <div id="UI" style="display:none">
         <!--最终页面的左侧-->
@@ -60,54 +61,54 @@
 </div>
 
 
-    <!--盛放每个country的标签-->
-    <div id="countries"></div>
+<!--盛放每个country的标签-->
+<div id="countries"></div>
 
-    <!--主页正下方数据类型选择部分-->
-    <div id="categories"></div>
+<!--主页正下方数据类型选择部分-->
+<div id="categories"></div>
 
-    <!--当前被hover的标签-->
-    <div id="pointer"></div>
+<!--当前被hover的标签-->
+<div id="pointer"></div>
 
-    <!--当前线的内容-->
-    <div id="linelink"></div>
+<!--当前线的内容-->
+<div id="linelink"></div>
 
-    <!--对每个模型的介绍，在hover该模型的button的时候出现-->
-    <div id="modeDescription"></div>
+<!--对每个模型的介绍，在hover该模型的button的时候出现-->
+<div id="modeDescription"></div>
 
-    <!--在产品空间中点击某产品以后出现在产品旁边的label-->
-    <div id="productlabel"></div>
+<!--在产品空间中点击某产品以后出现在产品旁边的label-->
+<div id="productlabel"></div>
 
-    <div id="noWebGL" style="display:none">
-        <div id='description'>经济复杂性的地球动态地绘制了整个世界的商品生产创造一个全球各国的经济景观。
-            <br/> 这个项目是用WebGL建造并且需要使用它才能够正常运行，您当前的浏览器没有达到要求<br/> 打开 <a
-                    href='https://get.webgl.org/'>get.webgl.org</a> 以解决问题。
-        </div>
+<div id="noWebGL" style="display:none">
+    <div id='description'>经济复杂性的地球动态地绘制了整个世界的商品生产创造一个全球各国的经济景观。
+        <br/> 这个项目是用WebGL建造并且需要使用它才能够正常运行，您当前的浏览器没有达到要求<br/> 打开 <a
+                href='https://get.webgl.org/'>get.webgl.org</a> 以解决问题。
     </div>
+</div>
 
-    <!--点击about以后在右侧划出-->
-    <div id="aboutText" style="display:none">
-        <span class="aboutTitle">关于</span><span style="float:right"><div id="closeAbout">关闭 x  </div></span>
-        <div class="optionSeparator">&nbsp;</div>
-        <div>由<a href="#" target="_blank">林子童</a>设计完成, 由<a
-                href="" target="_blank">成生辉</a>指导监督完成,灵感来源于
-            <a href="http://globe.cid.harvard.edu/" target="_blank">The Globe of Economic Complexity</a> .
-        </div>
-        <div class="optionSeparator">&nbsp;</div>
-        <div class="aboutTitle">数据来源</div>
-        <div>数据由<a href="https://github.com/cid-harvard/atlas-data" target="_blank">CID's
-            2012 world export data</a>中的产品和贸易数据加工而成, 从<a href="http://comtrade.un.org/" target="_blank">United
-            Nations Comtrade database.</a>中获取
-        </div>
-        <div class="optionSeparator">&nbsp;</div>
-        <div class="aboutTitle">技术</div>
-        <div>这个可视化产品是有WebGL构建，我们使用了JavaScript库中的Three.js来简化3D对象的创建和编辑。我们将会在项目完工后将代码放到Github上
-            进行共享
-        </div>
-        <div class="optionSeparator">&nbsp;</div>
-        <div class="aboutTitle">联系我们</div>
-        <div>如果您有任何问题、意见或者建议，欢迎直接发送邮件到lin_zitong@163.com</div>
+<!--点击about以后在右侧划出-->
+<div id="aboutText" style="display:none">
+    <span class="aboutTitle">关于</span><span style="float:right"><div id="closeAbout">关闭 x  </div></span>
+    <div class="optionSeparator">&nbsp;</div>
+    <div>由<a href="#" target="_blank">林子童</a>设计完成, 由<a
+            href="" target="_blank">成生辉</a>指导监督完成,灵感来源于
+        <a href="http://globe.cid.harvard.edu/" target="_blank">The Globe of Economic Complexity</a> .
     </div>
+    <div class="optionSeparator">&nbsp;</div>
+    <div class="aboutTitle">数据来源</div>
+    <div>数据由<a href="https://github.com/cid-harvard/atlas-data" target="_blank">CID's
+        2012 world export data</a>中的产品和贸易数据加工而成, 从<a href="http://comtrade.un.org/" target="_blank">United
+        Nations Comtrade database.</a>中获取
+    </div>
+    <div class="optionSeparator">&nbsp;</div>
+    <div class="aboutTitle">技术</div>
+    <div>这个可视化产品是有WebGL构建，我们使用了JavaScript库中的Three.js来简化3D对象的创建和编辑。我们将会在项目完工后将代码放到Github上
+        进行共享
+    </div>
+    <div class="optionSeparator">&nbsp;</div>
+    <div class="aboutTitle">联系我们</div>
+    <div>如果您有任何问题、意见或者建议，欢迎直接发送邮件到lin_zitong@163.com</div>
+</div>
 
 </div>
 </div>
@@ -135,6 +136,7 @@
 
 
 
+
 </script>
 
 <script type="x-shader/x-fragment" id="fragmentshader">
@@ -145,6 +147,7 @@
 		gl_FragColor = vec4( color * vColor, 1.0 );
 		gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
 	}
+
 
 
 
@@ -209,6 +212,7 @@
 
 
 
+
 </script>
 <!-- fragment shader a.k.a. pixel shader -->
 <script id="fragmentShader1" type="x-shader/x-vertex">
@@ -228,6 +232,7 @@
       gl_FragColor = vec4(color.xyz, opacity);
 
     }
+
 
 
 
