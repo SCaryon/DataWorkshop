@@ -12,13 +12,15 @@ label {
 a{
     color: #ca9e3f;
 }
-
+body{
+    background-color: #2d2d2d;
+}
 #header.transparent-header.floating-header .container {
     background-color: #2d2d2d;
 }
 
 #header-wrap{
-        background-color: #2d2d2d;
+    background-color:#2d2d2d;
 
 }
 #top-bar.transparent-topbar {
@@ -79,6 +81,11 @@ h2{
     /*font-weight: bold;*/
 }
 
+@media(min-width:992px){
+    .mobileButton {
+        display:none;
+    }
+}
 @media (max-width: 991.98px){
     #logo {
 
@@ -86,6 +93,13 @@ h2{
     }
     #primary-menu-trigger{
         top:7px;
+    }
+
+    .mobileButton {
+        display:block;
+    }
+    #header-wrap{
+        background-color:#2d2d2d;
     }
 }
  #logo img{
@@ -103,3 +117,4 @@ h2{
     border-top-color: rgb(202, 158, 63);
      top: 25px;
  }
+

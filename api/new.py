@@ -14,6 +14,13 @@ def login():
 def signup():
     return render_template('signup.html')
 
+@new.route("/term1/")
+def term1():
+    return render_template('term1.html')
+
+@new.route("/term2")
+def term2():
+    return render_template('term2.html')
 
 
 @new.route("/new/first")
