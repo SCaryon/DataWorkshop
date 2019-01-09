@@ -71,7 +71,8 @@ $.lang.cn = {
 * use $.lang[currentLanguage][languageNumber]
 */
 function setLanguage(currentLanguage) {
-    $.cookie("lang",currentLanguage);
+    console.log("language: "+currentLanguage);
+    $.cookie("lang",currentLanguage, { expires: 7, path: '/' });
   if(currentLanguage == "en"){
     $("#lang_select_img").attr("src","/static/new/theme/demos/seo/images/flags/usa.png");
     $("#lang_select_txt").text("En");
@@ -88,15 +89,17 @@ function setLanguage(currentLanguage) {
 }
 
 function init_lang(){
+    console.log("init: "+$.cookie("lang"));
      if(!$.cookie("lang")){
-        $.cookie("lang","en");
+         console.log("no language cookie");
+        $.cookie("lang","en", { expires: 7, path: '/' });
     }
 
-    var lang= $.cookie("lang");
+    let language= $.cookie("lang");
 
-    if(lang=="en"){
+    if(language=="en"){
         setLanguage("en");
-    }else if(lang=="cn"){
+    }else if(language=="cn"){
         setLanguage("cn");
     }
 }
