@@ -19,6 +19,11 @@ def home():
         return render_template('front.html')
 
 
+@new.route('/new/logout/')
+def logout():
+    session.clear()
+    return home()
+
 @new.route("/new/login/")
 def login():
     return render_template('login.html')
@@ -35,6 +40,9 @@ def term1():
 def term2():
     return render_template('term2.html')
 
+@new.route("/new/my/")
+def my():
+    return render_template('my.html')
 
 @new.route("/new/first")
 def world2():

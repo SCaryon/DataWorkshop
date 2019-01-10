@@ -32,6 +32,7 @@
 
     <!-- / -->
 
+	<script src="/static/new/theme/js/jquery.js"></script>
 
 	<!-- Document Title
 	============================================= -->
@@ -124,10 +125,13 @@
 							<li><a href="#"><div data-langs="market">MARKET</div></a></li>
                             <li><a href="#"><div data-langs="about">ABOUT</div></a></li>
 
-
-                            <li class="mobileButton"><a href="{{ url_for('new.login') }}"><div data-langs="login">LOGIN</div></a></li>
-                            <li class="mobileButton"><a href="{{ url_for('new.signup') }}"><div data-langs="register">REGISTER</div></a></li>
-
+                            {% if user %}
+                                <li><a href="{{ url_for('new.my') }}"><div data-langs="profile">MY</div></a></li>
+                                <li class="mobileButton"><a href="{{ url_for('new.logout') }}"><div data-langs="logout">LOGOUT</div></a></li>
+                            {% else %}
+                                <li class="mobileButton"><a href="{{ url_for('new.login') }}"><div data-langs="login">LOGIN</div></a></li>
+                                <li class="mobileButton"><a href="{{ url_for('new.signup') }}"><div data-langs="register">REGISTER</div></a></li>
+                            {% endif %}
 						</ul>
 
 {#						<!-- Top Search#}
@@ -142,12 +146,12 @@
 						<!-- Menu Buttons
 						============================================= -->
 
-                    {% if user %}
-                        <a href="#" class="button button-rounded fright"  data-langs="logout">LOGOUT</a>
-                    {% else %}
-                        <a href="{{ url_for('new.signup') }}" class="button button-rounded fright"  data-langs="register">REGISTER</a>
-                        <a href="{{ url_for('new.login') }}" style=" background: none; border: 1px solid #777; margin-right: 10px;" class="button button-rounded fright "  data-langs="login">LOGIN</a>
-                    {% endif %}
+                        {% if user %}
+                            <a href="{{ url_for('new.logout') }}" class="button button-rounded fright"  data-langs="logout">LOGOUT</a>
+                        {% else %}
+                            <a href="{{ url_for('new.signup') }}" class="button button-rounded fright"  data-langs="register">REGISTER</a>
+                            <a href="{{ url_for('new.login') }}" style=" background: none; border: 1px solid #777; margin-right: 10px;" class="button button-rounded fright "  data-langs="login">LOGIN</a>
+                        {% endif %}
 
 					</nav><!-- #primary-menu end -->
 
@@ -337,7 +341,6 @@
 
 	<!-- External JavaScripts
 	============================================= -->
-	<script src="/static/new/theme/js/jquery.js"></script>
     <script src="/static/new/theme/js/jquery.cookie.js"></script>
 	<script src="/static/new/theme/js/plugins.js"></script>
 

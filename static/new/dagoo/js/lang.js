@@ -19,7 +19,7 @@ $.lang.en = {
     "front-txt4":"Learn More",
 
     "login_txt1":"Login to your Account",
-    "login_txt2":"Username:",
+    "login_txt2":"Email:",
     "login_txt3":"Password:",
     "login_txt4":"Forgot Password?",
     "login_txt5":"Login",
@@ -51,7 +51,7 @@ $.lang.cn = {
     "front-txt4":"观看视频",
 
     "login_txt1":"登录账目",
-    "login_txt2":"用户名:",
+    "login_txt2":"电子邮件:",
     "login_txt3":"密码:",
     "login_txt4":"忘记密码？",
     "login_txt5":"登录",
