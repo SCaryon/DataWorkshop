@@ -123,6 +123,8 @@
 							<li><a href="#"><div data-langs="lab">LAB</div></a></li>
 							<li><a href="#"><div data-langs="market">MARKET</div></a></li>
                             <li><a href="#"><div data-langs="about">ABOUT</div></a></li>
+
+
                             <li class="mobileButton"><a href="{{ url_for('new.login') }}"><div data-langs="login">LOGIN</div></a></li>
                             <li class="mobileButton"><a href="{{ url_for('new.signup') }}"><div data-langs="register">REGISTER</div></a></li>
 
@@ -140,8 +142,13 @@
 						<!-- Menu Buttons
 						============================================= -->
 
+                    {% if user %}
+                        <a href="#" class="button button-rounded fright"  data-langs="logout">LOGOUT</a>
+                    {% else %}
                         <a href="{{ url_for('new.signup') }}" class="button button-rounded fright"  data-langs="register">REGISTER</a>
                         <a href="{{ url_for('new.login') }}" style=" background: none; border: 1px solid #777; margin-right: 10px;" class="button button-rounded fright "  data-langs="login">LOGIN</a>
+                    {% endif %}
+
 					</nav><!-- #primary-menu end -->
 
 				</div>
