@@ -11,25 +11,25 @@
 
 						<div class="card divcenter noradius noborder" style="max-width: 400px;">
 							<div class="card-body" style="padding: 40px;">
-								<form id="login-form" name="login-form" class="nobottommargin" action="#" method="post">
+								<div  class="nobottommargin">
 
-							<div style=" font-size: 25px; padding-bottom: 10px; color: #000;">Login to your Account</div>
+							        <div style=" font-size: 25px; padding-bottom: 10px; color: #000;" data-langs="login_txt1">Login to your Account</div>
 
-									<div class="col_full">
-										<label for="login-form-username">Username:</label>
-										<input type="text" id="login-form-username" name="login-form-username" value="" class="form-control not-dark" />
+									<div class="col_full" style="margin-bottom: 10px;">
+										<label for="login-form-email" data-langs="login_txt2">Email:</label>
+										<input type="text" id="login-form-email" value="" class="form-control not-dark" />
 									</div>
 
-									<div class="col_full">
-										<label for="login-form-password">Password:</label>
+									<div class="col_full" style="margin-bottom: 10px;">
+										<label for="login-form-password" data-langs="login_txt3">Password:</label>
 										<input type="password" id="login-form-password" name="login-form-password" value="" class="form-control not-dark" />
 									</div>
 
-									<div class="col_full nobottommargin">
-										<button class="button button-3d button-black nomargin" id="login-form-submit" name="login-form-submit" value="login">Login</button>
-										<a href="#" class="fright">Forgot Password?</a>
+									<div class="col_full nobottommargin" style=" margin-top: 40px;">
+										<button class="button button-3d button-black nomargin" onclick="click_log();" id="login-form-submit" name="login-form-submit" value="login"  data-langs="login_txt5">Login</button>
+										<a href="#" class="fright"  data-langs="login_txt4">Forgot Password?</a>
 									</div>
-								</form>
+								</div>
 
 
 							</div>
@@ -41,4 +41,60 @@
 					</div>
 				</div>
 
+    <script>
+
+    $(document).ready(function() {
+
+    });
+
+    $('#login-form-password').keypress(function(e) {
+        if(e.which == 13) {
+            click_log();
+        }
+    });
+
+    function click_log() {
+        if ($('#login-form-email').val() == "") {
+            $('#login-form-email').focus();
+            alert("Email should not be empty!");
+            return false;
+        } else if ($('#login-form-password').val() == "") {
+            $('#login-form-password').focus();
+            alert("Password should not be empty!");
+            return false;
+        }
+
+        var semail = /^(\w|.)+@(\d|.|[a-z]|[A-Z])+$/g;
+        if (!semail.test($('#login-form-email').val()) || $('#login-form-email').val().length < 5 || $('#login-form-email').val().length > 50) {
+            $('#login-form-email').focus();
+            alert("Please enter a valid email");
+            return false;
+        }
+
+        var data = {
+            "email": $('#login-form-email').val(),
+            "password": $('#login-form-password').val()
+        };
+        $.ajax({
+            type: "POST",
+            url: '/login/pass/',
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=UTF-8',
+            dataType: "html",
+            success: function (res) {//返回数据根据结果进行相应的处理
+                if (res == "account not exist")
+                    alert("Please enter the right username and password");
+                else if(res=="password not right")
+                    alert("Please enter the right password");
+                else {
+                    window.location.href = "{{ url_for('new.home') }}";
+                }
+            },
+            error: function () {
+                alert("Connect failed");
+            }
+        });
+    }
+
+    </script>
 {% endblock %}

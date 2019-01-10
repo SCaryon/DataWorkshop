@@ -32,6 +32,7 @@
 
     <!-- / -->
 
+	<script src="/static/new/theme/js/jquery.js"></script>
 
 	<!-- Document Title
 	============================================= -->
@@ -62,23 +63,25 @@
 					============================================= -->
 					<div class="top-links">
 						<ul>
-							<li><a href="index.html">ABOUT</a></li>
-							<li><a href="contact.html">CONTACT</a></li>
-
-							<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang">En</a>
+{#							<li><a href="#" data-langs="about">ABOUT</a></li>#}
+							<li><a href="#" data-langs="contact">CONTACT</a></li>
+                            <li><a href="#" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text"></span></a></li>
+                            <li><a href="#"><img  id="lang_select_img" src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang"><span id="lang_select_txt">En</span></a>
 								<ul>
-									<li><a href="#"><img src="/static/new/theme/demos/seo/images/flags/chi.png" alt="Lang">Cn</a></li>
+									<li><a href="#" onclick="setLanguage('en');"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang" data-lang="en">En</a></li>
+                                    <li><a href="#" onclick="setLanguage('cn');"><img src="/static/new/theme/demos/seo/images/flags/chi.png" alt="Lang" data-lang="cn">Cn</a></li>
 								</ul>
 							</li>
 						</ul>
 					</div><!-- .top-links end -->
-{#					<!-- Top Social#}
-{#					============================================= -->#}
-{#					<div id="top-social">#}
-{#						<ul>#}
-{#							<li><a href="http://instagram.com/semicolonweb" class="si-instagram" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text">Search</span></a></li>#}
-{#						</ul>#}
-{#					</div><!-- #top-social end -->#}
+
+                    <!-- Top Social
+					============================================= -->
+					<div id="top-social">
+						<ul>
+
+						</ul>
+					</div><!-- #top-social end -->
 
 				</div>
 
@@ -108,8 +111,8 @@
 					<nav id="primary-menu" class="with-arrows">
 
 						<ul>
-							<li class="current"><a href="{{ url_for('new.home') }}"><div>HOME</div></a></li>
-							<li><a href="#"><div>PRODUCT</div></a>
+							<li class="current"><a href="{{ url_for('new.home') }}"><div data-langs="home">HOME</div></a></li>
+							<li><a href="#"><div data-langs="product">PRODUCT</div></a>
 {#								<ul>#}
 {#									<li><a href="#"><div>WORK</div></a></li>#}
 {#									<li><a href="#"><div>LAB</div></a></li>#}
@@ -117,10 +120,18 @@
 {#									<li><a href="#"><div>LOGIN</div></a></li>#}
 {#								</ul>#}
 							</li>
-							<li><a href="#"><div>WORK</div></a></li>
-							<li><a href="#"><div>LAB</div></a></li>
-							<li><a href="#"><div>MARKET</div></a></li>
-							<li><a href="{{ url_for('new.login') }}"><div>LOGIN</div></a></li>
+							<li><a href="#"><div data-langs="work">WORK</div></a></li>
+							<li><a href="#"><div data-langs="lab">LAB</div></a></li>
+							<li><a href="#"><div data-langs="market">MARKET</div></a></li>
+                            <li><a href="#"><div data-langs="about">ABOUT</div></a></li>
+
+                            {% if user %}
+                                <li><a href="{{ url_for('new.my') }}"><div data-langs="profile">MY</div></a></li>
+                                <li class="mobileButton"><a href="{{ url_for('new.logout') }}"><div data-langs="logout">LOGOUT</div></a></li>
+                            {% else %}
+                                <li class="mobileButton"><a href="{{ url_for('new.login') }}"><div data-langs="login">LOGIN</div></a></li>
+                                <li class="mobileButton"><a href="{{ url_for('new.signup') }}"><div data-langs="register">REGISTER</div></a></li>
+                            {% endif %}
 						</ul>
 
 {#						<!-- Top Search#}
@@ -134,7 +145,13 @@
 
 						<!-- Menu Buttons
 						============================================= -->
-						<a href="{{ url_for('new.signup') }}" class="button button-rounded fright leftmargin-sm">REGISTER</a>
+
+                        {% if user %}
+                            <a href="{{ url_for('new.logout') }}" class="button button-rounded fright"  data-langs="logout">LOGOUT</a>
+                        {% else %}
+                            <a href="{{ url_for('new.signup') }}" class="button button-rounded fright"  data-langs="register">REGISTER</a>
+                            <a href="{{ url_for('new.login') }}" style=" background: none; border: 1px solid #777; margin-right: 10px;" class="button button-rounded fright "  data-langs="login">LOGIN</a>
+                        {% endif %}
 
 					</nav><!-- #primary-menu end -->
 
@@ -324,12 +341,18 @@
 
 	<!-- External JavaScripts
 	============================================= -->
-	<script src="/static/new/theme/js/jquery.js"></script>
+    <script src="/static/new/theme/js/jquery.cookie.js"></script>
 	<script src="/static/new/theme/js/plugins.js"></script>
 
 	<!-- Footer Scripts
 	============================================= -->
 	<script src="/static/new/theme/js/functions.js"></script>
+
+
+    <!-- Dagoo Specific JavaScripts
+	============================================= -->
+    <script src="/static/new/dagoo/js/layout.js"></script>
+	<script src="/static/new/dagoo/js/lang.js"></script>
 
 	<script>
 		//Pricing Table Script
