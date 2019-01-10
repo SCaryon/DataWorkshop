@@ -3,6 +3,15 @@ from model import user
 
 
 new = Blueprint('new',__name__,template_folder='../templates_new')
+
+def is_login():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        return user1
+
+    return ""
+
 @new.route("/new/")
 def home():
 
@@ -10,13 +19,8 @@ def home():
     session['embedding_method'] = 'Principal_Component_Analysis'
     session['visualization_method'] = 'Radviz'
     session['cluster_parameters'] = {}
-    if session.get('email'):
-        email = session.get('email')
-        user1 = user.query.filter_by(email=email).first()
-        print(user1)
-        return render_template('front.html', user=user1)
-    else:
-        return render_template('front.html')
+
+    return render_template('front.html', user=is_login())
 
 
 @new.route('/new/logout/')
@@ -34,15 +38,15 @@ def signup():
 
 @new.route("/new/term1/")
 def term1():
-    return render_template('term1.html')
+    return render_template('term1.html', user=is_login())
 
 @new.route("/new/term2")
 def term2():
-    return render_template('term2.html')
+    return render_template('term2.html', user=is_login())
 
 @new.route("/new/my/")
 def my():
-    return render_template('my.html')
+    return render_template('my.html', user=is_login())
 
 @new.route("/new/first")
 def world2():
