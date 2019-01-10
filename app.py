@@ -50,7 +50,8 @@ app.config['SECRET_KEY'] = os.urandom(24)
 # 设定session的保存时间，当session.permanent=True的时候
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
-#ksw now
+
+# ksw now
 
 @app.route('/')
 @app.route('/index')
@@ -313,10 +314,10 @@ def user_change():
 def user_change_img():
     file = request.files['file']
     if file and '.' in file.filename:
-        file_types = ['jpg','jpeg','png','pdf']
+        file_types = ['jpg', 'jpeg', 'png', 'pdf']
         this_type = file.filename.rsplit('.', 1)[1]
         for file_type in file_types:
-            old_file = 'static/user/' + session.get('email') + '/img/user_img.'+file_type
+            old_file = 'static/user/' + session.get('email') + '/img/user_img.' + file_type
             if os.path.exists(old_file):
                 os.remove(old_file)
         if this_type in file_types:
@@ -894,26 +895,75 @@ def geo_get():
 # 海量点分布
 @app.route('/geo/points/', methods=['GET', 'POST'])
 def geo_points():
-    final_data = csv.reader(open('./examples/geo/geo_points.csv'))
-    point = []
-    for i in final_data:
-        dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
-        point.append(dic)
-    final_data_object = {}
-    final_data_object['points'] = point
-    return render_template('geogoo/geo_points.html')
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            return render_template("geogoo/geo_points.html", user=user1)
+    else:  # 读取默认的数据
+        return render_template('geogoo/geo_points.html')
 
 
 @app.route('/geo/get/points/', methods=['GET', 'POST'])
 def geo_get_points():
-    final_data = csv.reader(open('./examples/geo/geo_points.csv'))
-    point = []
-    for i in final_data:
-        dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
-        point.append(dic)
-    final_data_object = {}
-    final_data_object['points'] = point
-    return jsonify(final_data_object)
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if os.path.exists("./static/user/" + email + "/data/geo_points.csv"):
+                final_data = csv.reader(open("./static/user/" + email + "/data/geo_points.csv"))
+            else:
+                final_data = csv.reader(open('./examples/geo/geo_points.csv'))
+            point = []
+            for i in final_data:
+                dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
+                point.append(dic)
+            final_data_object = {}
+            final_data_object['points'] = point
+            return jsonify(final_data_object)
+    else:
+        final_data = csv.reader(open('./examples/geo/geo_points.csv'))
+        point = []
+        for i in final_data:
+            dic = dict(zip(['longitude', 'latitude', 'value', 'name'], i))
+            point.append(dic)
+        final_data_object = {}
+        final_data_object['points'] = point
+        return jsonify(final_data_object)
+
+
+# 读取用户上传的点数据
+@app.route('/geo/points/upload/', methods=['GET', 'POST'])
+def geo_points_upload():
+    if session.get('email'):
+        email = session.get('email')
+        user1 = user.query.filter_by(email=email).first()
+        if user1 is None:
+            return "false"
+        else:
+            if request.method == 'POST':
+                path = "./static/user/" + email + "/data/"
+                filedata = request.files['file']
+                if filedata:
+                    if os.path.exists(path + filedata.filename):
+                        os.remove(path + filedata.filename)
+                    if os.path.exists(path + "geo_points.csv"):
+                        os.remove(path + "geo_points.csv")
+                    try:
+                        filedata.save(path + filedata.filename)
+                    except IOError:
+                        return '上传文件失败'
+                    os.rename(path + filedata.filename, path + "geo_points.csv")
+                else:
+                    return "filename invalid or network error"
+            return redirect(url_for('geo_points'))
+    else:
+        session["last_page"] = "/geo/points/"
+        return render_template('user/login.html')
 
 
 @app.route('/geo/line/', methods=['GET', 'POST'])
@@ -1042,7 +1092,7 @@ def generate_table_data(table_id, table_fea, table_da, table_cluster_method, tab
     for temp_list in table_id_da:
         table_id_fea_da_dic.append(data_list_to_dictionary(table_fea, temp_list))
     # table statistics data
-    table_stt_da = { 'corr': []}
+    table_stt_da = {'corr': []}
     stt = Statistics(table_da, table_fea[1:])
     table_stt_da['corr'] = stt.corr
     # table cluster and embedding data
@@ -1126,19 +1176,19 @@ def tablegoo():
     table_fea_fea_dic, table_fea_da_dic, table_id_fea_da_dic, table_id_da, table_stt_da, table_clu_emb_da, table_ano_de_da, table_clusters = generate_table_data(
         table_identifiers, table_features, table_data, table_cluster_method, table_embedding_method, parameters)
     return render_template('tablegoo/tablegoo_homepage.html',
-                            features_dictionary=table_fea_fea_dic,
-                            no_identifiers_data_list=table_data,
-                            no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
-                            no_identifiers_data_dictionary=table_fea_da_dic,
-                            data_dictionary=table_id_fea_da_dic,
-                            corr=table_stt_da['corr'],
-                            features_list=table_features,
-                            cluster_embedding_data=table_clu_emb_da,
-                            n_clusters=table_clusters,
-                            cluster_method=table_cluster_method,
-                            embedding_method=table_embedding_method,
-                            anomaly_detection_data=table_ano_de_da,
-                            visualization_method=table_visualization_method)
+                           features_dictionary=table_fea_fea_dic,
+                           no_identifiers_data_list=table_data,
+                           no_identifiers_data_list_transform=np.transpose(table_data).tolist(),
+                           no_identifiers_data_dictionary=table_fea_da_dic,
+                           data_dictionary=table_id_fea_da_dic,
+                           corr=table_stt_da['corr'],
+                           features_list=table_features,
+                           cluster_embedding_data=table_clu_emb_da,
+                           n_clusters=table_clusters,
+                           cluster_method=table_cluster_method,
+                           embedding_method=table_embedding_method,
+                           anomaly_detection_data=table_ano_de_da,
+                           visualization_method=table_visualization_method)
 
 
 @app.route('/table_upload', methods=['GET', 'POST'])
@@ -1687,6 +1737,7 @@ def cluster_way_evaluation():  # 需要的参数是各个图所展示出来的�
     result_str = ':'.join(result)
     return result_str
 
+
 def get_usermethod_labels():
     target_url = os.path.join("./static/user/" + session.get('email') + "/code/Mining")
     if os.path.exists(os.path.join(target_url, 'User_cluster.py')):
@@ -1708,6 +1759,7 @@ def get_usermethod_labels():
             file_object.close()
             return user_labels
 
+
 @app.route('/cluster/User_cluster', methods=['POST', 'GET'])
 def User_cluster():
     # 首先修改当前的工作路径，执行完程序后改回原来的工作路径
@@ -1718,8 +1770,8 @@ def User_cluster():
         body = 'page-top' + draw_id
         node_id = ['name' + draw_id, 'cluster' + draw_id, 'data_obj' + draw_id, 'method' + draw_id]
         if os.path.exists("./static/user/" + session.get('email') + "/data/table.csv"):
-                table_data, table_features, table_identifiers = read_table_data(
-                    "./static/user/" + session.get('email') + "/data/table.csv")
+            table_data, table_features, table_identifiers = read_table_data(
+                "./static/user/" + session.get('email') + "/data/table.csv")
         else:
             table_data, table_features, table_identifiers = read_table_data('./examples/table/car.csv')
         table_da_dic = generate_table_dic_data(table_identifiers, table_data, table_features)
@@ -1778,22 +1830,21 @@ def User_cluster():
                                    # final_data_object['data_dictionary'],
                                    method='User_cluster' + draw_id, body_id=body, body_draw_id=node_id, )
         if (exist == False):
-            return jsonify({'prompt':'please upload file of your method first!'})
+            return jsonify({'prompt': 'please upload file of your method first!'})
     else:
-        return jsonify({'prompt':'please sign in first!'})
-
+        return jsonify({'prompt': 'please sign in first!'})
 
 
 @app.route('/save_cluster_file', methods=['POST', 'GET'])
 def cluster_code():
-    #upload user file.include csv,py,jar,so
+    # upload user file.include csv,py,jar,so
     if request.method == 'POST' and session.get('email'):
         f = request.files['file']
         # 1361377791@qq.com
         # basepath = os.path.dirname(__file__)+'/static/user/'+session.get('email')+"/user_code"
         #  文件所要放入的路径
 
-        basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
+        basepath = os.path.join(os.getcwd(), "static/user/" + session.get('email'))
         # upload_path = os.path.join(basepath, '', secure_filename('User_cluster.zip'))
         if (request.form.get('label') == 'zip'):
             filename = os.path.join(basepath, '/code/Mining/User_cluster.zip')  # 要解压的文件
@@ -1912,13 +1963,14 @@ def mining_embedding():
                            regression_data=table_reg_da,
                            visualization_method=table_visualization_method)
 
+
 @app.route('/User_code', methods=['POST', 'GET'])
 def User_code():
     # save user's embedding file
     if request.method == 'POST' and session.get('email'):
         f = request.files['file']
         # basepath = os.path.dirname(__file__) + '/static/user/' + session.get('email') + "/user_code"  # 文件所要放入的路径
-        basepath = os.path.join(os.getcwd(),"static/user/" + session.get('email'))
+        basepath = os.path.join(os.getcwd(), "static/user/" + session.get('email'))
 
         if (request.form.get('label') == 'zip'):
             filename = os.path.join(basepath, 'code/Mining/User_embedding.zip')  # 要解压的文件
@@ -1958,6 +2010,7 @@ def User_code():
     else:
         session['last_page'] = '/embedding'
         return 'please sign in first!'
+
 
 @app.route('/projection/User_method', methods=['POST', 'GET'])
 def User_method():
@@ -2018,6 +2071,7 @@ def User_method():
     else:
         return jsonify({'prompt': 'please sign in first!'})
 
+
 # embedding end---------------------------------------------
 
 
@@ -2026,7 +2080,7 @@ def User_method():
 @app.route('/textgoo', methods=['GET', 'POST'])
 def textgoo():
     if not session.get('email'):
-        user1=None
+        user1 = None
         path = './examples/text/text_data.csv'
     else:
         email = session.get('email')
@@ -2161,12 +2215,12 @@ def upload_pic():
 
 @app.route('/BusRoute/', methods=['POST', 'GET'])
 def BusRoute():
-	return render_template('geogoo/BusRoute.html')
+    return render_template('geogoo/BusRoute.html')
 
 
 @app.route('/PM25/', methods=['POST', 'GET'])
 def PM25():
-	return render_template('geogoo/PM25.html')
+    return render_template('geogoo/PM25.html')
 
 
 # text_OCR--------------------------------------------------
