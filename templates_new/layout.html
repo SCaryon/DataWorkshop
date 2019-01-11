@@ -112,7 +112,7 @@
 
 						<ul>
 							<li ><a href="{{ url_for('new.home') }}"><div data-langs="home">HOME</div></a></li>  {# class="current" #}
-							<li><a href="#"><div data-langs="product">PRODUCT</div></a>
+							<li><a href="{{ url_for('new.product') }}"><div data-langs="product">PRODUCT</div></a>
 {#								<ul>#}
 {#									<li><a href="#"><div>WORK</div></a></li>#}
 {#									<li><a href="#"><div>LAB</div></a></li>#}
@@ -121,9 +121,9 @@
 {#								</ul>#}
 							</li>
 							<li><a href="{{ url_for('new.work') }}"><div data-langs="work">WORK</div></a></li>
-							<li><a href="#"><div data-langs="lab">LAB</div></a></li>
-							<li><a href="#"><div data-langs="market">MARKET</div></a></li>
-                            <li><a href="#"><div data-langs="about">ABOUT</div></a></li>
+							<li><a href="{{ url_for('new.lab') }}"><div data-langs="lab">LAB</div></a></li>
+							<li><a href="{{ url_for('new.market') }}"><div data-langs="market">MARKET</div></a></li>
+                            <li><a href="{{ url_for('new.aboutus') }}"><div data-langs="about">ABOUT</div></a></li>
 
                             {% if user %}
                                 <li><a href="{{ url_for('new.my') }}"><div data-langs="profile">MY</div></a></li>

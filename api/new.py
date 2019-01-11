@@ -52,6 +52,22 @@ def my():
 def work():
     return render_template('work.html', user=is_login())
 
+@new.route("/new/aboutus/")
+def aboutus():
+    return render_template('aboutus.html', user=is_login())
+
+@new.route("/new/market/")
+def market():
+    return render_template('market.html', user=is_login())
+
+@new.route("/new/lab/")
+def lab():
+    return render_template('lab.html', user=is_login())
+
+@new.route("/new/product/")
+def product():
+    return render_template('product.html', user=is_login())
+
 @new.route("/new/first")
 def world2():
     return "Hello Wo!"

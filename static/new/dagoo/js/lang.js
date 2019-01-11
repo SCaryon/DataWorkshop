@@ -29,7 +29,7 @@ $.lang.en = {
     "signup_txt3":"Username:",
     "signup_txt4":"Password:",
     "signup_txt5":"Email Verification Code:",
-    "signup_txt6":"By clicking the Register button, you agree to our <a href='"+Flask.url_for("new.term1")+"' target='_blank'>Terms of Service</a> and <a href='"+Flask.url_for("new.term2")+"' target='_blank'>Privacy Policy</a>.",
+    "signup_txt6":"By clicking the Register button, you agree to our <a href='/new/term1' target='_blank'>Terms of Service</a> and <a href='/new/term2' target='_blank'>Privacy Policy</a>.",
     "signup_txt7":"Register",
     "signup_txt8":"Get Code",
 
@@ -48,7 +48,7 @@ $.lang.cn = {
     "register":"成为gooer",
 
     "front-txt1":"一键式数据分析平台",
-    "front-txt2":"让每个人都能享受数据的乐趣",
+    "front-txt2":"融合数据分析和可视化前沿技术的大数据通用平台，dagoo让每个人都能享受数据的乐趣. ",
     "front-txt3":"体验 dagoo",
     "front-txt4":"观看视频",
 
@@ -63,7 +63,7 @@ $.lang.cn = {
     "signup_txt3":"用户名:",
     "signup_txt4":"密码:",
     "signup_txt5":"电子邮件验证码:",
-    "signup_txt6":"点击注册按钮即表示您同意我们的 <a href='"+Flask.url_for("new.term1")+"' target='_blank'>服务条款</a>和<a href='"+Flask.url_for("new.term2")+"' target='_blank'>隐私政策</a>.",
+    "signup_txt6":"点击注册按钮即表示您同意我们的 <a href='/new/term1' target='_blank'>服务条款</a>和<a href='/new/term2' target='_blank'>隐私政策</a>.",
     "signup_txt7":"注册",
     "signup_txt8":"获取代码",
 
