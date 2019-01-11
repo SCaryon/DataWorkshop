@@ -31,7 +31,9 @@ $.lang.en = {
     "signup_txt5":"Email Verification Code:",
     "signup_txt6":"By clicking the Register button, you agree to our <a href='/term1' target='_blank'>Terms of Service</a> and <a href='/term2' target='_blank'>Privacy Policy</a>.",
     "signup_txt7":"Register",
-    "signup_txt8":"Get Code"
+    "signup_txt8":"Get Code",
+
+    "work_txt1":"DaGoo supports data analysis in a variety of industries including economy, finance, public transportation, and climate."
 };
 
 $.lang.cn = {
@@ -63,7 +65,11 @@ $.lang.cn = {
     "signup_txt5":"电子邮件验证码:",
     "signup_txt6":"点击注册按钮即表示您同意我们的 <a href='/term1' target='_blank'>服务条款</a>和<a href='/term2' target='_blank'>隐私政策</a>.",
     "signup_txt7":"注册",
-    "signup_txt8":"获取代码"
+    "signup_txt8":"获取代码",
+
+    "work_txt1":"DaGoo 支持经济，金融，公共交通，气候等多种行业的数据分析。",
+
+
 };
 
 /**

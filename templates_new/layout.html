@@ -68,8 +68,8 @@
                             <li><a href="#" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text"></span></a></li>
                             <li><a href="#"><img  id="lang_select_img" src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang"><span id="lang_select_txt">En</span></a>
 								<ul>
-									<li><a href="#" onclick="setLanguage('en');"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang" data-lang="en">En</a></li>
-                                    <li><a href="#" onclick="setLanguage('cn');"><img src="/static/new/theme/demos/seo/images/flags/chi.png" alt="Lang" data-lang="cn">Cn</a></li>
+									<li><a href="#" onclick="$.cookie('lang','en', { expires: 7, path: '/' });window.location.reload();"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang" data-lang="en">En</a></li>
+                                    <li><a href="#" onclick="$.cookie('lang','cn', { expires: 7, path: '/' });window.location.reload();"><img src="/static/new/theme/demos/seo/images/flags/chi.png" alt="Lang" data-lang="cn">Cn</a></li>
 								</ul>
 							</li>
 						</ul>
@@ -111,7 +111,7 @@
 					<nav id="primary-menu" class="with-arrows">
 
 						<ul>
-							<li class="current"><a href="{{ url_for('new.home') }}"><div data-langs="home">HOME</div></a></li>
+							<li ><a href="{{ url_for('new.home') }}"><div data-langs="home">HOME</div></a></li>  {# class="current" #}
 							<li><a href="#"><div data-langs="product">PRODUCT</div></a>
 {#								<ul>#}
 {#									<li><a href="#"><div>WORK</div></a></li>#}
@@ -120,7 +120,7 @@
 {#									<li><a href="#"><div>LOGIN</div></a></li>#}
 {#								</ul>#}
 							</li>
-							<li><a href="#"><div data-langs="work">WORK</div></a></li>
+							<li><a href="{{ url_for('new.work') }}"><div data-langs="work">WORK</div></a></li>
 							<li><a href="#"><div data-langs="lab">LAB</div></a></li>
 							<li><a href="#"><div data-langs="market">MARKET</div></a></li>
                             <li><a href="#"><div data-langs="about">ABOUT</div></a></li>
@@ -180,7 +180,7 @@
 
 						<div class="widget clearfix">
 
-{#							<img src="/static/new/theme/images/footer-widget-logo.png" alt="Footer Logo" class="alignleft" style="margin-top: 8px; padding-right: 18px; border-right: 1px solid #DDD;">#}
+                            <div alt="Footer Logo" class="alignleft" style="color: #2d2d2d;    font-weight: 800; font-size: 40px;margin-top: 8px; padding-right: 18px; border-right: 1px solid #DDD;">DaGoo</div>
 
 							<p>We believe in <strong>Simple</strong>, <strong>Creative</strong> &amp; <strong>Flexible</strong> Design Standards with a Retina &amp; Responsive Approach. Browse the amazing Features this template offers.</p>
 
@@ -246,7 +246,7 @@
 											<i class="icon-envelope nobg noborder"></i>
 										</div>
 										<span class="text-muted">Call Us:</span><br>
-										<h3 class="nott ls0 t600">(10) 22 33445566</h3>
+										<h3 class="nott ls0 t600">(+86) 755 84273615</h3>
 									</div>
 								</div>
 
@@ -256,7 +256,7 @@
 											<i class="icon-phone3 nobg noborder"></i>
 										</div>
 										<span class="text-muted">Email Us:</span><br>
-										<h3 class="nott ls0 t600">info@Dagoo.com</h3>
+										<h3 class="nott ls0 t600">dagooteam@hotmail.com</h3>
 									</div>
 								</div>
 
@@ -312,7 +312,7 @@
 
 			<!-- Copyrights
 			============================================= -->
-			<div id="copyrights" style="background: url('/static/new/theme/demos/seo/images/hero/footer.svg') no-repeat top center; background-size: cover; padding-top: 70px;">
+			<div id="copyrights" style="background: url('/static/new/theme/demos/seo/images/hero/footer2.svg') no-repeat top center; background-size: cover; padding-top: 70px;">
 
 				<div class="container clearfix">
 

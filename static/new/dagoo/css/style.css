@@ -85,6 +85,9 @@ h2{
     .mobileButton {
         display:none;
     }
+    .slider-title h2{
+        font-size:40px;
+    }
 }
 @media (max-width: 991.98px){
     #logo {
@@ -118,3 +121,38 @@ h2{
      top: 25px;
  }
 
+#copyrights *{
+    color:#eee;
+}
+
+.entry .entry-title h3 a {
+    font-size: 20px;
+}
+
+.team-desc{
+    margin-left:30px;
+}
+.work1-box{
+    border-radius: 10px;
+    background-color: #fff;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0px 4px #efefef;
+}
+.work1-meta{margin-top: 10px;}
+.work1-meta h4{color: #000;display: inline-block;margin-right: 6px;margin-bottom: 0px;font-size: 13px;}
+.work1-meta span{
+    color: #b9b9b9;
+    letter-spacing: 1px;
+}
+.work1-title{margin-top: 5px;font-weight: 600;font-size: 20px;}
+.work1-content{
+
+}
+.work1-content p {
+
+}
+.work1-readmore{
+    position: absolute;
+    right: 10px;
+    bottom: 10px;}

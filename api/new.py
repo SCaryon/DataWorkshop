@@ -48,6 +48,10 @@ def term2():
 def my():
     return render_template('my.html', user=is_login())
 
+@new.route("/new/work/")
+def work():
+    return render_template('work.html', user=is_login())
+
 @new.route("/new/first")
 def world2():
     return "Hello Wo!"
