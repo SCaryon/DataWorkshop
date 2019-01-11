@@ -29,7 +29,7 @@ $.lang.en = {
     "signup_txt3":"Username:",
     "signup_txt4":"Password:",
     "signup_txt5":"Email Verification Code:",
-    "signup_txt6":"By clicking the Register button, you agree to our <a href='/term1' target='_blank'>Terms of Service</a> and <a href='/term2' target='_blank'>Privacy Policy</a>.",
+    "signup_txt6":"By clicking the Register button, you agree to our <a href='"+Flask.url_for("new.term1")+"' target='_blank'>Terms of Service</a> and <a href='"+Flask.url_for("new.term2")+"' target='_blank'>Privacy Policy</a>.",
     "signup_txt7":"Register",
     "signup_txt8":"Get Code",
 
@@ -52,7 +52,7 @@ $.lang.cn = {
     "front-txt3":"体验 dagoo",
     "front-txt4":"观看视频",
 
-    "login_txt1":"登录账目",
+    "login_txt1":"登录",
     "login_txt2":"电子邮件:",
     "login_txt3":"密码:",
     "login_txt4":"忘记密码？",
@@ -63,7 +63,7 @@ $.lang.cn = {
     "signup_txt3":"用户名:",
     "signup_txt4":"密码:",
     "signup_txt5":"电子邮件验证码:",
-    "signup_txt6":"点击注册按钮即表示您同意我们的 <a href='/term1' target='_blank'>服务条款</a>和<a href='/term2' target='_blank'>隐私政策</a>.",
+    "signup_txt6":"点击注册按钮即表示您同意我们的 <a href='"+Flask.url_for("new.term1")+"' target='_blank'>服务条款</a>和<a href='"+Flask.url_for("new.term2")+"' target='_blank'>隐私政策</a>.",
     "signup_txt7":"注册",
     "signup_txt8":"获取代码",
 

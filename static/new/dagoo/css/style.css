@@ -127,8 +127,12 @@ h2{
 
 .entry .entry-title h3 a {
     font-size: 20px;
+    color: #fff !important;
 }
 
+.heading-block h3 {
+    font-size: 36px;
+}
 .team-desc{
     margin-left:30px;
 }
