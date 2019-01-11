@@ -3,15 +3,17 @@
 
 <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/geogoo/colorselect.css">
+
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/style.css">
     <script type="text/javascript" src="/static/js/bootstrap/jquery-1.9.0.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/mdui.css">
     <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
     <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main1119.css"/>
-
     <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.min.css">
 
     <!-- MAIN CSS -->
+    <link href="http://a.amap.com/Loca/static/manual/example/style/demo.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/bootstrap/tooplate-style.css">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <link rel="stylesheet" href="/static/css/geogoo/geography.css">
@@ -19,10 +21,10 @@
     <title>Massive points</title>
 </head>
 
-<body>
+<body style="background: black">
+<div id="picker"></div>
 <div class="navbar custom-navbar navbar-fixed-top" role="navigation" style="background: black">
     <div class="container">
-
         <!-- NAVBAR HEADER -->
         <div class="navbar-header">
             <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -46,34 +48,9 @@
         </div>
     </div>
 </div>
-<div style="margin-top:150px;float: left;width: 15%;color: white">
-    <div>
-        <label for="attr_select" class="mdui-radio">Select Attribute</label>
-        <form class="mdui-theme-accent-blue" id="attr_select">
-            {% for k in attr %}
-                <label class="mdui-radio">
-                    <input type="radio" name="attribute" value="{{ k }}"/>
-                    <i class="mdui-radio-icon"></i>
-                    {{ k }}
-                </label>
-            {% endfor %}
-        </form>
-    </div>
-
-    <div>
-        <label for="color_select" class="mdui-radio">Color Bar</label>
-        <select class="mdui-select" mdui-select id="color_select"></select>
-    </div>
-    <div>
-        <div>min</div>
-        <div id="color_bar">
-            <canvas id="color_canvas" width="200" height="40"></canvas>
-        </div>
-    </div>
-    <button id="color_reverse" class="button_blue">reverse</button>
-    <br>
-
-    <form method="post" action="/geo/admin/upload/" enctype="multipart/form-data">
+<div style="margin-top:150px;float: left;width: 15%;color: white;position: relative">
+    <button id="change_color" class="button_blue" onclick="change_display()">change color</button>
+    <form method="post" action="/geo/points/upload/" enctype="multipart/form-data">
         <input class="button_blue" id="file_path" name="file_path" type="button"
                onclick="file.click()" value="File Upload">
         <input type="file" id="file" style="display:none" name="file"
@@ -81,16 +58,29 @@
         <input class="button_blue" type="submit" value="Submit">
     </form>
 </div>
-<div id="container" style="margin-top: 90px;"></div>
+<div id="container" style="margin-top: 90px;float: left;position: relative"></div>
 <script src="https://webapi.amap.com/loca?key=2dd663dd485017c4b832632ff9751da0"></script>
 <!-- UI组件库 1.0 -->
-<script src="/static/data/geogoo/geo_points.js"></script>
 <script src="/static/js/bootstrap/jquery.js"></script>
 <script src="/static/js/bootstrap/bootstrap.min.js"></script>
 <!--文件上传使用的-->
 <script src="/static/js/upload/papaparse.js"></script>
-<script src=" https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
+<script src="http://a.amap.com/Loca/static/manual/example/script/demo.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jschardet/1.4.1/jschardet.min.js"></script>
+{#<script src="/static/data/geogoo/geo_points.js"></script>#}
+<script src="/static/js/geogoo/colorselect.js"></script>
 <script>
+    {#$('#picker').fadeOut();#}
+
+    function change_display() {
+        if ($('#picker').css('opacity') == 0) {
+            $('#picker').css('opacity','1');
+        }
+        else {
+            $('#picker').css('opacity','0');
+        }
+    }
+
     geogra_data = {};
     $.ajax({
         type: "POST",
@@ -126,48 +116,69 @@
         mapStyle: 'amap://styles/26fc904bd43d8b834219809619ba4aea',
     });
 
-    var layer = Loca.visualLayer({
-        eventSupport: true,
-        fitView: true,
-        container: map,
-        blendMode: 'lighter',
-        type: 'point',
-        shape: 'circle'
-    });
+    function changelayer(color) {
+        var layer = Loca.visualLayer({
+            eventSupport: true,
+            fitView: true,
+            container: map,
+            {#blendMode: 'lighter',#}
+            type: 'point',
+            shape: 'circle',
+        });
 
-    layer.on('mousemove', function (ev) {
-        // 事件类型
-        var type = ev.type;
-        // 当前元素的原始数据
-        var rawData = ev.rawData;
-        // 原始鼠标事件
-        var originalEvent = ev.originalEvent;
-    });
+        layer.on('mousemove', (ev) => {
+            // 事件类型
+            var type = ev.type;
+            // 当前元素的原始数据
+            var rawData = ev.rawData;
+            // 原始鼠标事件
+            var originalEvent = ev.originalEvent;
+            openInfoWin(map.getMap(), originalEvent, {
+                '位置': [rawData.latitude.toString(), rawData.longitude.toString()],
+                '热度': rawData.value.toString(),
+            });
+        });
+        map.on('click', (ev) => {
+            closeInfoWin();
+            $('#picker').css('opacity','0');
+        });
 
 
-    layer.setData(geogra_data, {
-        lnglat: function (data) {
-            var item = data.value;
-            return [item.longitude, item.latitude];
+        layer.setData(geogra_data, {
+            lnglat: function (data) {
+                var item = data.value;
+                return [item.longitude, item.latitude];
+            }
+        });
+
+
+        layer.setOptions({
+            style: {
+                radius: function (data) {
+                    if (max === min)
+                        return 12;
+                    else
+                        return (data.value.value - min) / (max - min) * 6 + 6;
+                },
+                //fill: function (data) {
+                //  return '#cc589f';
+                //},
+                {#opacity: 1,#}
+                color: color,
+                opacity: 0.6,
+                borderWidth: 1,
+                borderColor: '#eee',
+            },
+        });
+        layer.render();
+    }
+
+    var picker = new ColorPicker(document.getElementById('picker'), {
+        onUpdate: function (rgb) {
+            changelayer("rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")");
         }
     });
-
-
-    layer.setOptions({
-        style: {
-            radius: function (data) {
-                if (max === min)
-                    return 8;
-                else
-                    return (data.value.value - min) / (max - min) * 8;
-            },
-            fill: function (data) {
-                return '#cc589f';
-            },
-            opacity: 1,
-        }
-    });
-    layer.render();
+    changelayer('#cc589f');
 
 
     //文件上传部分
@@ -231,23 +242,6 @@
             return encoding;
         }
     };
-
-    function read_file() {
-        var file_name = $("input[name=csvfile]").val();
-        if (file_name.lastIndexOf(".") != -1) {
-            var fileType = (file_name.substring(file_name.lastIndexOf(".") + 1, file_name.length)).toLowerCase();
-            if (fileType == 'csv') {
-                $("input[name=csvfile]").csv2arr(function (res) {
-                });
-            }
-            else
-                alert("Please use csv file")
-        }
-    }
-
-    function uploadComplete(evt) {//py文件上传成功
-        alert(evt.target.responseText);
-    }
 </script>
 
 </body>
