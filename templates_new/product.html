@@ -2,11 +2,12 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<section id="page-title" style="background-color: #fff;">
+<section id="page-title" style="background-color: #fff;border:none;">
 
     <div class="container clearfix">
-        <h1>Product</h1>
-        <span>Here are DaGoo's Products</span>
+        <h1>Product <a href="{{ url_for('new.product_all') }}" target="_blank" style="font-size: 15px; text-decoration: underline !important;" class=""><i class="icon-external-link"></i> Console</a></h1>
+
+        <span>DaGoo has SIX inseparable brothers. They are geniuses in different areas!</span>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
             <li class="breadcrumb-item active" aria-current="page">Product</li>
@@ -14,6 +15,120 @@
     </div>
 
 </section>
+
+
+<div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
+    <div class="container clearfix">
+        <div class="col_half nobottommargin center">
+            <img src="/static/new/dagoo/images/product1.jpg" alt="Image" >
+        </div>
+        <div class="col_half nobottommargin col_last">
+            <div class="heading-block" style="padding-top: 40px;">
+                <h2>Clean Goo</h2>
+                <span>Pre-precessing tools for well-defined data set</span>
+            </div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae, repudiandae, maxime, earum, sapiente assumenda non odit laborum qui vero vel quos sint excepturi in laudantium.</p>
+            <a href="{{ url_for('new.product_cleangoo') }}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+        </div>
+    </div>
+</div>
+
+<div class="section nobg notopmargin noborder bottommargin-sm" style="margin:0px !important;">
+    <div class="container clearfix">
+        <div class="col_half nobottommargin">
+            <div class="heading-block" style="padding-top: 40px;">
+                <h2>Multi Goo</h2>
+                <span>Multivariate data analysis</span>
+            </div>
+            <p>Multivariate data analysis - cluster, embedding, anomaly detection, regression,association analysis</p>
+            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+        </div>
+        <div class="col_half bottommargin-sm center col_last">
+            <img src="/static/new/dagoo/images/product2.jpg" alt="Image" >
+        </div>
+    </div>
+</div>
+
+
+<div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
+    <div class="container clearfix">
+        <div class="col_half nobottommargin center">
+            <img src="/static/new/dagoo/images/product3.jpg" alt="Image" >
+        </div>
+        <div class="col_half nobottommargin col_last">
+            <div class="heading-block" style="padding-top: 40px;">
+                <h2>Text Goo</h2>
+                <span>Text data analysis</span>
+            </div>
+            <p>text recognition, word cloud and knowledge graph</p>
+            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+        </div>
+    </div>
+</div>
+
+<div class="section nobg notopmargin noborder bottommargin-sm" style="margin:0px !important;">
+    <div class="container clearfix">
+        <div class="col_half nobottommargin">
+            <div class="heading-block" style="padding-top: 40px;">
+                <h2>Geo Goo</h2>
+                <span>Geographical data analysis</span>
+            </div>
+            <p>line, point, 2D and 3D map.</p>
+            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+        </div>
+        <div class="col_half bottommargin-sm center col_last">
+            <img src="/static/new/dagoo/images/product4.jpg" alt="Image" ">
+        </div>
+    </div>
+</div>
+
+
+<div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
+    <div class="container clearfix">
+        <div class="col_half nobottommargin center">
+            <img src="/static/new/dagoo/images/product5.jpg" alt="Image">
+        </div>
+        <div class="col_half nobottommargin col_last">
+            <div class="heading-block" style="padding-top: 40px;">
+                <h2>Graph Goo</h2>
+                <span>Pre-precessing tools for well-defined data set</span>
+            </div>
+            <p>Circular Layout, Chord Diagram,Tree Layout,Pack Layout,Radial layout,Grid Layout,Hierarchical Layout,Product3D,Product2D and Product Tower.</p>
+            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+        </div>
+    </div>
+</div>
+
+<div class="section nobg notopmargin noborder bottommargin-sm" style="margin:0px !important;">
+    <div class="container clearfix">
+        <div class="col_half nobottommargin">
+            <div class="heading-block" style="padding-top: 40px;">
+                <h2>Streaming Goo</h2>
+                <span>Duis mollis, est non commodo luctus. Donec sed odio dui</span>
+            </div>
+            <p>streamming graph, period detection, regression.</p>
+            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+        </div>
+        <div class="col_half bottommargin-sm center col_last">
+            <img src="/static/new/dagoo/images/product6.jpg" alt="Image">
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {#<!-- Content#}
 {#============================================= -->#}
 {#<section id="content">#}
@@ -124,7 +239,7 @@
 {#    </div>#}
 {##}
 {#</section><!-- #content end -->#}
-{#    #}
-{#    #}
+
+
     
 {% endblock %}

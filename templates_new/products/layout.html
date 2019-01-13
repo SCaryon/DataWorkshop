@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="author" content="SemiColonWeb" />
+
+	<!-- Stylesheets
+	============================================= -->
+{#	<link href="http://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,900" rel="stylesheet" type="text/css" />#}
+	<link rel="stylesheet" href="/static/new/theme/css/bootstrap.css" type="text/css" />
+	<link rel="stylesheet" href="/static/new/theme/style.css" type="text/css" />
+
+	<link rel="stylesheet" href="/static/new/theme/css/dark.css" type="text/css" />
+	<link rel="stylesheet" href="/static/new/theme/css/font-icons.css" type="text/css" />
+	<link rel="stylesheet" href="/static/new/theme/css/animate.css" type="text/css" />
+	<link rel="stylesheet" href="/static/new/theme/css/magnific-popup.css" type="text/css" />
+
+	<!-- Bootstrap Switch CSS -->
+	<link rel="stylesheet" href="/static/new/theme/css/components/bs-switches.css" type="text/css" />
+	<link rel="stylesheet" href="/static/new/theme/css/responsive.css" type="text/css" />
+	<meta name='viewport' content='initial-scale=1, viewport-fit=cover'>
+
+	<!-- Specific Stylesheet -->
+	<link rel="stylesheet" href="/static/new/theme/css/colors.php?color=FE9603" type="text/css" /> <!-- Theme Color -->
+	<link rel="stylesheet" href="/static/new/theme/demos/seo/css/fonts.css" type="text/css" />
+	<link rel="stylesheet" href="/static/new/theme/demos/seo/seo.css" type="text/css" />
+	<!-- / -->
+
+    <!-- Dagoo Specific Stylesheet -->
+    <link rel="stylesheet" href="/static/new/dagoo/css/style.css" type="text/css" />
+
+    <!-- / -->
+
+	<script src="/static/new/theme/js/jquery.js"></script>
+
+	<!-- Document Title
+	============================================= -->
+	<title>Dagoo</title>
+
+</head>
+
+<body class="stretched side-panel-left side-push-panel side-panel-open">
+
+    <div class="body-overlay" style="display: none;"></div>
+
+
+
+<div id="side-panel" class="dark">
+
+		<div id="side-panel-trigger-close" class="side-panel-trigger"><a href="#"><i class="icon-line-cross"></i></a></div>
+
+		<div class="side-panel-wrap">
+
+			<div class="widget clearfix">
+
+				<a href="{{ url_for("new.product_all")}}"><h4><i class = "icon-circle"></i>&nbsp;View All</h4></a>
+
+				<nav class="nav-tree nobottommargin">
+					<ul>
+						<li><a href="{{ url_for("new.product_cleangoo")}}"><i class="icon-asterisk"></i>Clean-Goo</a>
+						</li>
+						<li><a href="#"><i class="icon-asterisk"></i>Multi-Goo</a>
+                            <ul style="display: block;">
+								<li><a href="{{ url_for("new.product_multigoo_analysis")}}">Analysis</a></li>
+								<li><a href="#">Visualization</a></li>
+                            </ul>
+						</li>
+                        <li><a href="{{ url_for("new.product_textgoo")}}"><i class="icon-asterisk"></i>Text-Goo</a>
+						</li>
+                        <li><a href="#"><i class="icon-asterisk"></i>Geo-Goo</a>
+							<ul style="display: block;">
+								<li><a href="#">Global Map</a></li>
+								<li><a href="#">Plane Map</a></li>
+								<li><a href="#">Tower Map</a></li>
+								<li><a href="#">List Map</a></li>
+                                <li><a href="#">Administration</a></li>
+                                <li><a href="#">Points</a></li>
+                                <li><a href="#">Line</a></li>
+                                <li><a href="#">World</a></li>
+							</ul>
+						</li>
+                        <li><a href="#"><i class="icon-asterisk"></i>Graph-Goo</a>
+							<ul style="display: block;">
+								<li><a href="#">Circular Layout</a></li>
+								<li><a href="#">Chord Diagram</a></li>
+								<li><a href="#">Tree Layout</a></li>
+								<li><a href="#">Pack Layout</a></li>
+                                <li><a href="#">Grid Layout</a></li>
+                                <li><a href="#">Hierarchical Layout</a></li>
+                                <li><a href="#">Product3D</a></li>
+                                <li><a href="#">Product2D</a></li>
+                                <li><a href="#">Product Tower</a></li>
+							</ul>
+						</li>
+                        <li><a href="#"><i class="icon-asterisk"></i>Streaming-Goo</a>
+						</li>
+
+
+					</ul>
+				</nav>
+                <a  href="{{ url_for("new.home")}}" target="_blank"><h4 style="margin-top: 30px;"><i class = "icon-remove"></i>&nbsp;Return to DaGoo</h4></a>
+			</div>
+
+
+		</div>
+
+</div>
+
+    	<!-- Document Wrapper
+	============================================= -->
+<div id="wrapper" class="clearfix">
+
+    {% block content %}{% endblock %}
+
+</div><!-- #wrapper end -->
+
+
+	<!-- External JavaScripts
+	============================================= -->
+    <script src="/static/new/theme/js/jquery.cookie.js"></script>
+	<script src="/static/new/theme/js/plugins.js"></script>
+
+	<!-- Footer Scripts
+	============================================= -->
+	<script src="/static/new/theme/js/functions.js"></script>
+
+
+    <!-- Dagoo Specific JavaScripts
+	============================================= -->
+    <script src="/static/new/dagoo/js/layout.js"></script>
+	<script src="/static/new/dagoo/js/lang.js"></script>
+
+	<script>
+		//Pricing Table Script
+		jQuery(document).ready( function($){
+			function pricingSwitcher( elementCheck, elementParent, elementPricing ) {
+				elementParent.find('.pts-left,.pts-right').removeClass('pts-switch-active');
+				elementPricing.find('.pts-switch-content-left,.pts-switch-content-right').addClass('hidden');
+
+				if( elementCheck.filter(':checked').length > 0 ) {
+					elementParent.find('.pts-right').addClass('pts-switch-active');
+					elementPricing.find('.pts-switch-content-right').removeClass('hidden');
+				} else {
+					elementParent.find('.pts-left').addClass('pts-switch-active');
+					elementPricing.find('.pts-switch-content-left').removeClass('hidden');
+				}
+			}
+
+			$('.pts-switcher').each( function(){
+				var element = $(this),
+					elementCheck = element.find(':checkbox'),
+					elementParent = $(this).parents('.pricing-tenure-switcher'),
+					elementPricing = $( elementParent.attr('data-container') );
+
+				pricingSwitcher( elementCheck, elementParent, elementPricing );
+
+				elementCheck.on( 'change', function(){
+					pricingSwitcher( elementCheck, elementParent, elementPricing );
+				});
+			});
+		});
+
+	</script>
+
+</body>
+</html>

@@ -160,3 +160,47 @@ h2{
     position: absolute;
     right: 10px;
     bottom: 10px;}
+
+.section_product{
+    background-color: #2d2d2d;
+}
+.section_product *, .section_product h2{
+  color:#fff;
+}
+.section_product .heading-block:after{
+    border-color: #fff !important;
+}
+.section_product span{
+    color:#fff !important;
+}
+.section_product a{
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+
+.products_title{
+    padding:10px 0px !important;
+    background-color: #2d2d2d !important;
+    border:none !important;
+}
+
+.products_title h1,.products_title span{
+    display: inline-block !important;
+    color: #fff !important;
+}
+
+.products_title span{
+    margin-left: 10px;
+}
+
+.products_side_menu{
+    font-size: 20px;
+    height: 35px;
+    padding: 0px 18px;
+    background-color: #777;
+}
+
+.product_all_object_title{
+    font-size: 30px;
+}
