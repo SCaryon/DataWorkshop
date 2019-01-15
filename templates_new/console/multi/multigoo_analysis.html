@@ -21,22 +21,23 @@
 
     <link rel="stylesheet" type="text/css" href="/static/css/user/user.css">
 
-
 <div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
     <div class="container clearfix">
         <div class="col-lg-12 table_upload" style="padding-bottom: 0px;">
-            <form method="post" action="/table_upload" enctype="multipart/form-data" style="font-size: 18px;">
-                <input  type="file"  style="display:none" name="file" id="file">
-                <div id="data_file_path" class=""
+            <form method="post" action="/table_upload" enctype="multipart/form-data" style="text-align: center; font-size: 18px;">
+                <input  type="file"  style="display:none" name="file" id="file" onchange='$("#upload_file_name").text("<"+$("#file").val()+"> selected !")'>
+                <div id="data_file_path" class="button button-border button-rounded button-white button-light button-large"
                      onclick="file.click()" rel="tooltip" data-placement="top" data-original-title="select your file"
-                     style="display: inline-block;margin-left: 20px;margin-right: 50px;">
+                     style="display: inline-block;margin-right: 50px;">
                     <i class="icon-folder-open"></i>&nbsp;select your file
                 </div>
                 <input id='upload_kg' name="upload_kg" type="submit" style="display:none" >
-                <div class='' style="display: inline-block;" onclick="upload_kg.click()" rel="tooltip" data-placement="top" data-original-title="upload your file">
+                <div class='button button-border button-rounded button-white button-light button-large' style="display: inline-block;" onclick="upload_kg.click()" rel="tooltip" data-placement="top" data-original-title="upload your file">
                      <i class="icon-cloud"></i>&nbsp;upload your file
                 </div>
+                <div id="upload_file_name"></div>
             </form>
+
         </div>
     </div>
 
@@ -53,7 +54,7 @@
             <div id="analysis_attributions_analysis">
                 <div class="row">
 
-                    <div class="col-lg-12" id="analysis_corr_matrix_svg" style="border-radius: 7px;background:#fff;display: none">
+                    <div class="col-lg-12" id="analysis_corr_matrix_svg" style="padding: 5px 10px;border-radius: 7px;background:#fff;display: none">
                         <text>Order:</text>
                         <div>
                             <select id="order" style="color: #777;">
@@ -63,7 +64,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-12" id="analysis_attributions_analysis_svg" style="border-radius: 7px;background:#fff;display: inline">
+                    <div class="col-lg-12" id="analysis_attributions_analysis_svg" style="padding: 5px 10px;border-radius: 7px;background:#fff;display: inline">
                     </div>
 
                 </div>
@@ -84,7 +85,7 @@
         <div class="col-md-12" style="margin:20px 0px;border-radius: 7px;background:#fff;">
             <div  id="analysis_cluster_embedding">
                 <div class="row">
-                    <div class="col-lg-12" id="analysis_cluster_embedding_svg"></div>
+                    <div class="col-lg-12" id="analysis_cluster_embedding_svg" style="padding: 5px 10px;"></div>
                     <div class="col-lg-12" id="analysis_user_image"></div>
                 </div>
             </div>
@@ -98,7 +99,7 @@
             <div  id="analysis_anomaly_detection">
                 <div class="row">
                    <div class="col-lg-12" id="analysis_list"></div>
-                    <div class="col-lg-12" id="analysis_anomaly_detection_svg"></div>
+                    <div class="col-lg-12" id="analysis_anomaly_detection_svg" style="padding: 5px 10px;"></div>
                     <div class="col-lg-12" id="analysis_info"></div>
                 </div>
             </div>
@@ -522,7 +523,8 @@
   corr_matrix_json_data.nodes = nodes;
   corr_matrix_json_data.links = links;
 
-    analysis_svgsize = 400;
+    analysis_svgsize_w = $(".container").width()*0.85;
+    analysis_svgsize_h = 400;
     padding = 5;
 </script>
 <!--attribution-->
@@ -729,8 +731,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     corr_matrix_source = '<?xml version="1.0" standalone="no"?>\r\n' + corr_matrix_source;
     var corr_matrix_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(corr_matrix_source);
     var corr_matrix_canvas = document.createElement("canvas");
-    corr_matrix_canvas.width = analysis_svgsize*1.1;
-    corr_matrix_canvas.height = analysis_svgsize*1.1;
+    corr_matrix_canvas.width = analysis_svgsize_w*1.1;
+    corr_matrix_canvas.height = analysis_svgsize_h*1.1;
     var corr_matrix_context = corr_matrix_canvas.getContext("2d");
     var corr_matrix_image = new Image;
     corr_matrix_image.src = corr_matrix_url;
@@ -750,24 +752,24 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .linkDistance(function(d, i){
             return (1 - Math.abs(d.corr_data)) * 300;
         })
-        .size([analysis_svgsize, analysis_svgsize]);
+        .size([analysis_svgsize_w, analysis_svgsize_h]);
     /*var attributions_zoom = d3.behavior.zoom()
         .scaleExtent([0, 20])
         .on("zoom", attributions_zoomed);*/
     var attributions_svg = d3.select("#analysis_attributions_analysis_svg").append("svg")
-        .attr("width", analysis_svgsize*1.1)
-        .attr("height", analysis_svgsize*1.1)
+        .attr("width", analysis_svgsize_w*1.1)
+        .attr("height", analysis_svgsize_h*1.1)
         .attr('id', 'attributions_svg')
         .attr('border', '1px')
         .append('g')
         //.call(attributions_zoom)
         //.append("g")
-        .attr('transform', 'translate(' + 0 + ','+ 0.05*analysis_svgsize + ')');
+        .attr('transform', 'translate(' + 0 + ','+ 0.05*analysis_svgsize_h + ')');
 
     attributions_svg.append("rect")
         .attr("class", "analysis_attributions_analysis_svg_background")
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize_w)
+        .attr("height", analysis_svgsize_h)
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .attr('stroke', 'black');
@@ -775,8 +777,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     var n = attributions_analysis_jsondata.nodes.length;
 
     attributions_analysis_jsondata.nodes.forEach(function(d, i) {
-        d.x = analysis_svgsize / n * Math.floor(Math.random()*(n));
-        d.y = analysis_svgsize / n * Math.floor(Math.random()*(n));
+        d.x = analysis_svgsize_w / n * Math.floor(Math.random()*(n));
+        d.y = analysis_svgsize_h / n * Math.floor(Math.random()*(n));
     });
 
     force.start();
@@ -785,7 +787,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
 
     var ox = 0, oy = 0;
     attributions_analysis_jsondata.nodes.forEach(function(d) { ox += d.x, oy += d.y; });
-    ox = ox / n - analysis_svgsize / 2, oy = oy / n - analysis_svgsize / 2;
+    ox = ox / n - analysis_svgsize_w / 2, oy = oy / n - analysis_svgsize_h / 2;
     attributions_analysis_jsondata.nodes.forEach(function(d) { d.x -= ox, d.y -= oy; });
 
     var link = attributions_svg.selectAll(".link")
@@ -851,24 +853,24 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     });
 
     attributions_svg.append('rect')
-        .attr('x', analysis_svgsize - 80)
+        .attr('x', analysis_svgsize_w - 80)
         .attr('y', 20)
          .attr('width', 10)
          .attr('height', 10)
           .attr('fill', 'red');
     attributions_svg.append('text')
-          .attr('x', analysis_svgsize - 70)
+          .attr('x', analysis_svgsize_w - 70)
          .attr('y', 30)
          .text('negative');
 
     attributions_svg.append('rect')
-         .attr('x', analysis_svgsize - 80)
+         .attr('x', analysis_svgsize_w - 80)
          .attr('y', 50)
          .attr('width', 10)
          .attr('height', 10)
         .attr('fill', 'green');
     attributions_svg.append('text')
-        .attr('x', analysis_svgsize - 70)
+        .attr('x', analysis_svgsize_w - 70)
         .attr('y', 60)
         .text('positive');
 
@@ -882,8 +884,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     attributions_source = '<?xml version="1.0" standalone="no"?>\r\n' + attributions_source;
     var attributions_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(attributions_source);
     var attributions_canvas = document.createElement("canvas");
-    attributions_canvas.width = analysis_svgsize*1.1;
-    attributions_canvas.height = analysis_svgsize*1.1;
+    attributions_canvas.width = analysis_svgsize_w*1.1;
+    attributions_canvas.height = analysis_svgsize_h*1.1;
     var attributions_context = attributions_canvas.getContext("2d");
     var attributions_image = new Image;
     attributions_image.src = attributions_url;
@@ -903,10 +905,10 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cmin = cx_min < cy_min ? cx_min : cy_min;
     var xScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([padding, analysis_svgsize - padding]);
+        .range([padding, analysis_svgsize_w - padding]);
     var yScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([analysis_svgsize - padding, padding]);
+        .range([analysis_svgsize_h - padding, padding]);
     /**/var  brush = d3.svg.brush()
         .x(xScale)
         .y(yScale)
@@ -917,17 +919,17 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cluster_svg = d3.select("#analysis_cluster_embedding_svg")       //create svg
         .append('svg')
         .attr('id', 'cluster_svg')
-        .attr('width', analysis_svgsize*1.1)
-        .attr('height', analysis_svgsize*1.1)
+        .attr('width', analysis_svgsize_w*1.1)
+        .attr('height', analysis_svgsize_h*1.1)
         .append("g")
-        .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
+        .attr('transform', 'translate(' + 0.1*analysis_svgsize_w + ','+ 0.05*analysis_svgsize_h + ')');
     /**/d3.select("#analysis_cluster_embedding_svg svg g")
         .call(brush)
         .selectAll("rect")
         .style("fill-opacity", 0.1);
     cluster_svg.append('rect')
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize_w)
+        .attr("height", analysis_svgsize_h)
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .attr('stroke', 'black');
@@ -966,8 +968,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cluster_source = '<?xml version="1.0" standalone="no"?>\r\n' + cluster_source;
     var cluster_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(cluster_source);
     var cluster_canvas = document.createElement("canvas");
-    cluster_canvas.width = analysis_svgsize*1.1;
-    cluster_canvas.height = analysis_svgsize*1.1;
+    cluster_canvas.width = analysis_svgsize_w*1.1;
+    cluster_canvas.height = analysis_svgsize_h*1.1;
     var cluster_context = cluster_canvas.getContext("2d");
     var cluster_image = new Image;
     cluster_image.src = cluster_url;
@@ -1247,12 +1249,12 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
             .attr('height', 440)
             .append('g')
             .classed('main', true)
-            .attr('transform', "translate(" + 500 / 2 + ',' + analysis_svgsize / 2 + ')');
+            .attr('transform', "translate(" + 500 / 2 + ',' + analysis_svgsize_h / 2 + ')');
         d3.select('#analysis_user_image svg').append('g')
-            .attr('transform', 'translate(' + 0.1 * analysis_svgsize + ',' + 0.05 * analysis_svgsize + ')')
+            .attr('transform', 'translate(' + 0.1 * analysis_svgsize_w + ',' + 0.05 * analysis_svgsize_h + ')')
             .append('rect')
-            .attr("width", analysis_svgsize)
-            .attr("height", analysis_svgsize)
+            .attr("width", analysis_svgsize_w)
+            .attr("height", analysis_svgsize_h)
             .attr('fill', 'none')
             .attr('pointer-events', 'all')
             .attr('stroke', 'black');
@@ -1429,25 +1431,25 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cmin = cx_min < cy_min ? cx_min : cy_min;
     var xScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([padding, analysis_svgsize - padding]);
+        .range([padding, analysis_svgsize_w - padding]);
     var yScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([analysis_svgsize - padding, padding]);
+        .range([analysis_svgsize_h - padding, padding]);
     /*var anomaly_zoom = d3.behavior.zoom()
         .scaleExtent([0, 20])
         .on("zoom", anomaly_zoomed);*/
     var anomaly_svg = d3.select("#analysis_anomaly_detection_svg").append("svg")
-        .attr("width", analysis_svgsize*1.1)
-        .attr("height", analysis_svgsize*1.1)
+        .attr("width", analysis_svgsize_w*1.1)
+        .attr("height", analysis_svgsize_h*1.1)
         .attr('id', 'anomaly_svg')
         .append('g')
         //.call(anomaly_zoom)
         //.append("g")
-        .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
+        .attr('transform', 'translate(' + 0.1*analysis_svgsize_w + ','+ 0.05*analysis_svgsize_h + ')');
     anomaly_svg.append('rect')
         .classed("frame", true)
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize_w)
+        .attr("height", analysis_svgsize_h)
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .attr('stroke', 'black');
@@ -1494,8 +1496,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     anomaly_source = '<?xml version="1.0" standalone="no"?>\r\n' + anomaly_source;
     var anomaly_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(anomaly_source);
     var anomaly_canvas = document.createElement("canvas");
-    anomaly_canvas.width = analysis_svgsize*1.1;
-    anomaly_canvas.height = analysis_svgsize*1.1;
+    anomaly_canvas.width = analysis_svgsize_w*1.1;
+    anomaly_canvas.height = analysis_svgsize_h*1.1;
     var anomaly_context = anomaly_canvas.getContext("2d");
     var anomaly_image = new Image;
     anomaly_image.src = anomaly_url;
