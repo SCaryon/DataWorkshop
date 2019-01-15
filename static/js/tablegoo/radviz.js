@@ -273,9 +273,21 @@ function draw_radviz (){
             addToTable(categoricalVars, "#colorGroup", "colorAttribute", "radio");
 
             vis.loadData(no_identifiers_data_dictionary);
-            vis.setVars([]);
+
+            $("input:checkbox").prop("checked", true);
+                var selection = document.querySelectorAll('input[name="numericAttribute"]:checked');
+                var variables = [];
+                for (var i=0; i<selection.length; i++) {
+                variables.push(selection[i].value);
+            }
+            vis.setVars(variables);
             vis.setTooltipVars([]);
+
             vis();
+
+
+
+
 }
 
 

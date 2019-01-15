@@ -24,213 +24,113 @@
 
 <div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
     <div class="container clearfix">
+        <div class="col-lg-12 table_upload" style="padding-bottom: 0px;">
+            <form method="post" action="/table_upload" enctype="multipart/form-data" style="text-align: center; font-size: 18px;">
+                <input  type="file"  style="display:none" name="file2" id="file2" onchange='$("#upload_file_name").text("<"+$("#file2").val()+"> selected !")'>
+                <div id="data_file_path2" class="button button-border button-rounded button-white button-light button-large"
+                     onclick="file2.click()" rel="tooltip" data-placement="top" data-original-title="select your file"
+                     style="display: inline-block;margin-right: 50px;">
+                    <i class="icon-folder-open"></i>&nbsp;select your file
+                </div>
+                <input id='upload_kg2' name="upload_kg2" type="submit" style="display:none" >
+                <div class='button button-border button-rounded button-white button-light button-large' style="display: inline-block;" onclick="upload_kg2.click()" rel="tooltip" data-placement="top" data-original-title="upload your file">
+                     <i class="icon-cloud"></i>&nbsp;upload your file
+                </div>
+                <div id="upload_file_name"></div>
+            </form>
 
-        <div class="section-title col-lg-4">
-            <h1>Analysis</h1>
         </div>
-        <div class="col-lg-4 table_upload">
-            <form method="post" action="/table_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
-                <input  type="file"  style="display:none" name="file" id="file">
-                <div id="data_file_path" class="fa fa-plus-circle"
-                     onclick="file.click()" rel="tooltip" data-placement="top" data-original-title="select your file" style="margin-left: 20px;margin-right: 50px;"></div>
-                <input id='upload_kg' name="upload_kg" type="submit" style="display:none" >
-                <div class='fa fa-upload' onclick="upload_kg.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
+    </div>
+
+
+
+    <div class="container clearfix">
+        <div class="heading-block center">
+            <h2>Radviz</h2>
+            <span > (Simple Description)</span>
+        </div>
+        <div class="col-md-12" style="background: #fff;border-radius: 5px;padding-top: 15px;margin:20px 0px;padding-right:5px;font-size: 16px;">
+            <style>
+                .radviz_displayStyle{
+                     width: 100%;
+                    padding: 5px 20px;
+                    margin: 0px;
+                }
+                .radviz_displayStyle g{
+                    display: inline-block;
+                    border-radius: 5px;
+                }
+                .radviz_displayStyle g input{
+                    margin-right: 6px;
+                    margin-left: 12px;
+                }
+                .radviz_displayStyle g text{
+                    color:#000;
+                }
+            </style>
+            <form action="" id="setVars" class="radviz_displayStyle" style="height: inherit;background: initial;">
+                <p>Select Variables: </p>
+
+               <div id="numeric" class="radviz_selectionAlignment"></div>
+            </form>
+            <form action="" id="setColorVar" class="radviz_displayStyle" style="height: inherit;background: initial;">
+                <p>Color by: </p>
+                <table style="margin:0px; width: 100%;">
+                    <tbody>
+                    <tr>
+                        <td id="colorVar" class="radviz_selectionAliment" style="text-align: left">
+                            <g>
+                                <input type="radio" value="-1" label="None" name="colorAttribute"
+                                       checked="">
+                                <text>None</text>
+                                <p></p>
+                            </g>
+                            <g id="colorGroup"></g>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </form>
         </div>
 
-        <div class="col-md-12">
-            <div class="smart-body">
-                <ul class="nav nav-tabs primary bordered">
-                    <li class="active">
-                        <a href="#analysis_attributions_analysis" data-toggle="tab">
-                            <span class="visible-xs"><i class="icon-home"></i></span>
-                            <span class="hidden-xs">Attributes Analysis</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#analysis_cluster_embedding" data-toggle="tab">
-                            <span class="visible-xs"><i class="icon-man"></i></span>
-                            <span class="hidden-xs">Cluster&Embedding</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#analysis_anomaly_detection" data-toggle="tab">
-                            <span class="visible-xs"><i class="icon-email"></i></span>
-                            <span class="hidden-xs">Anomaly Detection</span>
-                        </a>
-                    </li>
 
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane fade active in" id="analysis_attributions_analysis">
-                                <div class="slimScrollBar" style="position: relative; overflow: hidden; width: auto; height: 450px;">
-                                    <div class="scrollable" data-height="120" style="overflow: hidden; width: auto; height: 450px;">
-                                        <div class="row">
-                                            <div class="col-lg-3" id="analysis_list">
-                                                <div class="col-xs-12 smart-margin-bottom-20">
-                                                    <button id="corr_matrix_button" onclick="set_corr_matrix_svg_visual()" rel="tooltip" data-placement="right" data-original-title="change the method" type="button" class="btn"><i class="fa fa-exchange"></i></button>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-5" id="analysis_corr_matrix_svg" style="display: none">
-                                                <text>Order:</text>
-                                                <div>
-                                                    <select id="order">
-                                                        <option value="name">by Name</option>
-                                                        <option value="count">by Correlation</option>
-                                                        <option value="group">by Cluster</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-5" id="analysis_attributions_analysis_svg" style="display: inline"></div>
-                                            <div class="col-lg-3" id="analysis_corr_force_info" >
-                                                <div class="panel panel-default">
-                                                    <div class="panel-body">
-                                                        We calculate the correlation coefficient between
-                                                        all pairs of attributes and draw a graph. The nodes
-                                                        of the graph represent the attributes. The correlation
-                                                        between the pairs of attributes whose absolute value
-                                                        is greater than 0.4, and the line length represents
-                                                        the absolute value of the correlation coefficient.
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3" id="analysis_corr_matrix_info" style="display: none">
-                                                <div class="panel panel-default">
-                                                    <div class="panel-body">
-                                                        We calculate the correlation coefficient between
-                                                        all pairs of attributes and draw a matrix graph.
-                                                        Each rectangle represents a pair of attributes.
-                                                        The brighter the color of the rectangle, the higher
-                                                        the correlation coefficient.You can put the mouse on
-                                                        the rectangle to check the correlation coefficient
-                                                        between the two attributes.
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                    <div class="tab-pane fade in" id="analysis_cluster_embedding">
-                                <div class="row">
-                                    <div class="col-lg-1" id="analysis_list">
-                                        <div class="col-xs-12 smart-margin-bottom-20">
-                                            <button id="corr_matrix_button" onclick="action_performed('/cluster')" rel="tooltip" data-placement="right" data-original-title="cluster methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
-                                        </div>
-                                        <div class="col-xs-12 smart-margin-bottom-20">
-                                            <button id="corr_matrix_button" onclick="action_performed('/embedding')" rel="tooltip" data-placement="right" data-original-title="embedding methods" type="button" class="btn"><i class="fa fa-edit"></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-5" id="analysis_cluster_embedding_svg"></div>
-                                    <div class="col-lg-6" id="analysis_user_image"></div>
-                                </div>
-                            </div>
-                    <div class="tab-pane fade in" id="analysis_anomaly_detection">
-                        <div class="row">
-                            <div class="col-lg-3" id="analysis_list"></div>
-                            <div class="col-lg-6" id="analysis_anomaly_detection_svg"></div>
-                            <div class="col-lg-3" id="analysis_info"></div>
-                        </div>
-                        </div>
+
+        <div class="col-md-12" style="margin:20px 0px;">
+            <div id="analysis_attributions_analysis">
+                <div class="row">
+                    <div class="col-lg-12" id="visDiv" style="padding: 5px 10px;border-radius: 7px;background:#fff;display: inline">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+ <div class="clearfix"></div>
+        <div class="heading-block center" style="padding-top:40px;">
+            <h2>Scatter Plot</h2>
+            <span > (Simple Description)</span>
+        </div>
+
+        <div class="col-md-12" style="margin:20px 0px;border-radius: 7px;background:#fff;">
+            <div  id="analysis_cluster_embedding">
+                <div class="row">
+                    <div class="col-lg-12" id="draw_scatter" style="padding: 5px 10px;overflow: scroll;"></div>
                 </div>
             </div>
         </div>
 
+ <div class="clearfix"></div>
+        <div class="heading-block center" style="padding-top:40px;">
+            <h2>Parallel Coordinates</h2>
+            <span > (Simple Description)</span>
+        </div>
+        <div class="col-md-12" style="margin:20px 0px;border-radius: 7px;background:#fff;overflow: scroll;">
+            <div  id="analysis_anomaly_detection">
+                <div class="row">
+                   <div class="col-lg-12" id="draw_parallel"></div>
+                </div>
+            </div>
+        </div>
 
-
-
-    <div class="section-title col-lg-4">
-    </div>
-    <div class="section-title col-lg-4">
-        <h1>Visual Charts</h1>
-    </div>
-    <div class="col-lg-4 table_upload">
-        <form method="post" action="/table_upload" enctype="multipart/form-data" style="margin-top: 50px;margin-left: 50px;">
-            <input  type="file"  style="display:none" name="file2" id="file2">
-            <div id="data_file_path2" class="fa fa-plus-circle"
-                 onclick="file2.click()" rel="tooltip" data-placement="top" data-original-title="select your file"  style="margin-left: 20px;margin-right: 50px;"></div>
-            <input id='upload_kg2' name="upload_kg2" type="submit" style="display:none" >
-            <div class='fa fa-upload' onclick="upload_kg2.click()" rel="tooltip" data-placement="top" data-original-title="upload your file"></div>
-        </form>
-    </div>
-    <div class="col-md-12">
-						<div class="smart-body">
-							<ul class="nav nav-tabs primary bordered">
-								<li class="active">
-									<a href="#draw_radviz" data-toggle="tab">
-										<span class="visible-xs"><i class="icon-home"></i></span>
-										<span class="hidden-xs">Radviz</span>
-									</a>
-								</li>
-								<li>
-									<a href="#draw_scatter" data-toggle="tab">
-										<span class="visible-xs"><i class="icon-man"></i></span>
-										<span class="hidden-xs">Scatter Plot</span>
-									</a>
-								</li>
-								<li>
-									<a href="#draw_parallel" data-toggle="tab">
-										<span class="visible-xs"><i class="icon-email"></i></span>
-										<span class="hidden-xs">Parallel Coordinates</span>
-									</a>
-								</li>
-
-							</ul>
-							<div class="tab-content">
-								<div class="tab-pane fade active in" id="draw_radviz">
-									<div class="slimScrollBar" style="position: relative; overflow: hidden; width: auto; height: 450px;">
-										<div class="scrollable" data-height="120" style="overflow: hidden; width: auto; height: 450px;">
-                                            <div class="row">
-                                                <div id="radviz_select_bar">
-                                                    <!-- CENTER COLUMN -->
-                                                    <div class="radviz_column-center">
-                                                        <div id="visDiv"></div>
-                                                    </div>
-                                                    <!-- LEFT COLUMN -->
-                                                    <div class="radviz_column-left">
-                                                        <form action="" id="setVars" class="radviz_displayStyle">
-                                                            <p style="margin-bottom: 10px;margin-top: 15px;" class="radviz_title">Select Variables</p>
-                                                            <table>
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td id="numeric" class="radviz_selectionAlignment"></td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </form>
-                                                        <form action="" id="setColorVar" class="radviz_displayStyle">
-                                                            <p>Color by:</p>
-                                                            <table>
-                                                                <tbody>
-                                                                <tr>
-                                                                    <td id="colorVar" class="radviz_selectionAlignment">
-                                                                        <g>
-                                                                            <input type="radio" value="-1" label="None" name="colorAttribute"
-                                                                                   checked="">
-                                                                            <text>None</text>
-                                                                            <p></p>
-                                                                        </g>
-                                                                        <g id="colorGroup"></g>
-                                                                    </td>
-                                                                </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-								<div class="tab-pane fade in" id="draw_scatter">
-
-                                </div>
-								<div class="tab-pane fade in" id="draw_parallel">
-
-                                </div>
-							</div>
-						</div>
-					</div>
 
 
 <div class="getdata">
@@ -311,6 +211,8 @@
 
     </div>
 </div>
+
+
 
 
 <!-- SCRIPTS -->
@@ -649,7 +551,8 @@
   corr_matrix_json_data.nodes = nodes;
   corr_matrix_json_data.links = links;
 
-    analysis_svgsize = 400;
+    analysis_svgsize_w = $(".container").width()*0.85;
+    analysis_svgsize_h = 400;
     padding = 5;
 </script>
 <!--attribution-->
@@ -856,8 +759,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     corr_matrix_source = '<?xml version="1.0" standalone="no"?>\r\n' + corr_matrix_source;
     var corr_matrix_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(corr_matrix_source);
     var corr_matrix_canvas = document.createElement("canvas");
-    corr_matrix_canvas.width = analysis_svgsize*1.1;
-    corr_matrix_canvas.height = analysis_svgsize*1.1;
+    corr_matrix_canvas.width = analysis_svgsize_w*1.1;
+    corr_matrix_canvas.height = analysis_svgsize_h*1.1;
     var corr_matrix_context = corr_matrix_canvas.getContext("2d");
     var corr_matrix_image = new Image;
     corr_matrix_image.src = corr_matrix_url;
@@ -877,24 +780,24 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
         .linkDistance(function(d, i){
             return (1 - Math.abs(d.corr_data)) * 300;
         })
-        .size([analysis_svgsize, analysis_svgsize]);
+        .size([analysis_svgsize_w, analysis_svgsize_h]);
     /*var attributions_zoom = d3.behavior.zoom()
         .scaleExtent([0, 20])
         .on("zoom", attributions_zoomed);*/
     var attributions_svg = d3.select("#analysis_attributions_analysis_svg").append("svg")
-        .attr("width", analysis_svgsize*1.1)
-        .attr("height", analysis_svgsize*1.1)
+        .attr("width", analysis_svgsize_w*1.1)
+        .attr("height", analysis_svgsize_h*1.1)
         .attr('id', 'attributions_svg')
         .attr('border', '1px')
         .append('g')
         //.call(attributions_zoom)
         //.append("g")
-        .attr('transform', 'translate(' + 0 + ','+ 0.05*analysis_svgsize + ')');
+        .attr('transform', 'translate(' + 0 + ','+ 0.05*analysis_svgsize_h + ')');
 
     attributions_svg.append("rect")
         .attr("class", "analysis_attributions_analysis_svg_background")
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize_w)
+        .attr("height", analysis_svgsize_h)
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .attr('stroke', 'black');
@@ -902,8 +805,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     var n = attributions_analysis_jsondata.nodes.length;
 
     attributions_analysis_jsondata.nodes.forEach(function(d, i) {
-        d.x = analysis_svgsize / n * Math.floor(Math.random()*(n));
-        d.y = analysis_svgsize / n * Math.floor(Math.random()*(n));
+        d.x = analysis_svgsize_w / n * Math.floor(Math.random()*(n));
+        d.y = analysis_svgsize_h / n * Math.floor(Math.random()*(n));
     });
 
     force.start();
@@ -912,7 +815,7 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
 
     var ox = 0, oy = 0;
     attributions_analysis_jsondata.nodes.forEach(function(d) { ox += d.x, oy += d.y; });
-    ox = ox / n - analysis_svgsize / 2, oy = oy / n - analysis_svgsize / 2;
+    ox = ox / n - analysis_svgsize_w / 2, oy = oy / n - analysis_svgsize_h / 2;
     attributions_analysis_jsondata.nodes.forEach(function(d) { d.x -= ox, d.y -= oy; });
 
     var link = attributions_svg.selectAll(".link")
@@ -978,24 +881,24 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     });
 
     attributions_svg.append('rect')
-        .attr('x', analysis_svgsize - 80)
+        .attr('x', analysis_svgsize_w - 80)
         .attr('y', 20)
          .attr('width', 10)
          .attr('height', 10)
           .attr('fill', 'red');
     attributions_svg.append('text')
-          .attr('x', analysis_svgsize - 70)
+          .attr('x', analysis_svgsize_w - 70)
          .attr('y', 30)
          .text('negative');
 
     attributions_svg.append('rect')
-         .attr('x', analysis_svgsize - 80)
+         .attr('x', analysis_svgsize_w - 80)
          .attr('y', 50)
          .attr('width', 10)
          .attr('height', 10)
         .attr('fill', 'green');
     attributions_svg.append('text')
-        .attr('x', analysis_svgsize - 70)
+        .attr('x', analysis_svgsize_w - 70)
         .attr('y', 60)
         .text('positive');
 
@@ -1009,8 +912,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     attributions_source = '<?xml version="1.0" standalone="no"?>\r\n' + attributions_source;
     var attributions_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(attributions_source);
     var attributions_canvas = document.createElement("canvas");
-    attributions_canvas.width = analysis_svgsize*1.1;
-    attributions_canvas.height = analysis_svgsize*1.1;
+    attributions_canvas.width = analysis_svgsize_w*1.1;
+    attributions_canvas.height = analysis_svgsize_h*1.1;
     var attributions_context = attributions_canvas.getContext("2d");
     var attributions_image = new Image;
     attributions_image.src = attributions_url;
@@ -1030,10 +933,10 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cmin = cx_min < cy_min ? cx_min : cy_min;
     var xScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([padding, analysis_svgsize - padding]);
+        .range([padding, analysis_svgsize_w - padding]);
     var yScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([analysis_svgsize - padding, padding]);
+        .range([analysis_svgsize_h - padding, padding]);
     /**/var  brush = d3.svg.brush()
         .x(xScale)
         .y(yScale)
@@ -1044,17 +947,17 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cluster_svg = d3.select("#analysis_cluster_embedding_svg")       //create svg
         .append('svg')
         .attr('id', 'cluster_svg')
-        .attr('width', analysis_svgsize*1.1)
-        .attr('height', analysis_svgsize*1.1)
+        .attr('width', analysis_svgsize_w*1.1)
+        .attr('height', analysis_svgsize_h*1.1)
         .append("g")
-        .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
+        .attr('transform', 'translate(' + 0.1*analysis_svgsize_w + ','+ 0.05*analysis_svgsize_h + ')');
     /**/d3.select("#analysis_cluster_embedding_svg svg g")
         .call(brush)
         .selectAll("rect")
         .style("fill-opacity", 0.1);
     cluster_svg.append('rect')
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize_w)
+        .attr("height", analysis_svgsize_h)
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .attr('stroke', 'black');
@@ -1093,8 +996,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cluster_source = '<?xml version="1.0" standalone="no"?>\r\n' + cluster_source;
     var cluster_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(cluster_source);
     var cluster_canvas = document.createElement("canvas");
-    cluster_canvas.width = analysis_svgsize*1.1;
-    cluster_canvas.height = analysis_svgsize*1.1;
+    cluster_canvas.width = analysis_svgsize_w*1.1;
+    cluster_canvas.height = analysis_svgsize_h*1.1;
     var cluster_context = cluster_canvas.getContext("2d");
     var cluster_image = new Image;
     cluster_image.src = cluster_url;
@@ -1374,12 +1277,12 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
             .attr('height', 440)
             .append('g')
             .classed('main', true)
-            .attr('transform', "translate(" + 500 / 2 + ',' + analysis_svgsize / 2 + ')');
+            .attr('transform', "translate(" + 500 / 2 + ',' + analysis_svgsize_h / 2 + ')');
         d3.select('#analysis_user_image svg').append('g')
-            .attr('transform', 'translate(' + 0.1 * analysis_svgsize + ',' + 0.05 * analysis_svgsize + ')')
+            .attr('transform', 'translate(' + 0.1 * analysis_svgsize_w + ',' + 0.05 * analysis_svgsize_h + ')')
             .append('rect')
-            .attr("width", analysis_svgsize)
-            .attr("height", analysis_svgsize)
+            .attr("width", analysis_svgsize_w)
+            .attr("height", analysis_svgsize_h)
             .attr('fill', 'none')
             .attr('pointer-events', 'all')
             .attr('stroke', 'black');
@@ -1556,25 +1459,25 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     cmin = cx_min < cy_min ? cx_min : cy_min;
     var xScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([padding, analysis_svgsize - padding]);
+        .range([padding, analysis_svgsize_w - padding]);
     var yScale = d3.scale.linear()
         .domain([cmin, cmax])
-        .range([analysis_svgsize - padding, padding]);
+        .range([analysis_svgsize_h - padding, padding]);
     /*var anomaly_zoom = d3.behavior.zoom()
         .scaleExtent([0, 20])
         .on("zoom", anomaly_zoomed);*/
     var anomaly_svg = d3.select("#analysis_anomaly_detection_svg").append("svg")
-        .attr("width", analysis_svgsize*1.1)
-        .attr("height", analysis_svgsize*1.1)
+        .attr("width", analysis_svgsize_w*1.1)
+        .attr("height", analysis_svgsize_h*1.1)
         .attr('id', 'anomaly_svg')
         .append('g')
         //.call(anomaly_zoom)
         //.append("g")
-        .attr('transform', 'translate(' + 0.1*analysis_svgsize + ','+ 0.05*analysis_svgsize + ')');
+        .attr('transform', 'translate(' + 0.1*analysis_svgsize_w + ','+ 0.05*analysis_svgsize_h + ')');
     anomaly_svg.append('rect')
         .classed("frame", true)
-        .attr("width", analysis_svgsize)
-        .attr("height", analysis_svgsize)
+        .attr("width", analysis_svgsize_w)
+        .attr("height", analysis_svgsize_h)
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .attr('stroke', 'black');
@@ -1621,8 +1524,8 @@ var corr_matrix_svg = d3.select("#analysis_corr_matrix_svg")
     anomaly_source = '<?xml version="1.0" standalone="no"?>\r\n' + anomaly_source;
     var anomaly_url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(anomaly_source);
     var anomaly_canvas = document.createElement("canvas");
-    anomaly_canvas.width = analysis_svgsize*1.1;
-    anomaly_canvas.height = analysis_svgsize*1.1;
+    anomaly_canvas.width = analysis_svgsize_w*1.1;
+    anomaly_canvas.height = analysis_svgsize_h*1.1;
     var anomaly_context = anomaly_canvas.getContext("2d");
     var anomaly_image = new Image;
     anomaly_image.src = anomaly_url;
