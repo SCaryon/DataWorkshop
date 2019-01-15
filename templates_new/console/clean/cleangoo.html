@@ -1,27 +1,19 @@
 
-{% extends 'products/layout.html' %}
+{% extends 'console/layout.html' %}
+{% block product_name %}
+    Clean Goo
+{% endblock %}
+
+{% block product_description %}
+    Clean your data
+{% endblock %}
+
 
 {% block content %}
 
-<!-- Page Title
-============================================= -->
-<section id="page-title" class="products_title">
-
-    <div class="container clearfix">
-        <a href="#" class="button button-rounded side-panel-trigger products_side_menu"><i class="icon-line-layout"></i></a>
-        <h1>CleanGoo</h1>
-        <span></span>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Product</a></li>
-            <li class="breadcrumb-item"><a href="#">CleanGoo</a></li>
-        </ol>
-    </div>
-
-</section><!-- #page-title end -->
 
 <div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
     <div class="container clearfix">
-
         <div id="analysis" >
             <div class="section-title">
                  <div id="clean_table" class="table table-striped"></div>
@@ -29,8 +21,9 @@
         </div>
     </div>
 </div>
+
 <style>
-    #aa{
+#aa{
   cursor:pointer;
 }
 select{

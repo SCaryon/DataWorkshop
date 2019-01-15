@@ -54,46 +54,46 @@
 
 			<div class="widget clearfix">
 
-				<a href="{{ url_for("new.product_all")}}"><h4><i class = "icon-circle"></i>&nbsp;View All</h4></a>
+				<a href="{{ url_for("console.all")}}"><h4><i class = "icon-circle"></i>&nbsp;View All</h4></a>
 
 				<nav class="nav-tree nobottommargin">
 					<ul>
-						<li><a href="{{ url_for("new.product_cleangoo")}}"><i class="icon-asterisk"></i>Clean-Goo</a>
+						<li><a href="{{ url_for("console.cleangoo")}}"><i class="icon-asterisk"></i>Clean-Goo</a>
 						</li>
 						<li><a href="#"><i class="icon-asterisk"></i>Multi-Goo</a>
                             <ul style="display: block;">
-								<li><a href="{{ url_for("new.product_multigoo_analysis")}}">Analysis</a></li>
-								<li><a href="#">Visualization</a></li>
+								<li><a href="{{ url_for("console.multigoo_analysis")}}">Analysis</a></li>
+								<li><a href="{{ url_for("console.multigoo_visualization")}}">Visualization</a></li>
                             </ul>
 						</li>
-                        <li><a href="{{ url_for("new.product_textgoo")}}"><i class="icon-asterisk"></i>Text-Goo</a>
+                        <li><a href="{{ url_for("console.textgoo")}}"><i class="icon-asterisk"></i>Text-Goo</a>
 						</li>
                         <li><a href="#"><i class="icon-asterisk"></i>Geo-Goo</a>
 							<ul style="display: block;">
-								<li><a href="#">Global Map</a></li>
-								<li><a href="#">Plane Map</a></li>
-								<li><a href="#">Tower Map</a></li>
-								<li><a href="#">List Map</a></li>
-                                <li><a href="#">Administration</a></li>
-                                <li><a href="#">Points</a></li>
-                                <li><a href="#">Line</a></li>
-                                <li><a href="#">World</a></li>
+								<li><a href="{{ url_for("console.geogoo_global")}}">Global Map</a></li>
+								<li><a href="{{ url_for("console.geogoo_planemap")}}">Plane Map</a></li>
+								<li><a href="{{ url_for("console.geogoo_tower")}}">Tower Map</a></li>
+								<li><a href="{{ url_for("console.geogoo_list")}}">List Map</a></li>
+                                <li><a href="{{ url_for("console.geogoo_administration")}}">Administration</a></li>
+                                <li><a href="{{ url_for("console.geogoo_points")}}">Points</a></li>
+                                <li><a href="{{ url_for("console.geogoo_line")}}">Line</a></li>
+                                <li><a href="{{ url_for("console.geogoo_world")}}">World</a></li>
 							</ul>
 						</li>
                         <li><a href="#"><i class="icon-asterisk"></i>Graph-Goo</a>
 							<ul style="display: block;">
-								<li><a href="#">Circular Layout</a></li>
-								<li><a href="#">Chord Diagram</a></li>
-								<li><a href="#">Tree Layout</a></li>
-								<li><a href="#">Pack Layout</a></li>
-                                <li><a href="#">Grid Layout</a></li>
-                                <li><a href="#">Hierarchical Layout</a></li>
-                                <li><a href="#">Product3D</a></li>
-                                <li><a href="#">Product2D</a></li>
-                                <li><a href="#">Product Tower</a></li>
+								<li><a href="{{ url_for("console.graphgoo_circular")}}">Circular Layout</a></li>
+								<li><a href="{{ url_for("console.graphgoo_chord")}}">Chord Diagram</a></li>
+								<li><a href="{{ url_for("console.graphgoo_tree")}}">Tree Layout</a></li>
+								<li><a href="{{ url_for("console.graphgoo_pack")}}">Pack Layout</a></li>
+                                <li><a href="{{ url_for("console.graphgoo_grid")}}">Grid Layout</a></li>
+                                <li><a href="{{ url_for("console.graphgoo_hierarchical")}}">Hierarchical Layout</a></li>
+                                <li><a href="{{ url_for("console.graphgoo_product3d")}}">Product3D</a></li>
+                                <li><a href="{{ url_for("console.graphgoo_product2d")}}">Product2D</a></li>
+                                <li><a href="{{ url_for("console.graphgoo_tower")}}">Product Tower</a></li>
 							</ul>
 						</li>
-                        <li><a href="#"><i class="icon-asterisk"></i>Streaming-Goo</a>
+                        <li><a href="{{ url_for("console.streaminggoo")}}"><i class="icon-asterisk"></i>Streaming-Goo</a>
 						</li>
 
 
@@ -110,6 +110,26 @@
     	<!-- Document Wrapper
 	============================================= -->
 <div id="wrapper" class="clearfix">
+
+    <!-- Page Title
+    ============================================= -->
+    <section id="page-title" class="products_title">
+
+        <div class="container clearfix">
+            <a href="#" style=" display: block; width: 56px; margin-bottom: 10px;" class="button button-rounded side-panel-trigger products_side_menu"><i class="icon-line-layout"></i></a>
+            <div>
+                <h1 style="font-size: 40px; margin-top: 10px;">{% block product_name %}{% endblock %}</h1>
+                <span>{% block product_description %}{% endblock %}</span>
+            </div>
+{#            <ol class="breadcrumb">#}
+{#                <li class="breadcrumb-item"><a href="#">Console</a></li>#}
+{#                <li class="breadcrumb-item"><a href="#">{% block product_name %}{% endblock %}</a></li>#}
+{#            </ol>#}
+        </div>
+
+    </section><!-- #page-title end -->
+
+
 
     {% block content %}{% endblock %}
 

@@ -27,6 +27,7 @@ from flask import Flask, request, json, render_template, session, jsonify, url_f
 from xlrd import open_workbook
 from werkzeug.utils import secure_filename
 from api.new import new
+from api.console import console
 
 from aip import AipOcr  # 引入百度api
 import jieba
@@ -45,6 +46,7 @@ client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 app = Flask(__name__)
 app.register_blueprint(new)
+app.register_blueprint(console)
 # app.run('127.0.0.1', debug=True, port=5000, ssl_context=('D:\OpenSSL-Win64\bin\server.crt', 'D:\OpenSSL-Win64\bin\server.key'))
 # 用于加密，作为盐混在原始的字符串中，然后用加密算法进行加密
 app.config['SECRET_KEY'] = os.urandom(24)
