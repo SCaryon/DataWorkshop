@@ -63,9 +63,11 @@
 					============================================= -->
 					<div class="top-links">
 						<ul>
-{#							<li><a href="#" data-langs="about">ABOUT</a></li>#}
-							<li><a href="#" data-langs="contact">CONTACT</a></li>
-                            <li><a href="#" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text"></span></a></li>
+							<li><a href="#" style="padding:0px;"><img src="/static/new/dagoo/images/icon_wechat.svg" style="border:none;"></a></li>
+                            <li><a href="#" style="padding:0px;"><img src="/static/new/dagoo/images/icon_weibo.svg" style="border:none;"></a></li>
+                            <li><a href="#" style="padding:0px;"><img src="/static/new/dagoo/images/icon_mail.svg" style="border:none;"></a></li>
+{#							<li><a href="#" data-langs="contact">CONTACT</a></li>#}
+{#                            <li><a href="#" target="_blank"><span class="ts-icon"><i class="icon-search"></i></span><span class="ts-text"></span></a></li>#}
                             <li><a href="#"><img  id="lang_select_img" src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang"><span id="lang_select_txt">En</span></a>
 								<ul>
 									<li><a href="#" onclick="$.cookie('lang','en', { expires: 7, path: '/' });window.location.reload();"><img src="/static/new/theme/demos/seo/images/flags/usa.png" alt="Lang" data-lang="en">En</a></li>
@@ -121,8 +123,8 @@
 {#								</ul>#}
 							</li>
 							<li><a href="{{ url_for('new.work') }}"><div data-langs="work">WORK</div></a></li>
-							<li><a href="{{ url_for('new.lab') }}"><div data-langs="lab">LAB</div></a></li>
-							<li><a href="{{ url_for('new.market') }}"><div data-langs="market">MARKET</div></a></li>
+{#							<li><a href="{{ url_for('new.lab') }}"><div data-langs="lab">LAB</div></a></li>#}
+{#							<li><a href="{{ url_for('new.market') }}"><div data-langs="market">MARKET</div></a></li>#}
                             <li><a href="{{ url_for('new.aboutus') }}"><div data-langs="about">ABOUT</div></a></li>
 
                             {% if user %}
@@ -182,50 +184,31 @@
 
                             <div alt="Footer Logo" class="alignleft" style="color: #2d2d2d;    font-weight: 800; font-size: 40px;margin-top: 8px; padding-right: 18px; border-right: 1px solid #DDD;">DaGoo</div>
 
-							<p>We believe in <strong>Simple</strong>, <strong>Creative</strong> &amp; <strong>Flexible</strong> Design Standards with a Retina &amp; Responsive Approach. Browse the amazing Features this template offers.</p>
+							<p> <strong>DON'T JUST ANALYZE THE DATA - SHOW IT</strong>  A versatile platform for big data with cutting-edge technologies of data analytic and visualization. Analyze the data with simple clicks.</p>
 
 							<div class="line line-sm"></div>
 
 							<div class="row">
 
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Home</a></li>
-										<li><a href="#">About</a></li>
-										<li><a href="#">FAQs</a></li>
-										<li><a href="#">Support</a></li>
-										<li><a href="#">Contact</a></li>
-									</ul>
+								<div class="col-lg-4 col-md-4 col-4 clearfix bottommargin-sm">
+									<a href="#" target="_blank" class="social-icon si-dark si-colored nobottommargin" style="background: #46af35;margin-right: 10px;">
+                                        <img src="/static/new/dagoo/images/icon_wechat.svg" style="border:none;width: 40px;">
+
+									</a>
+									<a href="http://facebook.com/semicolonweb" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Like us</strong><br>on Facebook</small></a>
+								</div>
+								<div class="col-lg-4 col-md-4 col-4 clearfix">
+									<a href="#" target="_blank" class="social-icon si-dark si-colored nobottommargin" style="background: #fff;margin-right: 10px;">
+										  <img src="/static/new/dagoo/images/icon_weibo.svg" style="border:none;width: 40px;">
+									</a>
+									<a href="http://themeforest.net/user/SemiColonWeb/follow" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Subscribe</strong><br>to RSS Feeds</small></a>
 								</div>
 
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Shop</a></li>
-										<li><a href="#">Portfolio</a></li>
-										<li><a href="#">Blog</a></li>
-										<li><a href="#">Events</a></li>
-										<li><a href="#">Forums</a></li>
-									</ul>
-								</div>
-
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Corporate</a></li>
-										<li><a href="#">Agency</a></li>
-										<li><a href="#">eCommerce</a></li>
-										<li><a href="#">Personal</a></li>
-										<li><a href="#">One Page</a></li>
-									</ul>
-								</div>
-
-								<div class="col-lg-3 col-6 bottommargin-sm widget_links">
-									<ul>
-										<li><a href="#">Restaurant</a></li>
-										<li><a href="#">Wedding</a></li>
-										<li><a href="#">App Showcase</a></li>
-										<li><a href="#">Magazine</a></li>
-										<li><a href="#">Landing Page</a></li>
-									</ul>
+                                <div class="col-lg-4 col-md-4 col-4 clearfix">
+									<a href="#" target="_blank" class="social-icon si-dark si-colored nobottommargin" style="background: #0a70bd;margin-right: 10px;">
+										  <img src="/static/new/dagoo/images/icon_mail.svg" style="border:none;width: 40px;">
+									</a>
+									<a href="http://themeforest.net/user/SemiColonWeb/follow" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Subscribe</strong><br>to RSS Feeds</small></a>
 								</div>
 
 							</div>
@@ -264,44 +247,9 @@
 
 						</div>
 
-						<div class="widget subscribe-widget clearfix">
-							<h5><strong>Subscribe</strong> to Our Newsletter to get Important News, Amazing Offers &amp; Inside Scoops:</h5>
-							<div class="widget-subscribe-form-result"></div>
-							<form id="widget-subscribe-form" action="include/subscribe.php" role="form" method="post" class="nobottommargin">
-								<div class="input-group divcenter">
-									<div class="input-group-prepend">
-										<div class="input-group-text nobg"><i class="icon-email2"></i></div>
-									</div>
-									<input type="email" id="widget-subscribe-form-email" name="widget-subscribe-form-email" class="form-control required email" placeholder="Enter your Email">
-									<div class="input-group-append">
-										<button class="btn btn-success button button-color nott ls0 m-0" type="submit">Subscribe</button>
-									</div>
-								</div>
-							</form>
-						</div>
 
-						<div class="widget clearfix" style="margin-bottom: -20px;">
 
-							<div class="row">
 
-								<div class="col-lg-6 col-md-12 col-6 clearfix bottommargin-sm">
-									<a href="http://facebook.com/semicolonweb" target="_blank" class="social-icon si-dark si-colored si-facebook nobottommargin" style="margin-right: 10px;">
-										<i class="icon-facebook"></i>
-										<i class="icon-facebook"></i>
-									</a>
-									<a href="http://facebook.com/semicolonweb" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Like us</strong><br>on Facebook</small></a>
-								</div>
-								<div class="col-lg-6 col-md-12 col-6 clearfix">
-									<a href="http://themeforest.net/user/SemiColonWeb/follow" target="_blank" class="social-icon si-dark si-colored si-rss nobottommargin" style="margin-right: 10px;">
-										<i class="icon-rss"></i>
-										<i class="icon-rss"></i>
-									</a>
-									<a href="http://themeforest.net/user/SemiColonWeb/follow" target="_blank" class="text-dark"><small style="display: block; margin-top: 3px;"><strong>Subscribe</strong><br>to RSS Feeds</small></a>
-								</div>
-
-							</div>
-
-						</div>
 
 					</div>
 
@@ -323,7 +271,7 @@
 
 					<div class="col_half col_last tright">
 						<div class="copyrights-menu copyright-links clearfix">
-							<a href="#">Home</a>/<a href="#">About Us</a>/<a href="#">Team</a>/<a href="#">Clients</a>/<a href="#">FAQs</a>/<a href="#">Contact</a>
+							<a href="{{ url_for('new.home') }}">Home</a>/<a href="{{ url_for('new.product') }}">Product</a>/<a href="{{ url_for('new.work') }}">Work</a>/<a href="{{ url_for('new.aboutus') }}">About</a>
 						</div>
 					</div>
 
