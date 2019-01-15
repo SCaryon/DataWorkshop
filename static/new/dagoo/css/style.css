@@ -104,6 +104,9 @@ h2{
     #header-wrap{
         background-color:#2d2d2d;
     }
+    .front_map{
+        display: none !important;
+    }
 }
  #logo img{
       height: 70px;
