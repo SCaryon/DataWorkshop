@@ -5,7 +5,7 @@
 <section id="page-title" style="background-color: #fff;border:none;">
 
     <div class="container clearfix">
-        <h1>Product <a href="{{ url_for('console.product_all') }}" target="_blank" style="font-size: 15px; text-decoration: underline !important;" class=""><i class="icon-external-link"></i> Console</a></h1>
+        <h1>Product <a href="{{ url_for('console.all') }}" target="_blank" style="font-size: 15px; text-decoration: underline !important;" class=""><i class="icon-external-link"></i> Console</a></h1>
 
         <span>DaGoo has SIX inseparable brothers. They are geniuses in different areas!</span>
         <ol class="breadcrumb">
@@ -28,7 +28,7 @@
                 <span>Pre-precessing tools for well-defined data set</span>
             </div>
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae, repudiandae, maxime, earum, sapiente assumenda non odit laborum qui vero vel quos sint excepturi in laudantium.</p>
-            <a href="{{ url_for('console.product_cleangoo') }}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+            <a href="{{ url_for('console.cleangoo') }}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
         </div>
     </div>
 </div>
@@ -41,7 +41,7 @@
                 <span>Multivariate data analysis</span>
             </div>
             <p>Multivariate data analysis - cluster, embedding, anomaly detection, regression,association analysis</p>
-            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+            <a href="{{ url_for('console.multigoo_analysis') }}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
         </div>
         <div class="col_half bottommargin-sm center col_last">
             <img src="/static/new/dagoo/images/product2.jpg" alt="Image" >
@@ -61,7 +61,7 @@
                 <span>Text data analysis</span>
             </div>
             <p>text recognition, word cloud and knowledge graph</p>
-            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+            <a href="{{ url_for('console.textgoo') }}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
         </div>
     </div>
 </div>
@@ -74,7 +74,7 @@
                 <span>Geographical data analysis</span>
             </div>
             <p>line, point, 2D and 3D map.</p>
-            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+            <a href="{{ url_for("console.geogoo_global")}}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
         </div>
         <div class="col_half bottommargin-sm center col_last">
             <img src="/static/new/dagoo/images/product4.jpg" alt="Image" ">
@@ -94,7 +94,7 @@
                 <span>Pre-precessing tools for well-defined data set</span>
             </div>
             <p>Circular Layout, Chord Diagram,Tree Layout,Pack Layout,Radial layout,Grid Layout,Hierarchical Layout,Product3D,Product2D and Product Tower.</p>
-            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+            <a href="{{ url_for("console.graphgoo_circular")}}" target="_blank" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
         </div>
     </div>
 </div>
@@ -107,7 +107,7 @@
                 <span>Duis mollis, est non commodo luctus. Donec sed odio dui</span>
             </div>
             <p>streamming graph, period detection, regression.</p>
-            <a href="#" class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
+            <a href="{{ url_for("console.streaminggoo")}}" target="_blank"  class="button button-border button-large button-rounded topmargin-sm noleftmargin">View Product</a>
         </div>
         <div class="col_half bottommargin-sm center col_last">
             <img src="/static/new/dagoo/images/product6.jpg" alt="Image">
