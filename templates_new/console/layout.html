@@ -54,11 +54,13 @@
 
 			<div class="widget clearfix">
 
-				<a href="{{ url_for("console.all")}}"><h4><i class = "icon-circle"></i>&nbsp;View All</h4></a>
+{#				<a href="{{ url_for("console.all")}}"><h4><i class = "icon-circle"></i>&nbsp;View All</h4></a>#}
 
 				<nav class="nav-tree nobottommargin">
 					<ul>
-						<li><a href="{{ url_for("console.cleangoo")}}"><i class="icon-asterisk"></i>Clean-Goo</a>
+						<li><a style="margin-bottom: 10px;" href="{{ url_for("console.all")}}"><i class="icon-asterisk"></i>View All</a>
+						</li>
+                        <li><a href="{{ url_for("console.cleangoo")}}"><i class="icon-asterisk"></i>Clean-Goo</a>
 						</li>
 						<li><a href="#"><i class="icon-asterisk"></i>Multi-Goo</a>
                             <ul style="display: block;">

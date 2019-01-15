@@ -37,6 +37,10 @@ def login():
 def signup():
     return render_template('signup.html')
 
+@new.route("/new/findpassword/")
+def findpassword():
+    return render_template('findpassword.html')
+
 @new.route("/new/term1/")
 def term1():
     return render_template('term1.html', user=is_login())
@@ -59,12 +63,15 @@ def aboutus():
 
 @new.route("/new/market/")
 def market():
-    return render_template('market.html', user=is_login())
+    # return render_template('market.html', user=is_login())
+    return render_template('comingsoon.html', user=is_login())
 
 @new.route("/new/lab/")
 def lab():
-    return render_template('lab.html', user=is_login())
+    # return render_template('lab.html', user=is_login())
+    return render_template('comingsoon.html', user=is_login())
 
 @new.route("/new/product/")
 def product():
     return render_template('product.html', user=is_login())
+
