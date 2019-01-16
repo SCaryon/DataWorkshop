@@ -68,8 +68,11 @@
 								<li><a href="{{ url_for("console.multigoo_visualization")}}">Visualization</a></li>
                             </ul>
 						</li>
-                        <li><a href="{{ url_for("console.textgoo")}}"><i class="icon-asterisk"></i>Text-Goo</a>
-						</li>
+                        	<li><a href="#"><i class="icon-asterisk"></i>Text-Goo</a>
+                            <ul style="display: block;">
+								<li><a href="{{ url_for("console.textgoo_wordcloud")}}">Word Cloud</a></li>
+								<li><a href="{{ url_for("console.textgoo_knowledgegraph")}}">Knowledge Graph</a></li>
+                            </ul>
                         <li><a href="#"><i class="icon-asterisk"></i>Geo-Goo</a>
 							<ul style="display: block;">
 								<li><a href="{{ url_for("console.geogoo_global")}}">Global Map</a></li>
