@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from table_data_io import read_table_data,generate_table_data,data_list_to_dictionary,check_table_data,generate_table_dic_data
 import numpy as np
+from graph_data_io import read_graph_data, check_graph_data
 
 url ='console'
 
@@ -172,27 +173,87 @@ def geogoo_world():
 # Product - Graph Goo
 @console.route("/"+url+"/graphgoo_circular")
 def graphgoo_circular():
-    return render_template('console/graph/graphgoo_circular.html', user=is_login())
+    if not session.get('email'):
+        path = './examples/graph/graph.csv'
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            path = "./static/user/" + email + "/data/graph.csv"
+        else:
+            path = './examples/graph/graph.csv'
+    graph_nodes, graph_matrix = read_graph_data(path)
+    return render_template('console/graph/graphgoo_circular.html', user=is_login(),
+                           nodes=graph_nodes, matrix=graph_matrix)
 
 @console.route("/"+url+"/graphgoo_chord")
 def graphgoo_chord():
-    return render_template('console/graph/graphgoo_chord.html', user=is_login())
+    if not session.get('email'):
+        path = './examples/graph/graph.csv'
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            path = "./static/user/" + email + "/data/graph.csv"
+        else:
+            path = './examples/graph/graph.csv'
+    graph_nodes, graph_matrix = read_graph_data(path)
+    return render_template('console/graph/graphgoo_chord.html', user=is_login(),
+                           nodes=graph_nodes, matrix=graph_matrix)
 
 @console.route("/"+url+"/graphgoo_tree")
 def graphgoo_tree():
-    return render_template('console/graph/graphgoo_tree.html', user=is_login())
+    if not session.get('email'):
+        path = './examples/graph/graph.csv'
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            path = "./static/user/" + email + "/data/graph.csv"
+        else:
+            path = './examples/graph/graph.csv'
+    graph_nodes, graph_matrix = read_graph_data(path)
+    return render_template('console/graph/graphgoo_tree.html', user=is_login(),
+                           nodes=graph_nodes, matrix=graph_matrix)
 
 @console.route("/"+url+"/graphgoo_pack")
 def graphgoo_pack():
-    return render_template('console/graph/graphgoo_pack.html', user=is_login())
+    if not session.get('email'):
+        path = './examples/graph/graph.csv'
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            path = "./static/user/" + email + "/data/graph.csv"
+        else:
+            path = './examples/graph/graph.csv'
+    graph_nodes, graph_matrix = read_graph_data(path)
+    return render_template('console/graph/graphgoo_pack.html', user=is_login(),
+                           nodes=graph_nodes, matrix=graph_matrix)
 
 @console.route("/"+url+"/graphgoo_grid")
 def graphgoo_grid():
-    return render_template('console/graph/graphgoo_grid.html', user=is_login())
+    if not session.get('email'):
+        path = './examples/graph/graph.csv'
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            path = "./static/user/" + email + "/data/graph.csv"
+        else:
+            path = './examples/graph/graph.csv'
+    graph_nodes, graph_matrix = read_graph_data(path)
+    return render_template('console/graph/graphgoo_grid.html', user=is_login(),
+                           nodes=graph_nodes, matrix=graph_matrix)
 
 @console.route("/"+url+"/graphgoo_hierarchical")
 def graphgoo_hierarchical():
-    return render_template('console/graph/graphgoo_hierarchical.html', user=is_login())
+    if not session.get('email'):
+        path = './examples/graph/graph.csv'
+    else:
+        email = session.get('email')
+        if os.path.exists("./static/user/" + email + "/data/graph.csv"):
+            path = "./static/user/" + email + "/data/graph.csv"
+        else:
+            path = './examples/graph/graph.csv'
+    graph_nodes, graph_matrix = read_graph_data(path)
+    return render_template('console/graph/graphgoo_hierarchical.html', user=is_login(),
+                           nodes=graph_nodes, matrix=graph_matrix)
 
 @console.route("/"+url+"/graphgoo_product3d")
 def graphgoo_product3d():

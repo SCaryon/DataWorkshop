@@ -1,53 +1,221 @@
 {% extends 'console/layout.html' %}
 {% block product_name %}
-{# ****     1. Write down the product name    #}
-    (Product Name)
+    GraphGoo
 {% endblock %}
 
 {% block product_description %}
-{# ****     2. Write down the product description    #}
-    (Product Description)
+    Grid Layout
 {% endblock %}
 
 
 {% block content %}
-
-<script type="application/javascript"></script>
-<style></style>
-{#********************************#}
-{#********************************#}
-{#   前面的                         #}
-{#  3. "js" or "css" in this area #}
-{#                                #}
-{#********************************#}
-{#********************************#}
+<style>
+.getdata{
+    display: none;
+}
+</style>
 
 <div class="section topmargin-lg nobottommargin section_product" style="margin:0px !important;">
     <div class="container clearfix">
-
-{#********************************#}
-{#********************************#}
-{#                                #}
-{#  4. Show plots in this area    #}
-{#                                #}
-{#********************************#}
-{#********************************#}
-
+        <div id="grid_layout">
+        </div>
     </div>
 </div>
 
+<div class="getdata">
+    <ul id="graph_nodes">
+        {% for item in nodes %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    <ul id="graph_matrix">
+        {% for item in matrix %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div>
 
-<script type="application/javascript"></script>
-<style></style>
-{#********************************#}
-{#********************************#}
-{#  后面的                          #}
-{#  5. "js" or "css" in this area #}
-{#                                #}
-{#********************************#}
-{#********************************#}
+<script src="/static/js/d3.v3.min.js"></script>
+<script src="/static/js/graphgoo/d3.geom.min.js"></script>
+<script src="/static/js/graphgoo/underscore-min.js"></script>
+<script type="text/javascript" charset="utf-8">
+    graph_nodes = new Array();
+    arr = document.getElementById("graph_nodes").getElementsByTagName('li');
+    temp = [];
+    for (i = 0; i < arr.length; i++) {
+        graph_nodes.push(arr[i].innerHTML);
+    }
+    var graph_matrix = new Array();
+    arr = document.getElementById('graph_matrix').getElementsByTagName('li');
+    temp = [];
+    for (i = 0; i < arr.length; i++) {
+        temp.push(arr[i].innerHTML)
+    }
+    for (i = 0; i < temp.length; i++) {
+        temp1 = temp[i].replace('[', '');
+        temp2 = temp1.replace(']', '');
+        temp3 = temp2.split(",");
+        numArray = temp3.map((value) => {
+            return parseFloat(value);
+        });
+        graph_matrix.push(numArray)
+    }
+    var grid_nodes = [];
+    var grid_links = [];
+    for(var i = 0; i < graph_nodes.length; i++) {
+        var node = {
+            label : graph_nodes[i]
+        };
+        grid_nodes.push(node);
+    };
 
+    for(var i = 0; i < grid_nodes.length; i++) {
+        for(var j = 0; j < i; j++) {
+            if(!isNaN(graph_matrix[i][j]))
+                grid_links.push({
+                    source : i,
+                    target : j,
+                    weight :graph_matrix[i][j]
+                });
+        }
+    };
 
-{#  6. Reference: /templetes_new/console/clean/cleangoo.html  #}
+    var grid_w = 1200, grid_h = 700;
+    var grid_vis = d3.select("#grid_layout")
+        .append("svg:svg")
+        .attr("width", grid_w)
+        .attr("height", grid_h);
+    var GRID_SIZE = grid_w/grid_nodes.length;
+    var grid_force = d3.layout.force()
+        .size([grid_w, grid_h])
+        .nodes(grid_nodes)
+        .links(grid_links)
+        .gravity(1)
+        .linkDistance(function(d){
+            return (1-d.weight)*100})
+        .charge(-3000)
+        .linkStrength(function(x) {
+            return x.weight * 5
+        });
+
+    grid_force.start();
+    var grid_link = grid_vis.selectAll("line.grid_link")
+        .data(grid_links).enter()
+        .append("svg:line")
+        .attr("class", "grid_link")
+        .style("stroke-width", 1.5)
+        .style("stroke", "#555")
+        .style("opacity", function(d){return d.weight*.7});
+    var grid_node = grid_vis.selectAll("g.grid_node")
+        .data(grid_force.nodes())
+        .enter()
+        .append("svg:g")
+        .attr("class", "grid_node");
+    grid_node.append("svg:circle")
+        .attr("r", 6)
+        .style("fill", "#555")
+        .style("stroke", "#FFF")
+        .style("stroke-width", "4px");
+    grid_node.call(grid_force.drag);
+    var grid_text = grid_vis.selectAll("g.grid_text")
+        .data(grid_force.nodes())
+        .enter()
+        .append("svg:g")
+        .attr("class", "grid_text")
+        .append("svg:text")
+        .style("fill", "white")
+        .attr('font-size', '12')
+        .attr("dx", 0)
+        .attr("dy", 0)
+        .text(function(d){
+            return d.label;
+        });
+    var grid_updateLink = function() {
+        this.attr("x1", function(d) {
+            return d.source.screenX;
+        }).attr("y1", function(d) {
+            return d.source.screenY;
+        }).attr("x2", function(d) {
+            return d.target.screenX;
+        }).attr("y2", function(d) {
+            return d.target.screenY;
+        });
+    };
+    var grid_updateNode = function() {
+        this.attr("transform", function(d) {
+            var gridpoint = grid.occupyNearest(d);
+            if(gridpoint) {
+                d.screenX = d.screenX || gridpoint.x;
+                d.screenY = d.screenY || gridpoint.y;
+                d.screenX += (gridpoint.x - d.screenX) * .2;
+                d.screenY += (gridpoint.y - d.screenY) * .2;
+                d.x += (gridpoint.x - d.x) * .05;
+                d.y += (gridpoint.y - d.y) * .05;
+            }
+            return "translate(" + d.screenX + "," + d.screenY + ")";
+        });
+    };
+
+    var grid = function(width, height) {
+        return {
+            cells : [],
+            init : function() {
+                this.cells = [];
+                for(var i = 0; i < width / GRID_SIZE; i++) {
+                    for(var j = 0; j < height / GRID_SIZE; j++) {
+                        var cell;
+                        cell = {
+                            x : i * GRID_SIZE,
+                            y : j * GRID_SIZE
+                        };
+                        this.cells.push(cell);
+                    };
+                };
+            },
+
+            sqdist : function(a, b) {
+                return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2);
+            },
+
+            occupyNearest : function(p) {
+                var minDist = 1000000;
+                var d;
+                var candidate = null;
+                for(var i = 0; i < this.cells.length; i++) {
+                    if(!this.cells[i].occupied && ( d = this.sqdist(p, this.cells[i])) < minDist) {
+                        minDist = d;
+                        candidate = this.cells[i];
+                    }
+                }
+                if(candidate)
+                    candidate.occupied = true;
+                return candidate;
+            }
+        }
+    }(grid_w, grid_h);
+
+    grid_force.on("tick", function() {
+        grid_vis.select("g.gridcanvas").remove();
+        grid.init();
+        var gridCanvas = grid_vis.append("svg:g").attr("class", "gridcanvas");
+        _.each(grid.cells, function(c) {
+            gridCanvas.append("svg:circle")
+                .attr("cx", c.x)
+                .attr("cy", c.y)
+                .attr("r", 2)
+                .style("fill", "#555")
+                .style("opacity", .3);
+        });
+        grid_node.call(grid_updateNode);
+        grid_link.call(grid_updateLink);
+        grid_text.attr("x", function(d){
+            return d.screenX;
+        })
+            .attr("y", function(d){
+                return d.screenY;
+            })
+    });
+</script>
+
 
 {% endblock %}
