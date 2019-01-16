@@ -2,6 +2,7 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/examples/geo/dist_code.csv" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/examples/table/test.csv" charset="GBK" />
     <file url="file://$PROJECT_DIR$/file_system.txt" charset="GBK" />
   </component>
 </project>
